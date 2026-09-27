@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0f12">
+  <title>Late Brake · Play</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="hud" hidden>
+    <div class="hud-panel hud-left">
+      <div class="hud-row"><span class="label">Lap <b id="lapNum">1</b></span><span class="label track-label" id="trackLabel"></span></div>
+      <div id="lapTime" class="lap-time">0:00.000</div>
+      <div class="hud-row">
+        <div id="delta" class="delta"></div>
+        <div id="invalidBadge" class="badge">Lap invalid</div>
+      </div>
+      <div class="sectors">
+        <div id="s0" class="sector">S1</div>
+        <div id="s1" class="sector">S2</div>
+        <div id="s2" class="sector">S3</div>
+      </div>
+    </div>
+
+    <div class="hud-panel hud-right">
+      <div class="hud-stat"><span class="label">Best</span><span id="bestTime">--:--.---</span></div>
+      <div class="hud-stat"><span class="label">Last</span><span id="lastTime">--:--.---</span></div>
+    </div>
+
+    <div class="speedo"><span id="gearVal" class="gear">N</span><span id="speedVal">0</span><span class="unit">km/h</span></div>
+    <div class="hud-buttons">
+      <button id="pauseBtn" class="round-btn pause-btn" aria-label="Pause">❚❚</button>
+      <button id="muteBtn" class="round-btn mute-btn" aria-label="Mute">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/>
+          <path class="waves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>
+          <path class="cross" d="m16 9 6 6m0-6-6 6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <canvas id="minimap"></canvas>
+
+  <div id="lights" hidden>
+    <div class="lights-row"><span class="light"></span><span class="light"></span><span class="light"></span></div>
+    <div id="lightsText" class="lights-text"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="touch">
+    <div class="steer">
+      <button data-control="left" aria-label="Steer left">◀</button>
+      <button data-control="right" aria-label="Steer right">▶</button>
+    </div>
+    <div class="pedals">
+      <button data-control="brake" class="pedal brake">Brake</button>
+      <button data-control="throttle" class="pedal gas">Gas</button>
+    </div>
+  </div>
+
+  <div id="menu" class="overlay">
+    <div class="menu-card">
+      <a class="logo" href="index.html">LATE<span>BRAKE</span></a>
+      <div class="menu-heading">Pick a circuit</div>
+      <div id="trackList" class="track-list"></div>
+
+      <div class="menu-heading">Mode</div>
+      <div class="modes">
+        <button class="mode selected">Time trial <small>Race your ghost</small></button>
+        <button class="mode" disabled>Race vs AI <small>Coming next</small></button>
+      </div>
+
+      <button id="startBtn" class="primary">Start</button>
+      <div class="controls-help keys-only">
+        <span><kbd>↑</kbd><kbd>W</kbd> gas</span>
+        <span><kbd>↓</kbd><kbd>S</kbd> brake</span>
+        <span><kbd>←</kbd><kbd>→</kbd> steer</span>
+        <span><kbd>R</kbd> restart</span>
+        <span><kbd>G</kbd> ghost</span>
+        <span><kbd>M</kbd> sound</span>
+        <span><kbd>Esc</kbd> pause</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay" hidden>
+    <div class="menu-card small">
+      <div class="menu-heading">Paused</div>
+      <button id="resumeBtn" class="primary">Resume</button>
+      <button id="restartBtn" class="secondary">Restart</button>
+      <button id="ghostToggle" class="secondary">Ghost: on</button>
+      <button id="soundToggle" class="secondary">Sound: on</button>
+      <button id="menuBtn" class="secondary">Change track</button>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
