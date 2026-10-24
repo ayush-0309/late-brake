@@ -9,6 +9,7 @@ const port = Number(process.argv[2]) || 5173;
 const types = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+  '.webmanifest': 'application/manifest+json', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.txt': 'text/plain',
 };
 
 createServer(async (req, res) => {
@@ -21,6 +22,8 @@ createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(body);
   } catch {
-    res.writeHead(404).end('Not found');
+    // Same as GitHub Pages: serve 404.html for anything missing.
+    const page = await readFile(join(root, '404.html')).catch(() => 'Not found');
+    res.writeHead(404, { 'Content-Type': 'text/html' }).end(page);
   }
 }).listen(port, () => console.log(`Late Brake on http://localhost:${port}`));

@@ -26,9 +26,13 @@ export function createAudio(opts = {}) {
   let lastHit = 0;
 
   // The AudioContext may only start after a user gesture.
+  // Without Web Audio the game still runs, silently.
+  let failed = false;
   function unlock() {
-    if (!nodes) build();
-    if (ctx.state === 'suspended' && !muted) ctx.resume().catch(() => {});
+    if (!nodes && !failed) {
+      try { build(); } catch { failed = true; nodes = null; return; }
+    }
+    if (nodes && ctx.state === 'suspended' && !muted) ctx.resume().catch(() => {});
   }
 
   function build() {
@@ -113,10 +117,7 @@ export function createAudio(opts = {}) {
 
   // Called once per rendered frame while racing.
   function update(car, input, dt) {
-    if (!nodes) return;
-    const t = ctx.currentTime;
     const v = Math.max(0, car.vf);
-    const n = nodes;
 
     // Gearbox follows road speed, with a short gap between shifts so a
     // sudden stop (a crash) doesn't rattle down all the gears at once.
@@ -146,6 +147,10 @@ export function createAudio(opts = {}) {
     let goal = Math.max(RPM_IDLE, wheelRpm(gear));
     if (gear === 1) goal = Math.max(goal, RPM_IDLE + throttle * (RPM_LAUNCH - RPM_IDLE));
     engine(goal, dt);
+    // The gearbox above also drives the HUD, so it runs even without sound.
+    if (!nodes) return;
+    const t = ctx.currentTime;
+    const n = nodes;
     const speed = car.speed;
     const braking = input.brake > 0 && v > 8 ? Math.min(1, v / 60) : 0;
     n.scrubGain.gain.setTargetAtTime(braking * 0.06, t, 0.05);
@@ -171,8 +176,9 @@ export function createAudio(opts = {}) {
   // flywheel; the loop is sped up or slowed down from the rpm it was recorded
   // at, and low revs are quieter and duller.
   function engine(goal, dt) {
-    const n = nodes, t = ctx.currentTime;
     rpm += (goal - rpm) * Math.min(1, dt * (goal > rpm ? 10 : 6));
+    if (!nodes) return;
+    const n = nodes, t = ctx.currentTime;
     const r = rpm / RPM_MAX;
 
     if (n.loops.main) n.loops.main.playbackRate.setTargetAtTime(rpm / LOOP_RPM, t, 0.02);
@@ -193,11 +199,12 @@ export function createAudio(opts = {}) {
   // Countdown and before GO: tyre and road layers off, engine free-revs
   // with the throttle so you can rev it on the grid.
   function idle(input, dt = 1 / 60) {
-    if (!nodes) return;
-    const t = ctx.currentTime;
-    const n = nodes;
-    for (const g of [n.scrubGain, n.squealGain, n.squealToneGain, n.kerbGain, n.grassGain, n.scrapeGain]) {
-      g.gain.setTargetAtTime(0, t, 0.05);
+    if (nodes) {
+      const t = ctx.currentTime;
+      const n = nodes;
+      for (const g of [n.scrubGain, n.squealGain, n.squealToneGain, n.kerbGain, n.grassGain, n.scrapeGain]) {
+        g.gain.setTargetAtTime(0, t, 0.05);
+      }
     }
     gear = 1;
     shiftDip = 0;
@@ -244,11 +251,13 @@ export function createAudio(opts = {}) {
   }
 
   function click(level) {
+    if (!nodes) return;
     burst(ctx.currentTime, 0.03, 'highpass', 2500, level);
   }
 
   // Downshift under braking: a short throttle blip, at most a few per second.
   function blip() {
+    if (!nodes) return;
     const t = ctx.currentTime;
     if (t - lastBlip < 0.25) return;
     lastBlip = t;
@@ -260,6 +269,7 @@ export function createAudio(opts = {}) {
 
   // Lift-off pops from the exhaust.
   function crackle() {
+    if (!nodes) return;
     const t = ctx.currentTime;
     const count = 3 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
@@ -323,6 +333,8 @@ export function createAudio(opts = {}) {
   return {
     unlock, update, idle, silence, hit, beep, chime,
     get gear() { return gear; },
+    get rpm() { return rpm; },
+    rpmMax: RPM_MAX,
     get muted() { return muted; },
     setMuted,
     suspend() { if (nodes) ctx.suspend().catch(() => {}); },

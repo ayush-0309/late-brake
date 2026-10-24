@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- Social share card. Render at 1200x630 with tools/make-og.sh. -->
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;1,800&display=block" rel="stylesheet">
+<style>
+  body { margin: 0; width: 1200px; height: 630px; background: #0b0d10; color: #f3f4f6; font-family: 'Barlow Condensed', sans-serif; overflow: hidden; position: relative; }
+  canvas { position: absolute; inset: 0; }
+  .text { position: absolute; left: 72px; top: 150px; }
+  .kicker { font-size: 26px; font-weight: 600; letter-spacing: .22em; color: #ff2d48; text-transform: uppercase; }
+  h1 { font-size: 180px; font-style: italic; font-weight: 800; margin: 0; line-height: .9; }
+  h1 span { color: #e8112d; }
+  p { font-size: 38px; font-weight: 600; color: #c3c8d0; margin: 22px 0 0; }
+</style></head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<div class="text"><div class="kicker">Top-down F1 time trials</div><h1>LATE<span>BRAKE</span></h1><p>Six real circuits. Race your ghost. In your browser.</p></div>
+<script type="module">
+  import { CIRCUITS } from '../src/circuits.js';
+  const pts = CIRCUITS.find((c) => c.id === 'be-1925').points;
+  const ctx = document.getElementById('c').getContext('2d');
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of pts) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+  const sc = Math.min(560 / (maxX - minX), 560 / (maxY - minY));
+  ctx.setTransform(sc, 0, 0, sc, 1010 - (minX + maxX) / 2 * sc, 315 - (minY + maxY) / 2 * sc);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const path = () => { ctx.beginPath(); for (const [x, y] of pts) ctx.lineTo(x, y); ctx.closePath(); };
+  path(); ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 22 / sc; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3 / sc; ctx.stroke();
+  const n = Math.floor(pts.length * 0.35);
+  ctx.beginPath(); for (let i = 0; i <= n; i++) ctx.lineTo(...pts[i]);
+  ctx.strokeStyle = '#e8112d'; ctx.lineWidth = 6 / sc; ctx.shadowColor = '#ff2d48'; ctx.shadowBlur = 20; ctx.stroke();
+  ctx.fillStyle = '#ff2d48'; ctx.beginPath(); ctx.arc(...pts[n], 10 / sc, 0, Math.PI * 2); ctx.fill();
+  document.fonts.ready.then(() => document.body.dataset.ready = '1');
+</script>
+</body></html>

@@ -41,6 +41,7 @@ export class Session {
     this.sectorTimes = [];
     this.sectorClasses = [];
     this.offTime = 0;
+    this.excursion = 0;                // seconds of the current trip off track
     this.valid = true;
     this.laps = [];
     this.events = [];
@@ -101,11 +102,40 @@ export class Session {
         this.valid = false;
         this.events.push({ type: 'invalid' });
       }
+      // Each trip off that lasts long enough is reported once.
+      this.excursion += DT;
+      if (this.excursion > OFF_ALLOWED && this.excursion - DT <= OFF_ALLOWED) this.events.push({ type: 'off' });
+    } else {
+      this.excursion = 0;
     }
 
     this.recordSplits();
     this.checkSectors(prev);
     this.record();
+  }
+
+  // Puts the car back on the track, stopped and facing down it, at the
+  // nearest point to where it is. The lap carries on: time spent off track
+  // before the reset already counts against it under the usual rule.
+  resetToTrack() {
+    if (this.phase !== 'running') return false;
+    const t = this.track, car = this.car;
+    const i = project(t, car.x, car.y, car.hint).i;
+    const a = Math.atan2(t.ty[i], t.tx[i]);
+    Object.assign(car, {
+      x: t.xs[i], y: t.ys[i], a, px: t.xs[i], py: t.ys[i], pa: a,
+      vx: 0, vy: 0, steer: 0, speed: 0, vf: 0, slip: 0, long: 0, wall: false, onTrack: true,
+    });
+    const pj = project(t, car.x, car.y, i);
+    let ds = pj.s - car.s;
+    if (ds < -t.length / 2) ds += t.length;
+    if (ds > t.length / 2) ds -= t.length;
+    car.s = pj.s;
+    car.hint = pj.i;
+    car.lat = pj.lat;
+    this.progress += ds;
+    this.events.push({ type: 'reset' });
+    return true;
   }
 
   checkSectors(prev) {

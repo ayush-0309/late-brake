@@ -18,12 +18,12 @@ export const CAR = {
   aeroDrag: 0.0012,  // drag per (m/s)²; ~1 g of lift-off decel at 300 km/h
   grip: 21,          // lateral grip at walking pace, m/s²
   downforce: 0.0028, // extra grip per (m/s)²; ~4.5 g at 300 km/h
-  steerMax: 0.5,     // rad at walking pace
-  steerFalloff: 16,  // steering angle halves by this speed
-  yawCap: 1.2,       // allowed over-rotation vs grip, gives a little slide
+  steerMax: 0.55,    // rad at walking pace
+  steerFalloff: 20,  // steering angle halves by this speed
+  yawCap: 1.15,      // allowed over-rotation vs grip, gives a little slide
   align: 3.5,        // how hard the car straightens up when sliding
-  steerIn: 4.5,      // steering rates, per second
-  steerOut: 7,
+  steerIn: 6.5,      // steering rates, per second
+  steerOut: 9,
   grassGrip: 0.45,
   grassDrag: 0.4,    // extra drag per m/s on grass
 };
@@ -41,10 +41,12 @@ export function stepCar(car, input, onTrack, dt = DT) {
   car.px = car.x; car.py = car.y; car.pa = car.a;
   car.onTrack = onTrack;
 
-  // Steering wheel moves smoothly toward the input.
+  // Steering wheel moves smoothly toward the input. `sens` (steering
+  // sensitivity setting, 1 = default) scales both the rate and the lock.
+  const sens = input.sens || 1;
   const target = input.steer;
-  const rate = Math.abs(target) > Math.abs(car.steer) && Math.sign(target) === Math.sign(car.steer || target)
-    ? CAR.steerIn : CAR.steerOut;
+  const rate = sens * (Math.abs(target) > Math.abs(car.steer) && Math.sign(target) === Math.sign(car.steer || target)
+    ? CAR.steerIn : CAR.steerOut);
   car.steer += clamp(target - car.steer, -rate * dt, rate * dt);
 
   let fx = Math.cos(car.a), fy = Math.sin(car.a);
@@ -54,7 +56,7 @@ export function stepCar(car, input, onTrack, dt = DT) {
   const G = (CAR.grip + CAR.downforce * sp * sp) * (onTrack ? 1 : CAR.grassGrip);
 
   // Yaw: bicycle model, capped by grip, plus self-alignment when sliding.
-  const maxAngle = CAR.steerMax / (1 + sp / CAR.steerFalloff);
+  const maxAngle = (sens * CAR.steerMax) / (1 + sp / CAR.steerFalloff);
   let yaw = (vf / CAR.wheelbase) * Math.tan(car.steer * maxAngle);
   const cap = (G * CAR.yawCap) / Math.max(sp, 4);
   yaw = clamp(yaw, -cap, cap);

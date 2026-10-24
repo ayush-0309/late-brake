@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="robots" content="noindex">
+  <title>Off track · Late Brake</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,800&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b0d10; color: #f3f4f6;
+      font-family: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif; text-align: center; padding: 16px; }
+    h1 { font-size: clamp(56px, 12vw, 110px); font-style: italic; font-weight: 800; margin: 0; line-height: .9; }
+    h1 span { color: #e8112d; }
+    p { font-size: 22px; color: #949ba7; margin: 14px 0 28px; }
+    a { display: inline-block; background: #e8112d; color: #fff; text-decoration: none; font-size: 22px; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; padding: 12px 36px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OFF <span>TRACK</span></h1>
+    <p>That page isn't on the circuit. Track limits, I'm afraid.</p>
+    <a id="home" href="/late-brake/">Back to the pits</a>
+  </main>
+  <script>
+    // Works both on GitHub Pages (/late-brake/) and on a local server (/).
+    if (!location.pathname.startsWith('/late-brake/')) document.getElementById('home').href = '/';
+  </script>
+</body>
+</html>

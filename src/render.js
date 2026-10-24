@@ -1,6 +1,10 @@
 // Canvas drawing: scenery, track, cars, ghost, skid marks and the minimap.
 
 import { buildScenery, drawGround, drawMarkings, drawTrackside, drawStructures, makePatterns } from './scenery.js';
+import { buildLine } from './line.js';
+
+// Racing line colours by zone: throttle, lift, brake.
+const LINE_COLORS = ['rgba(52,210,123,0.5)', 'rgba(245,197,66,0.6)', 'rgba(255,45,72,0.65)'];
 
 const C = {
   grass: '#4b8a40',
@@ -23,9 +27,10 @@ const MAX_SKIDS = 2400;
 export function createRenderer(canvas, minimap) {
   const ctx = canvas.getContext('2d');
   const mctx = minimap.getContext('2d');
-  const cam = { x: 0, y: 0, zoom: 8, ready: false };
+  const cam = { x: 0, y: 0, a: 0, zoom: 8, ready: false };
   let paths = null;
   let scenery = null;
+  let line = null, linePaths = null;
   const pats = makePatterns(ctx);
   let skids = [];
   let lastRear = null;
@@ -46,6 +51,8 @@ export function createRenderer(canvas, minimap) {
   function setTrack(track) {
     paths = buildPaths(track);
     scenery = track.scenery ||= buildScenery(track);
+    line = track.line ||= buildLine(track);
+    linePaths = track.linePaths ||= buildLinePaths(line);
     skids = [];
     lastRear = null;
     cam.ready = false;
@@ -64,7 +71,9 @@ export function createRenderer(canvas, minimap) {
     const ox = -s * 0.78, oy = c * 0.78;
     const rear = [bx + ox, by + oy, bx - ox, by - oy];
     const skidding = car.speed > 6 && (car.slip > 2.2 || (car.long < -38 && car.speed > 40));
-    if (skidding && lastRear) {
+    // A jump (reset to track) breaks the marks instead of joining them up.
+    const jumped = lastRear && Math.abs(rear[0] - lastRear[0]) + Math.abs(rear[1] - lastRear[1]) > 4;
+    if (skidding && lastRear && !jumped) {
       skids.push([lastRear[0], lastRear[1], rear[0], rear[1]]);
       skids.push([lastRear[2], lastRear[3], rear[2], rear[3]]);
       if (skids.length > MAX_SKIDS) skids.splice(0, skids.length - MAX_SKIDS);
@@ -72,21 +81,41 @@ export function createRenderer(canvas, minimap) {
     lastRear = rear;
   }
 
+  // World-space box that covers the (possibly rotated) screen, for culling.
+  function viewBox(ax, ay, rot, z) {
+    const c = Math.cos(-rot), sn = Math.sin(-rot);
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const [sx, sy] of [[0, 0], [w, 0], [0, h], [w, h]]) {
+      const u = (sx - ax) / z, v = (sy - ay) / z;
+      const wx = cam.x + u * c - v * sn, wy = cam.y + u * sn + v * c;
+      x0 = Math.min(x0, wx); x1 = Math.max(x1, wx);
+      y0 = Math.min(y0, wy); y1 = Math.max(y1, wy);
+    }
+    return { x0, y0, x1, y1 };
+  }
+
   function draw(session, alpha, opts, frameDt) {
     const car = session.car;
     const x = lerp(car.px, car.x, alpha), y = lerp(car.py, car.y, alpha);
     const a = lerpAngle(car.pa, car.a, alpha);
 
-    // Camera leads the car a little and pulls back with speed.
+    // Chase camera turns with the car so "left" is always screen-left, and
+    // sits the car low on screen to show the road ahead. Fixed camera keeps
+    // north up and leads the car. Both pull back with speed.
+    const chase = opts.camera !== 'fixed';
     const lead = Math.min(1, car.speed / 90);
-    const tx = x + car.vx * 0.4, ty = y + car.vy * 0.4;
-    const base = Math.max(Math.min(w, h), 0.6 * Math.max(w, h)) / 70;
-    const tz = base * (1 - 0.45 * lead);
-    if (!cam.ready) { cam.x = tx; cam.y = ty; cam.zoom = tz; cam.ready = true; }
-    const k = 1 - Math.exp(-frameDt * 5);
+    const look = chase ? 0.2 : 0.4;
+    const tx = x + car.vx * look, ty = y + car.vy * look;
+    // Chase looks along the screen's height, so zoom is set by height: about
+    // 40 m of road ahead at rest, twice that flat out.
+    const base = chase ? Math.min(h / 60, w / 30) : Math.max(Math.min(w, h), 0.6 * Math.max(w, h)) / 70;
+    const tz = base * (1 - (chase ? 0.5 : 0.45) * lead);
+    if (!cam.ready) { cam.x = tx; cam.y = ty; cam.zoom = tz; cam.a = a; cam.ready = true; }
+    const k = 1 - Math.exp(-frameDt * (chase ? 9 : 5));
     cam.x += (tx - cam.x) * k;
     cam.y += (ty - cam.y) * k;
     cam.zoom += (tz - cam.zoom) * (1 - Math.exp(-frameDt * 1.5));
+    cam.a += angleDiff(cam.a, a) * (1 - Math.exp(-frameDt * 6));
 
     const t = session.track;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -94,11 +123,13 @@ export function createRenderer(canvas, minimap) {
     ctx.fillRect(0, 0, w, h);
 
     const z = cam.zoom;
-    ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (w / 2 - cam.x * z), dpr * (h / 2 - cam.y * z));
-    const view = {
-      x0: cam.x - w / 2 / z, x1: cam.x + w / 2 / z,
-      y0: cam.y - h / 2 / z, y1: cam.y + h / 2 / z,
-    };
+    const rot = chase ? -Math.PI / 2 - cam.a : 0;
+    const ax = w / 2, ay = chase ? h * 0.63 : h / 2;
+    ctx.translate(ax, ay);
+    ctx.rotate(rot);
+    ctx.scale(z, z);
+    ctx.translate(-cam.x, -cam.y);
+    const view = viewBox(ax, ay, rot, z);
 
     if (!scenery.city) {
       // Grass: soft patches plus faint mowing stripes.
@@ -140,6 +171,16 @@ export function createRenderer(canvas, minimap) {
     drawStartLine(ctx, t);
     drawMarkings(ctx, scenery, view);
 
+    // Racing line: 'full' shows every zone, 'braking' only lifts and stops.
+    if (opts.line === 'full' || opts.line === 'braking') {
+      ctx.lineCap = 'butt';
+      ctx.lineWidth = 1.4;
+      for (let z = opts.line === 'braking' ? 1 : 0; z < 3; z++) {
+        ctx.strokeStyle = LINE_COLORS[z];
+        ctx.stroke(linePaths[z]);
+      }
+    }
+
     // Barriers: a steel rail with a dark tyre wall behind it.
     ctx.strokeStyle = C.barrier;
     ctx.lineWidth = 1.4;
@@ -148,6 +189,7 @@ export function createRenderer(canvas, minimap) {
     ctx.lineWidth = 0.35;
     ctx.stroke(paths.barriers);
     drawTrackside(ctx, scenery, view);
+    drawBoards(ctx, line.boards, view);
 
     if (skids.length) {
       ctx.strokeStyle = C.skid;
@@ -164,31 +206,61 @@ export function createRenderer(canvas, minimap) {
     if (ghost) drawCar(ctx, ghost.x, ghost.y, ghost.a, 0, C.ghost, 0.5);
     drawCar(ctx, x, y, a, car.steer, C.player, 1);
 
-    drawMinimap(session, ghost, x, y);
+    drawMinimap(session, ghost, x, y, a);
   }
 
-  function drawMinimap(session, ghost, x, y) {
+  function drawMinimap(session, ghost, x, y, a) {
     if (minimap.width !== Math.round(minimap.clientWidth * dpr)) resize();
     const mw = minimap.width, mh = minimap.height;
+    if (!mw || !mh) return;
     mctx.setTransform(1, 0, 0, 1, 0, 0);
     mctx.clearRect(0, 0, mw, mh);
-    const b = session.track.bounds, pad = 14 * dpr;
+    const t = session.track, b = t.bounds, pad = 12 * dpr;
     const sc = Math.min((mw - pad * 2) / (b.maxX - b.minX), (mh - pad * 2) / (b.maxY - b.minY));
     const ox = (mw - (b.maxX - b.minX) * sc) / 2 - b.minX * sc;
     const oy = (mh - (b.maxY - b.minY) * sc) / 2 - b.minY * sc;
+    const px = (u) => u * dpr / sc; // screen pixels to map units
     mctx.setTransform(sc, 0, 0, sc, ox, oy);
     mctx.lineJoin = 'round';
-    mctx.strokeStyle = 'rgba(255,255,255,0.85)';
-    mctx.lineWidth = 3.2 * dpr / sc;
+    mctx.lineCap = 'round';
+    mctx.strokeStyle = 'rgba(0,0,0,0.55)';
+    mctx.lineWidth = px(6);
     mctx.stroke(paths.center);
-    const dot = (px, py, col, r) => {
-      mctx.fillStyle = col;
+    mctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    mctx.lineWidth = px(2.6);
+    mctx.stroke(paths.center);
+
+    // Start/finish line.
+    mctx.strokeStyle = C.player;
+    mctx.lineWidth = px(2.4);
+    mctx.beginPath();
+    mctx.moveTo(t.xs[0] - t.nx[0] * px(6), t.ys[0] - t.ny[0] * px(6));
+    mctx.lineTo(t.xs[0] + t.nx[0] * px(6), t.ys[0] + t.ny[0] * px(6));
+    mctx.stroke();
+
+    if (ghost) {
+      mctx.fillStyle = C.ghost;
       mctx.beginPath();
-      mctx.arc(px, py, (r * dpr) / sc, 0, Math.PI * 2);
+      mctx.arc(ghost.x, ghost.y, px(3.5), 0, Math.PI * 2);
       mctx.fill();
-    };
-    if (ghost) dot(ghost.x, ghost.y, C.ghost, 4);
-    dot(x, y, C.player, 4.5);
+    }
+    // The player is an arrow pointing where the car is heading.
+    mctx.save();
+    mctx.translate(x, y);
+    mctx.rotate(a);
+    mctx.scale(px(1), px(1));
+    mctx.beginPath();
+    mctx.moveTo(8, 0);
+    mctx.lineTo(-5, 5.5);
+    mctx.lineTo(-2.5, 0);
+    mctx.lineTo(-5, -5.5);
+    mctx.closePath();
+    mctx.fillStyle = C.player;
+    mctx.strokeStyle = '#fff';
+    mctx.lineWidth = 1.6;
+    mctx.stroke();
+    mctx.fill();
+    mctx.restore();
   }
 
   return { setTrack, resetRun, addSkid, draw, resize };
@@ -348,6 +420,53 @@ function drawCar(ctx, x, y, a, steer, color, alpha) {
   ctx.restore();
 }
 
+// One path per zone. Runs start at a zone change so none is split at index 0,
+// and each run ends on the next run's first point so there are no gaps.
+function buildLinePaths(line) {
+  const paths = [new Path2D(), new Path2D(), new Path2D()];
+  const { n, xs, ys, zone } = line;
+  let j0 = 0;
+  for (let q = 1; q < n; q++) if (zone[q] !== zone[q - 1]) { j0 = q; break; }
+  let cur = -1;
+  for (let q = 0; q <= n; q++) {
+    const j = (j0 + q) % n, z = zone[j];
+    if (z !== cur) {
+      if (cur >= 0) paths[cur].lineTo(xs[j], ys[j]);
+      paths[z].moveTo(xs[j], ys[j]);
+      cur = z;
+    } else {
+      paths[z].lineTo(xs[j], ys[j]);
+    }
+  }
+  return paths;
+}
+
+// Braking boards: white signs beside the track, numbers upright for a car
+// driving towards the corner.
+function drawBoards(ctx, boards, view) {
+  const W = 5.6, H = 3.2, S = 20;
+  for (const b of boards) {
+    if (b.x < view.x0 - 4 || b.x > view.x1 + 4 || b.y < view.y0 - 4 || b.y > view.y1 + 4) continue;
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.a + Math.PI / 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(-W / 2 + 0.35, -H / 2 + 0.35, W, H);
+    ctx.fillStyle = '#f4f4f2';
+    ctx.fillRect(-W / 2, -H / 2, W, H);
+    ctx.strokeStyle = '#15171b';
+    ctx.lineWidth = 0.2;
+    ctx.strokeRect(-W / 2 + 0.3, -H / 2 + 0.3, W - 0.6, H - 0.6);
+    ctx.scale(1 / S, 1 / S);
+    ctx.font = `800 ${Math.round(2.6 * S)}px 'Barlow Condensed', 'Arial Narrow', sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#15171b';
+    ctx.fillText(b.label, 0, 0.08 * S);
+    ctx.restore();
+  }
+}
+
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -362,32 +481,83 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-function lerpAngle(a, b, t) {
-  const d = Math.atan2(Math.sin(b - a), Math.cos(b - a));
-  return a + d * t;
+function angleDiff(a, b) {
+  return Math.atan2(Math.sin(b - a), Math.cos(b - a));
 }
 
-export function drawTrackPreview(canvas, track) {
+function lerpAngle(a, b, t) {
+  return a + angleDiff(a, b) * t;
+}
+
+// Circuit outline for the menu. `detail` adds sector colours and a
+// direction arrow at the start line.
+const SECTOR_COLORS = ['#ff2d48', '#f5c542', '#4aa3ff'];
+
+export function drawTrackPreview(canvas, track, { detail = false } = {}) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const cw = canvas.clientWidth, ch = canvas.clientHeight;
-  if (cw < 40 || ch < 40) return;
-  canvas.width = cw * dpr;
-  canvas.height = ch * dpr;
+  if (cw < 20 || ch < 20) return;
+  canvas.width = Math.round(cw * dpr);
+  canvas.height = Math.round(ch * dpr);
   const ctx = canvas.getContext('2d');
-  const b = track.bounds, pad = 16 * dpr;
+  const b = track.bounds, pad = (detail ? 22 : 5) * dpr;
   const sc = Math.min((canvas.width - pad * 2) / (b.maxX - b.minX), (canvas.height - pad * 2) / (b.maxY - b.minY));
   const ox = (canvas.width - (b.maxX - b.minX) * sc) / 2 - b.minX * sc;
   const oy = (canvas.height - (b.maxY - b.minY) * sc) / 2 - b.minY * sc;
+  const px = (u) => (u * dpr) / sc;
   ctx.setTransform(sc, 0, 0, sc, ox, oy);
   ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  const outline = new Path2D();
+  for (let i = 0; i < track.n; i++) outline.lineTo(track.xs[i], track.ys[i]);
+  outline.closePath();
+
+  if (!detail) {
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = px(2.5);
+    ctx.stroke(outline);
+    return;
+  }
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  ctx.lineWidth = px(11);
+  ctx.stroke(outline);
+  // Each sector in its own colour.
+  for (let k = 0; k < 3; k++) {
+    const i0 = Math.floor((k * track.n) / 3), i1 = Math.floor(((k + 1) * track.n) / 3);
+    ctx.beginPath();
+    for (let i = i0; i <= i1; i++) ctx.lineTo(track.xs[i % track.n], track.ys[i % track.n]);
+    ctx.strokeStyle = SECTOR_COLORS[k];
+    ctx.lineWidth = px(4.5);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = px(1.2);
+  ctx.stroke(outline);
+
+  // Chequered start line and an arrow showing race direction.
+  const x0 = track.xs[0], y0 = track.ys[0];
+  const ang = Math.atan2(track.ty[0], track.tx[0]);
+  ctx.save();
+  ctx.translate(x0, y0);
+  ctx.rotate(ang);
+  ctx.scale(px(1), px(1));
+  for (let r = -3; r < 3; r++) {
+    for (let c = 0; c < 2; c++) {
+      ctx.fillStyle = (r + c) % 2 ? '#111' : '#fff';
+      ctx.fillRect(c * 3 - 3, r * 3, 3, 3);
+    }
+  }
+  ctx.translate(0, -16);
   ctx.beginPath();
-  for (let i = 0; i < track.n; i++) ctx.lineTo(track.xs[i], track.ys[i]);
-  ctx.closePath();
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = (5 * dpr) / sc;
+  ctx.moveTo(-6, 0);
+  ctx.lineTo(10, 0);
+  ctx.moveTo(4, -5);
+  ctx.lineTo(10, 0);
+  ctx.lineTo(4, 5);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 2.2;
   ctx.stroke();
-  ctx.fillStyle = '#e8112d';
-  ctx.beginPath();
-  ctx.arc(track.xs[0], track.ys[0], (6 * dpr) / sc, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.restore();
 }
