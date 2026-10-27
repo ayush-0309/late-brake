@@ -6,8 +6,11 @@
 import { getOnline, onlineEnabled } from './online.js';
 import { formatTime } from './storage.js';
 import { track } from './analytics.js';
+import { CONFIG } from './config.js';
+import { buyColour, resumeCheckout } from './shop.js';
+import { COLOURS } from './medals.js';
 
-// `game`: { tracks, selected(), select(track), startRun(opts), toast(...) }
+// `game`: { tracks, selected(), select(track), startRun(opts), toast(...), ownedChanged() }
 export function createOnlineUI(game) {
   const $ = (id) => document.getElementById(id);
   let online = null;
@@ -18,8 +21,11 @@ export function createOnlineUI(game) {
   // the sign-in dialog is never left empty.
   let providers = { anonymous_users: true, google: true };
   let leaveArmed = 0;        // a guest's first tap on "Leave guest account"
+  let owned = new Set();     // car colours this player has bought
 
-  if (!onlineEnabled()) return { ready: Promise.resolve(null), canPlay: async () => true, lapDone() {}, refresh() {}, get user() { return null; } };
+  if (!onlineEnabled()) {
+    return { ready: Promise.resolve(null), canPlay: async () => true, lapDone() {}, refresh() {}, owned, shopOpen: false, get user() { return null; } };
+  }
 
   const ready = (async () => {
     online = await getOnline();
@@ -36,6 +42,7 @@ export function createOnlineUI(game) {
     renderChallenge();
     refresh();
     openSharedGhost();
+    if (shopOpen()) finishCheckout();
     return online;
   })();
 
@@ -48,6 +55,39 @@ export function createOnlineUI(game) {
     // Signing in and picking a name come before anything else.
     if (!user?.name) openAccount();
     refresh();
+    loadOwned();
+  }
+
+  // ---------- car colours ----------
+
+  // Colours bought on this account; they follow it to any device.
+  async function loadOwned() {
+    const forUser = online.user?.id;
+    const ids = forUser ? await online.ownedColours().catch(() => []) : [];
+    if (online.user?.id !== forUser) return; // signed in or out meanwhile
+    owned = new Set(ids);
+    game.ownedChanged();
+  }
+
+  // A purchase a reload interrupted, now paid: say so and add it.
+  async function finishCheckout() {
+    const id = await resumeCheckout(online);
+    const colour = COLOURS.find((c) => c.id === id);
+    if (!colour) return;
+    owned = new Set([...owned, colour.id]);
+    game.ownedChanged();
+    game.toast('Car colour', colour.name, 'Bought. It\'s in your garage', 'best');
+  }
+
+  const shopOpen = () => !!online && (CONFIG.shop || !!online.mock);
+
+  // Buying a colour (shop.js takes the payment): true once it's the player's.
+  async function buy(colour) {
+    if (!(await buyColour(online, colour))) return false;
+    owned = new Set([...owned, colour.id]);
+    track('Buy colour', { colour: colour.name });
+    game.ownedChanged();
+    return true;
   }
 
   function openAccount() {
@@ -271,7 +311,13 @@ export function createOnlineUI(game) {
     }
   }
 
-  return { ready, canPlay, lapDone, refresh, get user() { return online?.user || null; } };
+  return {
+    ready, canPlay, lapDone, refresh, buy,
+    continueWithGoogle: () => online.signInWithGoogle(),
+    get owned() { return owned; },
+    get shopOpen() { return shopOpen(); },
+    get user() { return online?.user || null; },
+  };
 }
 
 function escapeHtml(s) {

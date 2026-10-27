@@ -103,7 +103,7 @@ export function createRenderer(canvas, minimap) {
     // up to date, and snap the camera when this view comes back.
     if (opts.camera === 'none') {
       cam.ready = false;
-      drawMinimap(session, opts.ghost ? session.ghostPose() : null, x, y, a, poses(session.opponents, alpha));
+      drawMinimap(session, opts.ghost ? session.ghostPose() : null, x, y, a, poses(session.opponents, alpha), opts.paint);
       return;
     }
 
@@ -217,12 +217,12 @@ export function createRenderer(canvas, minimap) {
       if (r.x < view.x0 - 6 || r.x > view.x1 + 6 || r.y < view.y0 - 6 || r.y > view.y1 + 6) continue;
       drawCar(ctx, r.x, r.y, r.a, r.steer, r.color, 1);
     }
-    drawCar(ctx, x, y, a, car.steer, C.player, 1);
+    drawCar(ctx, x, y, a, car.steer, opts.paint || C.player, 1);
 
-    drawMinimap(session, ghost, x, y, a, rivals);
+    drawMinimap(session, ghost, x, y, a, rivals, opts.paint);
   }
 
-  function drawMinimap(session, ghost, x, y, a, rivals = []) {
+  function drawMinimap(session, ghost, x, y, a, rivals = [], paint = C.player) {
     if (minimap.width !== Math.round(minimap.clientWidth * dpr)) resize();
     const mw = minimap.width, mh = minimap.height;
     if (!mw || !mh) return;
@@ -278,7 +278,7 @@ export function createRenderer(canvas, minimap) {
     mctx.lineTo(-2.5, 0);
     mctx.lineTo(-5, -5.5);
     mctx.closePath();
-    mctx.fillStyle = C.player;
+    mctx.fillStyle = paint;
     mctx.strokeStyle = '#fff';
     mctx.lineWidth = 1.6;
     mctx.stroke();
@@ -392,7 +392,7 @@ function drawCar(ctx, x, y, a, steer, color, alpha) {
   ctx.lineWidth = 0.06;
   ctx.stroke(S.suspension);
 
-  // Front wing: main plane in the livery, a white flap, carbon endplates.
+  // Front wing: main plane in the car's colour, a white flap, carbon endplates.
   ctx.fillStyle = color;
   ctx.fill(S.frontMain);
   ctx.fillStyle = '#f2f2f2';
@@ -671,6 +671,19 @@ function lerpAngle(a, b, t) {
 // Circuit outline for the menu. `detail` adds sector colours and a
 // direction arrow at the start line.
 const SECTOR_COLORS = ['#ff2d48', '#f5c542', '#4aa3ff'];
+
+// A car colour swatch: the car from above, nose to the right, filling the canvas.
+export function drawCarPreview(canvas, color) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const cw = canvas.clientWidth, ch = canvas.clientHeight;
+  if (cw < 20 || ch < 10) return;
+  canvas.width = Math.round(cw * dpr);
+  canvas.height = Math.round(ch * dpr);
+  const ctx = canvas.getContext('2d');
+  const sc = Math.min(canvas.width / 6, canvas.height / 2.6); // the car is about 5.6 m by 2 m
+  ctx.setTransform(sc, 0, 0, sc, canvas.width / 2, canvas.height / 2);
+  drawCar(ctx, 0, 0, 0, 0, color, 1);
+}
 
 export function drawTrackPreview(canvas, track, { detail = false } = {}) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);

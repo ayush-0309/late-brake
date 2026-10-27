@@ -54,6 +54,21 @@ export function createMockOnline() {
     async providers() {
       return { google: true, anonymous_users: true };
     },
+    // Buying: no Dodo checkout here; the session says so and counts as paid.
+    async ownedColours() {
+      return user ? (data.owned ||= {})[user.id] || [] : [];
+    },
+    async startCheckout(colour) {
+      if (user?.guest) throw new Error('Continue with Google first, so the colour stays yours');
+      return { mock: true, sessionId: `mock_${colour}` };
+    },
+    async checkPayment(sessionId) {
+      const colour = sessionId.replace(/^mock_/, '');
+      const mine = ((data.owned ||= {})[user.id] ||= []);
+      if (!mine.includes(colour)) mine.push(colour);
+      save(data);
+      return { paid: true, colour };
+    },
     async signOut() {
       user = null;
       delete data.user;

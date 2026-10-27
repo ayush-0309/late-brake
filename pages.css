@@ -1,0 +1,44 @@
+/* The plain text pages: terms, privacy, refunds and contact. Headings use
+   the game's condensed face; long text is set in the system face to read easily. */
+:root {
+  --bg: #0b0d10; --surface: #14171c; --line: rgba(255, 255, 255, .09); --line-2: rgba(255, 255, 255, .16);
+  --text: #f3f4f6; --soft: #c3c8d0; --muted: #8f96a2; --accent: #e8112d;
+  --display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--soft); font-family: var(--body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+a { color: var(--text); text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--accent); }
+a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.wrap { width: min(760px, 100%); margin: 0 auto; padding: 0 20px; }
+
+.nav { border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.logo { font-family: var(--display); font-size: 28px; font-weight: 800; font-style: italic; color: var(--text); text-decoration: none; }
+.logo span { color: var(--accent); }
+.nav-play {
+  font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  text-decoration: none; padding: 5px 16px; border-radius: 999px; border: 1px solid var(--line-2);
+}
+.nav-play:hover { background: rgba(255, 255, 255, .06); }
+
+main.wrap { padding-top: 44px; padding-bottom: 56px; }
+h1 { font-family: var(--display); font-size: clamp(42px, 9vw, 64px); font-style: italic; font-weight: 800; line-height: .95; margin: 0 0 10px; color: var(--text); text-transform: uppercase; }
+h2 { font-family: var(--display); font-size: 27px; font-weight: 700; line-height: 1.15; color: var(--text); margin: 38px 0 8px; }
+h3 { font-size: 17px; color: var(--text); margin: 22px 0 4px; }
+p, ul { margin: 0 0 14px; }
+ul { padding-left: 22px; }
+li { margin-bottom: 6px; }
+strong { color: var(--text); }
+.updated { color: var(--muted); font-size: 15px; margin-bottom: 26px; }
+.lead { font-size: 19px; color: var(--text); }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 22px; margin: 0 0 14px; }
+.box > :last-child { margin-bottom: 0; }
+.email { font-family: var(--display); font-size: clamp(26px, 6vw, 34px); font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+
+footer { border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 15px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+footer a { color: var(--soft); }
+footer a[aria-current="page"] { color: var(--text); text-decoration-color: var(--accent); }

@@ -124,6 +124,10 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
           <span id="accountLabel">Sign in</span>
         </button>
+        <button class="icon-btn garage-btn" id="garageBtn" aria-label="Garage">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="M8.5 9.6 6 3h4l2 4 2-4h4l-2.5 6.6"/></svg>
+          <span>Garage</span><b id="medalCount">0</b>
+        </button>
         <button class="icon-btn" data-open="settings" aria-label="Settings">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
           <span>Settings</span>
@@ -179,6 +183,7 @@
               <div><dt>Best lap</dt><dd id="detailBest"></dd></div>
               <div><dt>Best sectors</dt><dd id="detailSectors"></dd></div>
             </dl>
+            <div class="medal-targets" id="detailMedals" aria-label="Medal times"></div>
             <p id="versusNote" class="versus-note" hidden></p>
           </div>
           <div id="board" class="board" hidden>
@@ -212,8 +217,11 @@
       </div>
 
       <div class="menu-foot">
-        <span class="soon">Supporter pack: liveries, helmets, no ads <em>Coming soon</em></span>
-        <a href="sponsors.html">Advertise on the track</a>
+        <span class="soon">Supporter pack: car colours, helmets, no ads <em>Coming soon</em></span>
+        <span class="foot-links">
+          <a href="sponsors.html">Advertise on the track</a>
+          <span class="policies"><a href="terms.html">Terms</a> <a href="privacy.html">Privacy</a> <a href="refunds.html">Refunds</a> <a href="contact.html">Contact</a></span>
+        </span>
       </div>
     </div>
   </div>
@@ -304,6 +312,7 @@
             Continue with Google
           </button>
         </div>
+        <p class="fine-print">By playing you agree to the <a href="terms.html" target="_blank" rel="noopener">terms</a> and <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>
       </div>
       <form id="nameForm">
         <div id="account-name" hidden>
@@ -314,6 +323,27 @@
       </form>
       <button id="signOutBtn" class="secondary" hidden>Sign out</button>
       <p id="accountError" class="field-error" role="alert"></p>
+    </div>
+  </div>
+
+  <div id="garage" class="overlay" hidden>
+    <div class="sheet small garage-sheet" role="dialog" aria-modal="true" aria-labelledby="garageTitle">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="garageTitle">Garage</h2>
+        <button class="icon-btn" id="garageClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <p class="sheet-text" id="garageText"></p>
+      <div id="colourList" class="colour-list" role="radiogroup" aria-label="Car colour"></div>
+      <div id="buyPanel" class="buy-panel" hidden>
+        <p class="sheet-text" id="buyText"></p>
+        <p id="buyError" class="field-error" role="alert"></p>
+        <button id="buyBtn" class="primary"></button>
+        <button id="buyCancel" class="secondary">Not now</button>
+        <p class="fine-print">Sold through Dodo Payments. <a href="refunds.html" target="_blank" rel="noopener">Refunds within 14 days</a> · <a href="terms.html" target="_blank" rel="noopener">Terms</a></p>
+      </div>
+      <button id="garageDone" class="secondary">Done</button>
     </div>
   </div>
 
@@ -386,7 +416,7 @@
       <div class="setting">
         <div class="setting-text">
           <div class="setting-name">Lap records</div>
-          <div class="setting-help">Best laps and ghosts are saved in this browser.</div>
+          <div class="setting-help">Best laps, ghosts and medals are saved in this browser.</div>
         </div>
         <button id="resetRecords" class="secondary danger">Reset all</button>
       </div>

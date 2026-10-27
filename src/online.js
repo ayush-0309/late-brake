@@ -62,6 +62,12 @@ async function createSupabaseOnline({ url, anonKey }) {
     if (error) throw new Error(error.message);
     return data;
   };
+  // The shop Edge Function; its own error message beats the generic one.
+  async function shop(body) {
+    const { data, error } = await db.functions.invoke('shop', { body });
+    if (error) throw new Error((await error.context?.json?.().catch(() => null))?.error || error.message);
+    return data;
+  }
 
   return {
     db,
@@ -127,6 +133,21 @@ async function createSupabaseOnline({ url, anonKey }) {
       return check(await db.rpc('submit_lap', {
         p_track: track, p_time: lap.time, p_sectors: lap.sectors, p_ghost: thinGhost(lap.ghost), p_challenge: challenge,
       }));
+    },
+
+    // Car colours this player has bought (ids).
+    async ownedColours() {
+      if (!user) return [];
+      const rows = check(await db.from('purchases').select('colour').eq('user_id', user.id).eq('status', 'paid'));
+      return rows.map((r) => r.colour);
+    },
+    // Buying a colour: the shop function starts a Dodo Payments checkout
+    // (shop.js opens it), then asks Dodo whether it was paid.
+    async startCheckout(colour, returnUrl) {
+      return shop({ action: 'checkout', colour, returnUrl });
+    },
+    async checkPayment(sessionId) {
+      return shop({ action: 'status', sessionId });
     },
 
     // Someone's best lap on a circuit, to race as a ghost.

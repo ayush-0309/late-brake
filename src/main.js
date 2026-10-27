@@ -5,7 +5,7 @@ import { RaceSession } from './race.js';
 import { OnlineRaceSession } from './online-race.js';
 import { createLobby } from './lobby-ui.js';
 import { createInput } from './input.js';
-import { createRenderer, drawTrackPreview } from './render.js';
+import { createRenderer, drawTrackPreview, drawCarPreview } from './render.js';
 import { loadTrack, saveTrack, clearTrack, formatTime } from './storage.js';
 import { loadSettings, saveSettings, SENSITIVITY, LINE_MODES, CAMERAS } from './settings.js';
 import { createAudio } from './audio.js';
@@ -13,10 +13,12 @@ import { createView3D } from './view3d.js';
 import { createPlatform } from './platform.js';
 import { initAnalytics, track, reportError } from './analytics.js';
 import { createOnlineUI } from './online-ui.js';
+import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, earnMedal, unlocked, colourFor } from './medals.js';
 
 const $ = (id) => document.getElementById(id);
 const tracks = TRACKS.map(buildTrack);
 const settings = loadSettings();
+let colour = colourFor(settings.colour, new Set()); // what the car is painted in; bought colours count once signed in
 const input = createInput($('touch'), { onPad });
 const renderer = createRenderer($('game'), $('minimap'));
 const audio = createAudio();
@@ -60,8 +62,12 @@ function buildMenu() {
   syncMode();
   const list = $('trackList');
   list.innerHTML = '';
+  const medals = loadMedals();
+  $('medalCount').textContent = medalCount(medals);
+  $('garageBtn').setAttribute('aria-label', `Garage, ${medalCount(medals)} medals`);
   for (const t of tracks) {
     const saved = loadTrack(t.id);
+    const m = medals[t.id];
     const card = document.createElement('button');
     card.className = 'track-card' + (t === selected ? ' selected' : '');
     card.setAttribute('role', 'option');
@@ -72,7 +78,7 @@ function buildMenu() {
         <div class="track-name">${t.name}</div>
         <div class="track-sub">${t.country} · ${(t.length / 1000).toFixed(2)} km</div>
       </div>
-      <div class="track-best"><span class="label">Best</span><b>${saved?.best ? formatTime(saved.best.time) : '—'}</b></div>`;
+      <div class="track-best"><span class="label">Best</span><b>${m ? `<i class="medal m${m}" title="${MEDALS[m - 1]} medal"></i>` : ''}${saved?.best ? formatTime(saved.best.time) : '—'}</b></div>`;
     card.addEventListener('click', () => select(t));
     card.addEventListener('dblclick', () => requestRun());
     list.appendChild(card);
@@ -131,6 +137,10 @@ function updateDetail() {
   $('detailSectors').textContent = bs?.every((x) => x != null)
     ? bs.map((x) => formatTime(x).replace(/^0:/, '')).join(' · ')
     : '—';
+  // The lap times that win each medal here, ticked off once won.
+  const got = loadMedals()[t.id] || 0;
+  $('detailMedals').innerHTML = t.medals.map((time, k) =>
+    `<span class="medal-target${got > k ? ' got' : ''}"><i class="medal m${k + 1}"></i>${MEDALS[k]} <b>${formatTime(time).replace(/\.?0+$/, '')}</b></span>`).join('');
 }
 
 function openMenu({ keepRoom = false } = {}) {
@@ -246,6 +256,7 @@ function setSetting(name, value) {
       : name === 'opponents' || name === 'raceLaps' ? Number(value) : value;
     saveSettings(settings);
   }
+  colour = colourFor(settings.colour, onlineUI.owned);
   syncSettings();
   syncMode();
 }
@@ -282,6 +293,8 @@ $('resetRecords').addEventListener('click', () => {
   resetArmed = 0;
   btn.textContent = 'Reset all';
   for (const t of tracks) clearTrack(t.id);
+  clearMedals();
+  colour = colourFor(settings.colour, onlineUI.owned);
   if (session) {
     session.best = null;
     session.bestSectors = [null, null, null];
@@ -289,6 +302,93 @@ $('resetRecords').addEventListener('click', () => {
   buildMenu();
   toast('Lap records', 'Cleared', '', 'info');
 });
+
+// ---------- garage ----------
+
+const rupees = (n) => `₹${n}`;
+let offered = null; // the locked colour shown for sale
+
+function openGarage() {
+  renderGarage();
+  show('garage', true);
+  ($('colourList').querySelector('[aria-checked="true"]') || $('garageDone')).focus({ preventScroll: true });
+}
+
+function closeGarage() {
+  show('garage', false);
+  $('garageBtn').focus({ preventScroll: true });
+}
+
+// Car colours to pick from. A locked one says how many medals unlock it
+// and, when the shop is open, its price.
+function renderGarage() {
+  const count = medalCount(), max = tracks.length * MEDALS.length, shop = onlineUI.shopOpen;
+  $('garageText').textContent = count >= max
+    ? `All ${max} medals. Every colour is yours.`
+    : `${count} of ${max} medals. Win medals on the circuits to unlock more colours${shop ? ', or buy the ones you want' : ''}. A gold counts as three.`;
+  const list = $('colourList');
+  list.innerHTML = COLOURS.map((c) => {
+    const open = unlocked(c, onlineUI.owned);
+    return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop ? '' : ' disabled'}>
+      <canvas aria-hidden="true"></canvas>
+      <span class="colour-name">${c.name}</span>
+      <small>${open ? '' : `${c.needs} medals${shop ? ` or ${rupees(c.price)}` : ''}`}</small>
+    </button>`;
+  }).join('');
+  hideOffer();
+  requestAnimationFrame(() => list.querySelectorAll('canvas').forEach((cv, i) => drawCarPreview(cv, COLOURS[i].paint)));
+}
+
+// A locked colour tapped: offer it for sale. Buying needs Google, so a
+// guest is asked to continue with Google first (they keep their laps).
+function offerColour(c) {
+  offered = c;
+  const guest = onlineUI.user?.guest;
+  $('buyText').textContent = guest
+    ? `${c.name} costs ${rupees(c.price)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
+    : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${rupees(c.price)}. It stays yours on any device you sign in to with Google.`;
+  $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${rupees(c.price)}`;
+  $('buyError').textContent = '';
+  show('buyPanel', true);
+  $('buyBtn').focus({ preventScroll: true });
+}
+
+function hideOffer() {
+  offered = null;
+  show('buyPanel', false);
+}
+
+$('colourList').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-colour]');
+  if (!b) return;
+  const c = COLOURS.find((x) => x.id === b.dataset.colour);
+  if (!unlocked(c, onlineUI.owned)) return offerColour(c);
+  setSetting('colour', c.id);
+  renderGarage();
+});
+
+$('buyBtn').addEventListener('click', async () => {
+  const c = offered;
+  if (!c) return;
+  $('buyBtn').disabled = true;
+  try {
+    if (onlineUI.user?.guest) await onlineUI.continueWithGoogle();
+    else if (await onlineUI.buy(c)) {
+      setSetting('colour', c.id);
+      renderGarage();
+      toast('Car colour', c.name, "It's yours on any device", 'best');
+    }
+  } catch (err) {
+    $('buyError').textContent = err.message;
+  } finally {
+    $('buyBtn').disabled = false;
+  }
+});
+$('buyCancel').addEventListener('click', hideOffer);
+$('garageBtn').addEventListener('click', openGarage);
+$('garageClose').addEventListener('click', closeGarage);
+$('garageDone').addEventListener('click', closeGarage);
+$('garage').addEventListener('click', (e) => { if (e.target === $('garage')) closeGarage(); });
 
 // ---------- loop ----------
 
@@ -324,7 +424,7 @@ function frame(now) {
       const alpha = session && !paused ? acc / DT : 1;
       const cockpit = settings.camera === 'cockpit' && get3D();
       showCockpit(!!cockpit);
-      const opts = { ghost: settings.ghost, camera: cockpit ? 'none' : settings.camera, line: settings.line };
+      const opts = { ghost: settings.ghost, camera: cockpit ? 'none' : settings.camera, line: settings.line, paint: colour.paint };
       renderer.draw(view, alpha, opts, dt);
       if (cockpit) cockpit.draw(view, alpha, opts);
     }
@@ -505,7 +605,15 @@ function onLap(e) {
   if (e.rescued) sub += ' · rescued';
   if (e.isBest && !e.rescued) platform.happyTime();
   track('Lap', { track: selected.name, result: e.rescued ? 'rescued' : e.valid ? 'valid' : 'invalid', best: e.isBest ? 'yes' : 'no' });
-  toast(`Lap ${e.lap}`, formatTime(e.time), sub, cls);
+  // A clean lap can win a medal, and medals unlock car colours.
+  const won = e.valid && !e.rescued ? earnMedal(selected, e.time) : null;
+  if (won) {
+    const newColour = won.unlocked.filter((c) => !onlineUI.owned.has(c.id)).at(-1);
+    if (newColour) sub = `New car colour unlocked: ${newColour.name}`;
+    cls = 'best';
+    track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1] });
+  }
+  toast(won ? `${MEDALS[won.medal - 1]} medal` : `Lap ${e.lap}`, formatTime(e.time), sub, cls);
   onlineUI.lapDone(selected, e, session);
   audio.chime(cls === 'best' ? 'best' : cls === 'bad' ? 'bad' : 'lap');
 }
@@ -700,10 +808,12 @@ addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea, select')) return; // typing, not driving
   const settingsOpen = !$('settings').hidden;
   const helpOpen = !$('help').hidden;
-  const dialogOpen = settingsOpen || !$('account').hidden || !$('lobby').hidden;
+  const garageOpen = !$('garage').hidden;
+  const dialogOpen = settingsOpen || garageOpen || !$('account').hidden || !$('lobby').hidden;
   if (e.code === 'Escape') {
     if (!$('lobby').hidden && !session) lobby.leave();
     else if (settingsOpen) closeSettings();
+    else if (garageOpen) closeGarage();
     else if (helpOpen) $('helpKeep').click();
     else if (session) setPaused(!paused);
   } else if (e.code === 'KeyP') {
@@ -794,6 +904,11 @@ const onlineUI = createOnlineUI({
   startRun: (opts) => requestRun(opts),
   toast,
   offerVersus,
+  // Signed in, out, or bought a colour: repaint and refresh the garage.
+  ownedChanged() {
+    colour = colourFor(settings.colour, onlineUI.owned);
+    if (!$('garage').hidden) renderGarage();
+  },
 });
 
 // An online race starting: every screen gets the same circuit and grid.

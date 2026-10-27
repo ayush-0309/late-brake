@@ -24,9 +24,9 @@ const RIM_LIP = hex('#a9aeb6');
 const PAINT = 0.75, SATIN = 0.35, RUBBER = 0.06;
 
 // `decals`: atlas rects for the name on the rear wing and the race number.
-export function carMesh(livery, W, decals, number = '7') {
+export function carMesh(bodyColour, W, decals, number = '7') {
   const b = builder();
-  const body = hex(livery);
+  const body = hex(bodyColour);
 
   // Paint on top, bare carbon underneath.
   const paint = () => (i, t) => (Math.sin(t) < -0.35 ? CARBON : body);

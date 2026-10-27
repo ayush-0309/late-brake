@@ -12,6 +12,7 @@ export const DEFAULTS = {
   opponents: 3,           // AI rivals in a race, 1–3
   raceLaps: 3,
   difficulty: 'medium',   // 'easy' | 'medium' | 'hard'
+  colour: 'red',          // car colour, an id from COLOURS in medals.js, painted only once unlocked
 };
 
 export const LINE_MODES = ['full', 'braking', 'off'];
@@ -34,6 +35,7 @@ export function loadSettings() {
   if ([1, 2, 3].includes(saved.opponents)) s.opponents = saved.opponents;
   if ([3, 5, 10].includes(saved.raceLaps)) s.raceLaps = saved.raceLaps;
   if (['easy', 'medium', 'hard'].includes(saved.difficulty)) s.difficulty = saved.difficulty;
+  if (typeof saved.colour === 'string') s.colour = saved.colour;
   return s;
 }
 

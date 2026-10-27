@@ -22,4 +22,9 @@ export const CONFIG = {
     url: 'https://pghptqjmrmtyyxlofkll.supabase.co',
     anonKey: 'sb_publishable_gjIMjCLm51iwgVAgsSsM9w_UutI5h_a',
   },
+
+  // Selling car colours with Dodo Payments (needs the shop Edge Function,
+  // see supabase/README.md). Off until that's set up; ?online=mock turns on
+  // a pretend shop for trying it locally.
+  shop: false,
 };

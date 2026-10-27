@@ -133,3 +133,22 @@ end;
 $$;
 revoke all on function public.submit_lap(text, real, real[], jsonb, boolean) from public;
 grant execute on function public.submit_lap(text, real, real[], jsonb, boolean) to authenticated;
+
+-- Car colours bought with Dodo Payments, one row per checkout session. Only
+-- the `shop` Edge Function writes here (with the service role); players can
+-- read their own. Rows outlive a deleted account so payments can be traced.
+create table if not exists public.purchases (
+  id text primary key,                     -- Dodo checkout session (cks_…)
+  user_id uuid references auth.users on delete set null,
+  colour text not null,
+  status text not null default 'created' check (status in ('created', 'paid', 'refunded')),
+  payment_id text,
+  amount integer,                          -- smallest currency unit (paise), once paid
+  currency text,
+  created_at timestamptz not null default now(),
+  paid_at timestamptz
+);
+create index if not exists purchases_by_user on public.purchases (user_id);
+alter table public.purchases enable row level security;
+drop policy if exists "own purchases" on public.purchases;
+create policy "own purchases" on public.purchases for select using (auth.uid() = user_id);

@@ -62,6 +62,42 @@ Races use Supabase Realtime (broadcast and presence on a channel per room). Noth
 default. On the free plan, Realtime allows about 200 players connected at once and 100 messages a second
 across the project; each racer sends 10 messages a second, so plan an upgrade before a big launch.
 
+## Selling car colours (optional)
+
+Players can buy locked car colours in the Garage with Dodo Payments (UPI, cards and more). Dodo is the merchant of
+record: it handles tax, invoices and payment methods, and pays you out. The checkout opens over the game, so players
+never leave it. It stays off until `shop: true` in `src/config.js`. Buying needs a Google account, so a purchase
+follows the player to any device.
+
+1. **Dodo account.** Sign up at https://dodopayments.com and complete business verification. Dodo reviews your
+   website before live payments: have terms, a privacy policy, a refund policy and a contact page, with prices shown.
+   Everything below starts in **Test mode** (no real money).
+2. **Products.** **Products → Create product**, one per colour, each a **one-time payment** in **INR**:
+   Racing Green ₹99, Pearl ₹149, Purple Sector ₹199, Hot Pink ₹249, Volt ₹349, Champion Gold ₹499. Make the price
+   tax-inclusive so players pay exactly what the game shows. Copy each product's id (`pdt_…`).
+3. **API key.** **Developer → API Keys → Add API key**, and copy it. It goes only into Supabase, never into the game.
+4. **Table.** Run `schema.sql` again in the **SQL Editor**. It adds `purchases` and leaves everything else as it is.
+5. **Function.** **Edge Functions → Deploy a new function → Via Editor**, name it `shop`, paste
+   `functions/shop/index.ts` and deploy. Then open its settings and turn **Verify JWT** off (Dodo's webhook has no
+   Supabase token; the function checks the player itself). With the Supabase CLI instead:
+   `supabase functions deploy shop --no-verify-jwt`.
+6. **Webhook.** In Dodo, **Developer → Webhooks → Add endpoint**: URL
+   `https://<project ref>.supabase.co/functions/v1/shop`, events **payment.succeeded** and **refund.succeeded**.
+   Copy its signing secret (`whsec_…`). This makes a payment count even if the player closes the page before the
+   game checks it, and takes a colour back when you refund it.
+7. **Secrets.** **Edge Functions → Secrets** in Supabase:
+   - `DODO_API_KEY`: the key from step 3
+   - `DODO_WEBHOOK_SECRET`: the `whsec_…` secret from step 6
+   - `DODO_MODE`: `test`
+   - `DODO_PRODUCTS`: the product ids from step 2 as JSON, e.g.
+     `{"green":"pdt_…","pearl":"pdt_…","purple":"pdt_…","pink":"pdt_…","volt":"pdt_…","gold":"pdt_…"}`
+8. **Switch it on.** Set `shop: true` in `src/config.js` and deploy the site.
+
+Test with Dodo's test cards, then for real money make the products, API key and webhook again in **Live mode**,
+update the four secrets (`DODO_MODE` to `live`) and you're done; the game needs no change. The prices shown in the
+game are in `COLOURS` in `src/medals.js`: keep them the same as the products. Payments and refunds are in the Dodo
+dashboard; each checkout is also a row in `purchases`.
+
 ## How laps are checked
 
 Laps only get in through `submit_lap()`, which rejects:

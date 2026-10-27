@@ -105,7 +105,7 @@ export function createView3D(canvas) {
   let prog, loc, tex, aniso;
   let world = null, worldTrack = null, atlas = null;
   let car = null, ghostCar = null, driver = null, frontWheel = null, wheel = null, sky = null, shadow = null;
-  let liveries = new Map(); // rival colour -> car mesh
+  let cars = new Map(); // paint colour -> car mesh, for rivals and the player's chosen colour
   let lost = false;
   let w = 0, h = 0, dpr = 1;
 
@@ -162,8 +162,8 @@ export function createView3D(canvas) {
     if (world) for (const m of Object.values(world).flat()) if (m?.buf) gl.deleteBuffer(m.buf);
     world = buildWorld(gl, track, sc, line, atlas);
     // Cars use this atlas's decals, so they're rebuilt with it.
-    for (const m of [car, ghostCar, driver, frontWheel, wheel, sky, shadow, ...liveries.values()]) if (m) gl.deleteBuffer(m.buf);
-    liveries = new Map();
+    for (const m of [car, ghostCar, driver, frontWheel, wheel, sky, shadow, ...cars.values()]) if (m) gl.deleteBuffer(m.buf);
+    cars = new Map();
     const W = atlas.white, decals = { name: atlas.decalName, number: atlas.decalNumber };
     car = mesh(gl, carMesh('#e8112d', W, decals));
     ghostCar = mesh(gl, carMesh('#4aa3ff', W, decals));
@@ -237,11 +237,10 @@ export function createView3D(canvas) {
     gl.depthFunc(gl.LEQUAL);
     gl.depthMask(true);
     drawMesh(world.solid, atlas.tex, { fog });
-    drawMesh(car, atlas.tex, { model: M, fog });
+    drawMesh(opts.paint ? carIn(opts.paint) : car, atlas.tex, { model: M, fog });
     drawFrontWheels(M, c.steer, {});
     for (const r of rivals) {
-      if (!liveries.has(r.color)) liveries.set(r.color, mesh(gl, carMesh(r.color, atlas.white, { name: atlas.decalName, number: atlas.decalNumber })));
-      drawMesh(liveries.get(r.color), atlas.tex, { model: r.M, fog });
+      drawMesh(carIn(r.color), atlas.tex, { model: r.M, fog });
       drawMesh(driver, atlas.tex, { model: r.M, fog });
       drawFrontWheels(r.M, r.steer, {});
     }
@@ -267,6 +266,12 @@ export function createView3D(canvas) {
   }
 
   const IDENTITY = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+  // A car in this colour, built the first time it's needed.
+  function carIn(paint) {
+    if (!cars.has(paint)) cars.set(paint, mesh(gl, carMesh(paint, atlas.white, { name: atlas.decalName, number: atlas.decalNumber })));
+    return cars.get(paint);
+  }
+
   function drawMesh(m, t, { model = IDENTITY, fog = [1e6, 2e6], tile = [0, 0], tileOrigin = [0, 0], alpha = 1 } = {}) {
     if (!m || !m.count) return;
     gl.bindBuffer(gl.ARRAY_BUFFER, m.buf);
