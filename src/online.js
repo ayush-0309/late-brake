@@ -32,21 +32,31 @@ export async function getOnline() {
 
 async function createSupabaseOnline({ url, anonKey }) {
   const { createClient } = await import(SUPABASE_JS);
+  // A guest who picked a Google account that already has a driver comes back
+  // with this error; read it before the client tidies the URL.
+  const linkError = new URLSearchParams(location.hash.slice(1)).get('error_code') || new URLSearchParams(location.search).get('error_code');
   const db = createClient(url, anonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
-  let user = null;        // { id, email, name }
+  let user = null;        // { id, email, name, guest }
   const listeners = new Set();
   const emit = () => listeners.forEach((fn) => fn(user));
+  const back = () => location.origin + location.pathname;
 
   async function loadProfile(session) {
     if (!session?.user) { user = null; emit(); return; }
     const { data } = await db.from('profiles').select('name').eq('id', session.user.id).maybeSingle();
-    user = { id: session.user.id, email: session.user.email, name: data?.name || null };
+    user = { id: session.user.id, email: session.user.email, name: data?.name || null, guest: !!session.user.is_anonymous };
     emit();
   }
   // Supabase warns against calling it again inside this callback (it can
   // deadlock), so the profile loads just after.
   db.auth.onAuthStateChange((_event, session) => { setTimeout(() => loadProfile(session), 0); });
   await loadProfile((await db.auth.getSession()).data.session);
+  // That Google account already has a driver: sign in to it instead (the
+  // guest's laps stay with the guest).
+  if (linkError === 'identity_already_exists') {
+    history.replaceState(null, '', back() + location.search);
+    await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back() } });
+  }
 
   const check = ({ data, error }) => {
     if (error) throw new Error(error.message);
@@ -58,10 +68,21 @@ async function createSupabaseOnline({ url, anonKey }) {
     get user() { return user; },
     onUser(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
-    // Email sign-in link; it brings the player back to this page signed in.
-    async sendSignInLink(email) {
-      const back = location.origin + location.pathname;
-      check(await db.auth.signInWithOtp({ email, options: { emailRedirectTo: back } }));
+    // Guest play: an account with no email, kept in this browser.
+    async playAsGuest() {
+      check(await db.auth.signInAnonymously());
+    },
+    // Google sign-in: leaves for Google and comes back to this page signed in.
+    // A guest gets Google added to their account instead, keeping their laps.
+    async signInWithGoogle() {
+      const options = { redirectTo: back() };
+      check(await (user?.guest ? db.auth.linkIdentity({ provider: 'google', options }) : db.auth.signInWithOAuth({ provider: 'google', options })));
+    },
+    // Sign-in methods switched on in the Supabase dashboard, e.g.
+    // { google: true, anonymous_users: true } (guests).
+    async providers() {
+      const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: anonKey } });
+      return res.ok ? (await res.json()).external || {} : {};
     },
     async signOut() {
       await db.auth.signOut();

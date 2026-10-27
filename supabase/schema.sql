@@ -1,7 +1,7 @@
 -- Late Brake online: accounts, leaderboards, the daily challenge.
 -- Run this once in your Supabase project's SQL editor (see README.md here).
 
--- Display names. Sign-in itself is Supabase Auth (email links).
+-- Display names. Sign-in itself is Supabase Auth (guests and Google).
 create table if not exists public.profiles (
   id uuid primary key references auth.users on delete cascade,
   name text not null unique check (name ~ '^[A-Za-z0-9 ._-]{2,20}$'),
@@ -100,11 +100,12 @@ begin
      or abs((select sum(x) from unnest(p_sectors) x) - p_time) > 0.05 then
     raise exception 'Sectors do not add up';
   end if;
-  if jsonb_typeof(p_ghost -> 'pts') <> 'array' or pg_column_size(p_ghost) > 300000 then
+  -- coalesce: a missing field must fail these checks, not slip past as null.
+  if coalesce(jsonb_typeof(p_ghost -> 'pts'), '') <> 'array' or pg_column_size(p_ghost) > 300000 then
     raise exception 'Bad ghost';
   end if;
   samples := jsonb_array_length(p_ghost -> 'pts') / 3;
-  if samples < 30 or abs((samples - 1) * (p_ghost ->> 'every')::real - p_time) > 1.5 then
+  if samples < 30 or abs((samples - 1) * coalesce((p_ghost ->> 'every')::real, 0) - p_time) > 1.5 then
     raise exception 'Ghost does not match the lap';
   end if;
 

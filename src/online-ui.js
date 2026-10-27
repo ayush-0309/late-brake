@@ -13,6 +13,8 @@ export function createOnlineUI(game) {
   let challenge = null;      // { day, track } today
   let boardTab = 'all';      // 'all' | 'today'
   let boardFor = null;
+  let providers = {};        // sign-in methods switched on in Supabase
+  let leaveArmed = 0;        // a guest's first tap on "Leave guest account"
 
   if (!onlineEnabled()) return { ready: Promise.resolve(null), lapDone() {}, refresh() {}, get user() { return null; } };
 
@@ -22,6 +24,7 @@ export function createOnlineUI(game) {
     $('accountBtn').hidden = false;
     online.onUser(onUser);
     onUser(online.user);
+    online.providers().then((p) => { providers = p; renderMethods(); }, () => {});
     try {
       challenge = await online.challenge();
     } catch (err) {
@@ -47,23 +50,42 @@ export function createOnlineUI(game) {
   function openAccount() {
     renderAccount();
     $('account').hidden = false;
-    ($('account').querySelector('input:not([hidden])') || $('accountClose')).focus({ preventScroll: true });
+    // The first thing to press or fill in; just the close button over your own details.
+    const first = !online.user?.name && [...$('account').querySelectorAll('.primary, input')].find((el) => el.offsetParent);
+    (first || $('accountClose')).focus({ preventScroll: true });
   }
 
   function closeAccount() {
     $('account').hidden = true;
   }
 
-  function renderAccount(state) {
+  function renderAccount() {
     const user = online.user;
-    const view = state || (!user ? 'signin' : !user.name ? 'name' : 'me');
-    for (const v of ['signin', 'sent', 'name', 'me']) $(`account-${v}`).hidden = v !== view;
+    const view = !user ? 'signin' : !user.name ? 'name' : 'me';
+    // A guest gets the Google button too, to keep their laps.
+    const shown = view === 'me' && user.guest && providers.google ? ['me', 'signin'] : [view];
+    for (const v of ['signin', 'name', 'me']) $(`account-${v}`).hidden = !shown.includes(v);
+    clearTimeout(leaveArmed);
+    leaveArmed = 0;
+    $('signOutBtn').hidden = view !== 'me';
+    $('signOutBtn').textContent = user?.guest ? 'Leave guest account' : 'Sign out';
     $('accountError').textContent = '';
+    renderMethods();
     if (view === 'me') {
       $('accountName').textContent = user.name;
-      $('accountEmail').textContent = user.email || '';
+      $('accountEmail').textContent = user.guest ? 'Guest' : user.email || '';
     }
     if (view === 'name') $('nameInput').value = user?.name || '';
+  }
+
+  // Guest play and Google show once they're switched on in Supabase.
+  function renderMethods() {
+    const user = online.user;
+    $('guestSignin').hidden = !providers.anonymous_users || !!user;
+    $('googleSignin').hidden = !providers.google;
+    $('signinText').textContent = user?.guest
+      ? 'Guest accounts live in this browser only. Sign in with Google to keep your laps on any device.'
+      : 'Put your laps on the leaderboards, share your ghost and race online. No password needed.';
   }
 
   $('accountBtn').addEventListener('click', openAccount);
@@ -73,21 +95,19 @@ export function createOnlineUI(game) {
     if (e.code === 'Escape' && !$('account').hidden) { e.stopImmediatePropagation(); closeAccount(); }
   }, true);
 
-  $('signinForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = $('emailInput').value.trim();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return error('Enter your email address.');
-    busy('signinForm', true);
+  const signInVia = (step, go) => async () => {
+    busy('account-signin', true);
+    track('Sign in', { step });
     try {
-      await online.sendSignInLink(email);
-      track('Sign in', { step: 'link sent' });
-      if (!online.mock) renderAccount('sent');
+      await go();
     } catch (err) {
       error(err.message);
     } finally {
-      busy('signinForm', false);
+      busy('account-signin', false);
     }
-  });
+  };
+  $('guestBtn').addEventListener('click', signInVia('guest', () => online.playAsGuest()));
+  $('googleBtn').addEventListener('click', signInVia('google', () => online.signInWithGoogle()));
 
   $('nameForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -106,13 +126,22 @@ export function createOnlineUI(game) {
     }
   });
 
+  // There's no way back into a guest account, so leaving takes two taps
+  // (confirm() is often blocked inside game portals' frames).
   $('signOutBtn').addEventListener('click', async () => {
+    if (online.user?.guest && !leaveArmed) {
+      $('signOutBtn').textContent = 'Tap again to leave';
+      leaveArmed = setTimeout(() => { leaveArmed = 0; $('signOutBtn').textContent = 'Leave guest account'; }, 3000);
+      return;
+    }
+    clearTimeout(leaveArmed);
+    leaveArmed = 0;
     await online.signOut();
     closeAccount();
   });
 
   function error(msg) { $('accountError').textContent = msg; }
-  function busy(form, on) { for (const el of $(form).elements) el.disabled = on; }
+  function busy(id, on) { for (const el of $(id).querySelectorAll('button, input')) el.disabled = on; }
 
   // ---------- daily challenge ----------
 

@@ -36,11 +36,23 @@ export function createMockOnline() {
     mock: true,
     get user() { return user; },
     onUser(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    async sendSignInLink(email) {
-      user = { id: 'me-' + email.toLowerCase(), email, name: data.names[email.toLowerCase()] || null };
+    async playAsGuest() {
+      user = { id: 'guest-' + Date.now().toString(36), email: null, name: null, guest: true };
       data.user = user;
       save(data);
       setTimeout(emit, 300);
+    },
+    // A guest keeps their id (and laps) and gains the Google account.
+    async signInWithGoogle() {
+      const email = 'driver@gmail.com';
+      const id = user?.guest ? user.id : 'me-' + email;
+      user = { id, email, name: data.names[id] || null, guest: false };
+      data.user = user;
+      save(data);
+      setTimeout(emit, 300);
+    },
+    async providers() {
+      return { google: true, anonymous_users: true };
     },
     async signOut() {
       user = null;
@@ -50,9 +62,9 @@ export function createMockOnline() {
     },
     async setName(name) {
       if (!/^[A-Za-z0-9 ._-]{2,20}$/.test(name)) throw new Error('Names are 2–20 letters, numbers, spaces, dots, dashes or underscores.');
-      const taken = Object.entries(data.names).some(([e, n]) => n.toLowerCase() === name.toLowerCase() && e !== user.email.toLowerCase());
+      const taken = Object.entries(data.names).some(([id, n]) => n.toLowerCase() === name.toLowerCase() && id !== user.id);
       if (taken || FAKES.includes(name)) throw new Error('That name is taken.');
-      data.names[user.email.toLowerCase()] = name;
+      data.names[user.id] = name;
       user = { ...user, name };
       data.user = user;
       save(data);

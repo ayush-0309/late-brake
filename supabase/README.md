@@ -10,25 +10,51 @@ exactly as before with those features hidden.
 2. Open **SQL Editor**, paste the whole of `schema.sql` from this folder and run it.
    It creates the tables, the lap checks and the daily challenge. It's safe to run again after changes.
 
-## 2. Sign-in by email link
+## 2. Sign-in
 
-1. **Authentication → Providers**: make sure **Email** is on. Passwords aren't used; players get a sign-in link.
-2. **Authentication → URL Configuration**:
-   - **Site URL**: `https://ayush-0309.github.io/late-brake/play.html`
-   - **Redirect URLs**: add `https://ayush-0309.github.io/late-brake/play.html` and, for testing, `http://localhost:5173/play.html`
-3. Supabase's built-in email sender is rate-limited (a few emails an hour). Before launch, add your own SMTP
-   under **Project Settings → Authentication → SMTP** (Resend, Postmark, Amazon SES and others work).
+Players either **play as a guest** (pick a name, no account details at all) or **continue with Google**. A guest
+can add Google later and keeps their laps; until then the guest account lives in that browser only. There are no
+passwords or emails.
+
+1. **Authentication → URL Configuration**:
+   - **Site URL**: `https://www.latebrake.in/play.html`
+   - **Redirect URLs**: add `https://www.latebrake.in/play.html`, `https://late-brake.vercel.app/play.html` and, for testing, `http://localhost:5173/play.html`
+2. **Authentication → Sign In / Providers → User Signups**: turn on **Allow anonymous sign-ins** (guests) and
+   **Allow manual linking** (it lets a guest add Google), then **Save changes**.
+3. Under **Auth Providers**, turn **Email** off. The game doesn't use it, and leaving it on lets anyone use your
+   project to send sign-in emails.
+
+Guests count as monthly active users like everyone else. Supabase allows 30 new guests an hour from one IP address;
+if fake guests start filling the leaderboards, turn on a CAPTCHA under **Attack Protection**.
+
+### Google
+
+The sign-in dialog shows **Continue with Google** once the Google provider is on.
+
+1. In [Google Cloud Console](https://console.cloud.google.com), pick or create a project, then
+   **Google Auth Platform → Get started**: app name `Late Brake`, your support email, audience **External**.
+   Then **Audience → Publish app** so anyone can sign in (the basic email and profile scopes need no review).
+2. **Google Auth Platform → Clients → Create client**, type **Web application**:
+   - **Authorized JavaScript origins**: `https://www.latebrake.in`, `https://late-brake.vercel.app`, `http://localhost:5173`
+   - **Authorized redirect URIs**: `https://<project ref>.supabase.co/auth/v1/callback` (Supabase shows the
+     exact one under **Authentication → Sign In / Providers → Google**)
+3. In Supabase, **Authentication → Sign In / Providers → Google**: turn it on and paste the **Client ID** and
+   **Client Secret**. The redirect URLs from step 1 above apply to Google too.
+
+Google's sign-in screen says you're continuing to `<project ref>.supabase.co`. A Supabase custom domain (a paid
+add-on) changes that to your own.
 
 ## 3. Connect the game
 
-**Project Settings → API**: copy the **Project URL** and the **anon public** key into `src/config.js`:
+**Project Settings → API Keys**: copy the **publishable** key (`sb_publishable_…`; older projects have a legacy
+**anon** key, `eyJ…`, which works too) into `src/config.js`, with the Project URL (`https://<project ref>.supabase.co`):
 
 ```js
-supabase: { url: 'https://xxxx.supabase.co', anonKey: 'eyJ…' },
+supabase: { url: 'https://xxxx.supabase.co', anonKey: 'sb_publishable_…' },
 ```
 
-The anon key is meant to be public: the database rules in `schema.sql` decide what it can do. Never put the
-`service_role` key in the game.
+The publishable key is meant to be public: the database rules in `schema.sql` decide what it can do. Never put a
+secret key (`sb_secret_…` or the legacy `service_role` key) in the game.
 
 ## 4. Online races
 

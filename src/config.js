@@ -15,7 +15,11 @@ export const CONFIG = {
   // can be tried locally (so does adding ?platform=test to the URL).
   platform: null,
 
-  // Online features (accounts, leaderboards, multiplayer), off when null:
-  //   { url: 'https://xxxx.supabase.co', anonKey: 'eyJ…' }
-  supabase: null,
+  // Online features (accounts, leaderboards, multiplayer), off when null.
+  // anonKey is the project's publishable key (sb_publishable_…) or legacy
+  // anon key (eyJ…); both are public. Never put a secret key here.
+  supabase: {
+    url: 'https://pghptqjmrmtyyxlofkll.supabase.co',
+    anonKey: 'sb_publishable_gjIMjCLm51iwgVAgsSsM9w_UutI5h_a',
+  },
 };
