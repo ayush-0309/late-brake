@@ -1,6 +1,7 @@
 // Menu and dialogs for the online features: sign-in, display name, daily
 // challenge card, leaderboards (click a time to race that ghost) and sharing
 // your ghost. Everything stays hidden when online features are off.
+// With them on, playing needs a guest or Google account with a name.
 
 import { getOnline, onlineEnabled } from './online.js';
 import { formatTime } from './storage.js';
@@ -13,10 +14,12 @@ export function createOnlineUI(game) {
   let challenge = null;      // { day, track } today
   let boardTab = 'all';      // 'all' | 'today'
   let boardFor = null;
-  let providers = {};        // sign-in methods switched on in Supabase
+  // Sign-in methods switched on in Supabase; both assumed until it says, so
+  // the sign-in dialog is never left empty.
+  let providers = { anonymous_users: true, google: true };
   let leaveArmed = 0;        // a guest's first tap on "Leave guest account"
 
-  if (!onlineEnabled()) return { ready: Promise.resolve(null), lapDone() {}, refresh() {}, get user() { return null; } };
+  if (!onlineEnabled()) return { ready: Promise.resolve(null), canPlay: async () => true, lapDone() {}, refresh() {}, get user() { return null; } };
 
   const ready = (async () => {
     online = await getOnline();
@@ -24,7 +27,7 @@ export function createOnlineUI(game) {
     $('accountBtn').hidden = false;
     online.onUser(onUser);
     onUser(online.user);
-    online.providers().then((p) => { providers = p; renderMethods(); }, () => {});
+    online.providers().then((p) => { providers = { ...providers, ...p }; renderMethods(); }, () => {});
     try {
       challenge = await online.challenge();
     } catch (err) {
@@ -42,8 +45,8 @@ export function createOnlineUI(game) {
     $('accountLabel').textContent = user ? user.name || 'Pick a name' : 'Sign in';
     $('accountBtn').classList.toggle('signed-in', !!user);
     if (!$('account').hidden) renderAccount();
-    // Signed in for the first time: a name is needed before anything else.
-    if (user && !user.name) openAccount();
+    // Signing in and picking a name come before anything else.
+    if (!user?.name) openAccount();
     refresh();
   }
 
@@ -51,12 +54,23 @@ export function createOnlineUI(game) {
     renderAccount();
     $('account').hidden = false;
     // The first thing to press or fill in; just the close button over your own details.
-    const first = !online.user?.name && [...$('account').querySelectorAll('.primary, input')].find((el) => el.offsetParent);
+    const first = !online.user?.name && [...$('account').querySelectorAll('.primary, .google-btn, input')].find((el) => el.offsetParent);
     (first || $('accountClose')).focus({ preventScroll: true });
   }
 
   function closeAccount() {
+    if (!online.user?.name) return; // still choosing how to play
     $('account').hidden = true;
+  }
+
+  // Whether a run can start: yes once signed in with a name, or when online
+  // features aren't working (the game still plays then). Otherwise it brings
+  // up the sign-in dialog.
+  async function canPlay() {
+    await ready;
+    if (!online || online.user?.name) return true;
+    openAccount();
+    return false;
   }
 
   function renderAccount() {
@@ -68,6 +82,7 @@ export function createOnlineUI(game) {
     clearTimeout(leaveArmed);
     leaveArmed = 0;
     $('signOutBtn').hidden = view !== 'me';
+    $('accountClose').hidden = view !== 'me';
     $('signOutBtn').textContent = user?.guest ? 'Leave guest account' : 'Sign out';
     $('accountError').textContent = '';
     renderMethods();
@@ -85,7 +100,7 @@ export function createOnlineUI(game) {
     $('googleSignin').hidden = !providers.google;
     $('signinText').textContent = user?.guest
       ? 'Guest accounts live in this browser only. Sign in with Google to keep your laps on any device.'
-      : 'Put your laps on the leaderboards, share your ghost and race online. No password needed.';
+      : 'Play as a guest to start straight away, or sign in with Google to keep your laps on any device.';
   }
 
   $('accountBtn').addEventListener('click', openAccount);
@@ -136,8 +151,7 @@ export function createOnlineUI(game) {
     }
     clearTimeout(leaveArmed);
     leaveArmed = 0;
-    await online.signOut();
-    closeAccount();
+    await online.signOut(); // back to the sign-in dialog
   });
 
   function error(msg) { $('accountError').textContent = msg; }
@@ -257,7 +271,7 @@ export function createOnlineUI(game) {
     }
   }
 
-  return { ready, lapDone, refresh, get user() { return online?.user || null; } };
+  return { ready, canPlay, lapDone, refresh, get user() { return online?.user || null; } };
 }
 
 function escapeHtml(s) {

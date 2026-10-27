@@ -161,6 +161,7 @@ function openMenu({ keepRoom = false } = {}) {
 // restart keeps racing the same ghost or challenge.
 async function requestRun(opts) {
   if (adPlaying) return;
+  if (!session && !(await onlineUI.canPlay())) return; // guest or Google first
   if (session?.online) return toast('Online race', "Can't restart", 'Finish the race or leave it from the pause menu', 'info');
   if (!session && settings.mode === 'online' && !(opts && !(opts instanceof Event) && opts.mode)) return lobby.open();
   if (opts instanceof Event || opts === undefined) opts = session ? runOpts : menuRunOpts();
