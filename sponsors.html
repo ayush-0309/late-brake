@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <title>Advertise on Late Brake</title>
+  <meta name="description" content="Put your brand on the track: trackside boards, runoff logos, grandstand roofs and sponsored challenges in Late Brake, a browser formula racing game.">
+  <link rel="canonical" href="https://ayush-0309.github.io/late-brake/sponsors.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Advertise on Late Brake">
+  <meta property="og:description" content="Trackside boards, runoff logos, grandstand roofs and sponsored challenges in a browser racing game.">
+  <meta property="og:image" content="https://ayush-0309.github.io/late-brake/media/sponsor-trackside.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d10; --surface: #13161b; --line: rgba(255,255,255,.1); --text: #f3f4f6; --muted: #949ba7;
+      --accent: #e8112d; --accent-hi: #ff2d48; --yellow: #f5c542;
+      --font: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; }
+    a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    .wrap { width: min(1080px, 100%); margin: 0 auto; padding-left: 20px; padding-right: 20px; }
+    nav { display: flex; justify-content: space-between; align-items: center; padding-top: 18px; padding-bottom: 18px; }
+    .logo { font-size: 30px; font-weight: 800; font-style: italic; text-decoration: none; }
+    .logo span { color: var(--accent); }
+    nav .play { font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; color: var(--muted); }
+    nav .play:hover { color: var(--text); }
+
+    header { padding-top: 40px; padding-bottom: 36px; }
+    .kicker { font-size: 15px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-hi); }
+    h1 { font-size: clamp(48px, 8vw, 92px); font-style: italic; font-weight: 800; margin: 8px 0 0; line-height: .9; }
+    .lede { font-size: clamp(20px, 2.4vw, 25px); color: #c3c8d0; max-width: 34ch; margin: 18px 0 28px; line-height: 1.25; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 22px; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; padding: 14px 32px; border-radius: 12px;
+      background: linear-gradient(180deg, var(--accent-hi), var(--accent)); color: #fff; box-shadow: 0 10px 30px rgba(232,17,45,.3); }
+    .btn:hover { filter: brightness(1.08); }
+
+    .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    figure { margin: 0; }
+    figure img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--line); aspect-ratio: 16 / 9; object-fit: cover; }
+    figcaption { font-size: 16px; color: var(--muted); margin-top: 8px; }
+
+    section { padding-top: 48px; padding-bottom: 8px; }
+    h2 { font-size: 13px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+    .card { padding: 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    .card h3 { margin: 0 0 6px; font-size: 24px; font-weight: 800; }
+    .card p { margin: 0; font-size: 17px; color: #c3c8d0; line-height: 1.35; }
+    .card .tag { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--yellow); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 17px; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    td:first-child { font-weight: 700; white-space: nowrap; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+
+    .contact { margin-top: 48px; padding: 28px; border-radius: 18px; background: radial-gradient(ellipse at 80% 0%, rgba(232,17,45,.2), transparent 60%), var(--surface); border: 1px solid var(--line); }
+    .contact h2 { color: var(--text); font-size: 34px; letter-spacing: 0; text-transform: none; font-weight: 800; font-style: italic; margin-bottom: 8px; }
+    .contact p { font-size: 19px; color: #c3c8d0; margin: 0 0 20px; max-width: 52ch; line-height: 1.3; }
+    .contact small { display: block; margin-top: 14px; font-size: 15px; color: var(--muted); }
+
+    footer { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 24px; padding-bottom: 40px; color: var(--muted); font-size: 15px; }
+    @media (max-width: 700px) { .shots { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav class="wrap">
+    <a class="logo" href="./">LATE<span>BRAKE</span></a>
+    <a class="play" href="play.html">Play</a>
+  </nav>
+
+  <header class="wrap">
+    <div class="kicker">Advertise</div>
+    <h1>Put your brand on the track</h1>
+    <p class="lede">Late Brake is a free formula racing game played in the browser, on desktop and phones. Every board, runoff logo and grandstand roof around its six circuits can carry your brand.</p>
+    <a class="btn" id="contactTop" href="#contact">Get in touch</a>
+  </header>
+
+  <main>
+    <div class="wrap shots">
+      <figure>
+        <img src="media/sponsor-trackside.jpg" alt="Top-down view of the main straight: a grandstand with a roof ad and a line of trackside boards" width="1200" height="675">
+        <figcaption>From above: boards line the barriers, and roofs carry big logos.</figcaption>
+      </figure>
+      <figure>
+        <img src="media/sponsor-cockpit.jpg" alt="Cockpit view down a street circuit with trackside boards along the barriers" width="1200" height="675">
+        <figcaption>From the cockpit: boards are in view on every straight.</figcaption>
+      </figure>
+    </div>
+
+    <section class="wrap" aria-labelledby="slotsTitle">
+      <h2 id="slotsTitle">Where your brand goes</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Trackside boards</h3>
+          <p>12-metre boards behind the barriers, grouped in braking zones and along the main straight, where players look hardest.</p>
+          <span class="tag">Per circuit or everywhere</span>
+        </div>
+        <div class="card">
+          <h3>Runoff logos</h3>
+          <p>Your logo painted large on the tarmac runoff on the outside of corners. Hard to miss when a player runs wide.</p>
+          <span class="tag">Per corner</span>
+        </div>
+        <div class="card">
+          <h3>Grandstand and pit roofs</h3>
+          <p>The biggest canvases on the circuit: grandstand roofs and the pit building, seen from above on every lap.</p>
+          <span class="tag">Per circuit</span>
+        </div>
+        <div class="card">
+          <h3>Circuit takeover</h3>
+          <p>Every slot on one circuit in your colours, from the boards to the roofs. A natural fit for an event or launch.</p>
+          <span class="tag">Exclusive</span>
+        </div>
+        <div class="card">
+          <h3>Sponsored challenge</h3>
+          <p>A weekly time challenge under your name, with your branding round the circuit and an optional prize for the fastest lap.</p>
+          <span class="tag">Weekly</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="specsTitle">
+      <h2 id="specsTitle">What to send</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Slot</th><th>Shape</th><th>Artwork</th></tr></thead>
+          <tbody>
+            <tr><td>Trackside board</td><td>About 9 : 1</td><td>PNG or SVG, 1800 × 210 px or larger. Or just your name and two brand colours, and we set it in type.</td></tr>
+            <tr><td>Runoff logo</td><td>About 4.5 : 1</td><td>PNG or SVG on a transparent background, 1350 × 300 px or larger. It's painted onto dark tarmac.</td></tr>
+            <tr><td>Roofs</td><td>Wide, 8 : 1 to 18 : 1</td><td>PNG or SVG, at least 1800 px wide.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <div class="contact" id="contact">
+        <h2>Talk to us</h2>
+        <p>Tell us which slots and circuits you're interested in, and for how long. We'll reply with current player numbers, availability and prices.</p>
+        <a class="btn" id="contactBtn" href="#contact">Email us</a>
+        <small id="contactText"></small>
+      </div>
+    </div>
+  </main>
+
+  <footer class="wrap">
+    Late Brake is an independent game and isn't affiliated with any racing series, team or circuit. <a href="./">Home</a> · <a href="play.html">Play</a>
+  </footer>
+
+  <script type="module">
+    import { CONFIG } from './src/config.js';
+    import { initAnalytics } from './src/analytics.js';
+    initAnalytics();
+    const email = CONFIG.sponsorEmail;
+    if (email) {
+      const href = `mailto:${email}?subject=${encodeURIComponent('Advertising on Late Brake')}`;
+      for (const id of ['contactTop', 'contactBtn']) document.getElementById(id).href = href;
+      document.getElementById('contactText').textContent = `Or write to ${email}`;
+    }
+  </script>
+</body>
+</html>

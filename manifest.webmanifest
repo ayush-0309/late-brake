@@ -1,7 +1,7 @@
 {
   "name": "Late Brake",
   "short_name": "Late Brake",
-  "description": "Top-down F1 time trials on real Grand Prix circuits.",
+  "description": "Top-down formula racing on real-world circuits.",
   "start_url": "play.html",
   "scope": "./",
   "display": "fullscreen",

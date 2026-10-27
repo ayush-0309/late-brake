@@ -55,21 +55,30 @@ export function buildScenery(t) {
       for (let lat = o1; lat <= o2 + 0.1; lat += 4) block(...at(k, side * lat));
     }
   };
+  // Also returns both edges as point lists, which the 3D view builds from.
   const strip = (i0, i1, side, inner, outer) => {
     const path = new Path2D();
     const box = bbox();
+    const innerPts = [], outerPts = [];
     for (let k = i0; k <= i1; k++) {
       const [x, y] = at(k, side * inner(k));
       k === i0 ? path.moveTo(x, y) : path.lineTo(x, y);
       grow(box, x, y);
+      innerPts.push([x, y]);
     }
     for (let k = i1; k >= i0; k--) {
       const [x, y] = at(k, side * outer(k));
       path.lineTo(x, y);
       grow(box, x, y);
+      outerPts.unshift([x, y]);
     }
     path.closePath();
-    return { path, box };
+    return { path, box, inner: innerPts, outer: outerPts };
+  };
+  const pts = (i0, i1, side, lat) => {
+    const out = [];
+    for (let k = i0; k <= i1; k++) out.push(at(k, side * lat));
+    return out;
   };
   const line = (i0, i1, side, lat, path = new Path2D()) => {
     for (let k = i0; k <= i1; k++) {
@@ -100,7 +109,7 @@ export function buildScenery(t) {
 
   const sc = {
     city: t.setting === 'city',
-    runoffs: [], tyres: new Path2D(), logos: [], boards: [], stands: [],
+    runoffs: [], tyres: new Path2D(), tyreRanges: [], logos: [], boards: [], stands: [],
     pit: null, trees: [], buildings: [], grid: [],
   };
 
@@ -116,6 +125,7 @@ export function buildScenery(t) {
     };
     sc.runoffs.push({ kind, ...strip(i0, i1, c.side, inner, outer) });
     line(c.i - 30, c.i + 25, c.side, (k) => hw + run(k, c.side) + 0.7, sc.tyres);
+    sc.tyreRanges.push({ i0: c.i - 30, i1: c.i + 25, side: c.side });
 
     const r = run(c.i + 6, c.side);
     if (kind === 'tarmac' && r > 7) {
@@ -155,7 +165,8 @@ export function buildScenery(t) {
     }
     const [rx, ry] = at(0, side * (o1 + 22));
     sc.pit = {
-      lane, building, lines, seams, doors,
+      side, lane, building, lines, seams, doors,
+      laneLines: [pts(-h, h, side, o1 + 0.5), pts(-h, h, side, o1 + 10.5)],
       roof: { x: rx, y: ry, a: ang(0), len: Math.min(h * 1.2, 120), h: 9, ad: ads[1 % ads.length] },
     };
   }
@@ -165,7 +176,7 @@ export function buildScenery(t) {
     const o1 = hw + maxRun(i0, i1, side) + 4.5, o2 = o1 + depth;
     if (!stripFree(i0, i1, side, o1, o2)) return false;
     blockStrip(i0, i1, side, o1, o2);
-    const { path, box } = strip(i0, i1, side, () => o1, () => o2);
+    const { path, box, inner: front, outer: back } = strip(i0, i1, side, () => o1, () => o2);
     const seatDepth = depth * 0.58;
     const rows = new Path2D();
     for (let lat = o1 + 1.2; lat < o1 + seatDepth; lat += 1.1) line(i0, i1, side, lat, rows);
@@ -180,7 +191,8 @@ export function buildScenery(t) {
     const mid = Math.round((i0 + i1) / 2);
     const [rx, ry] = at(mid, side * (o1 + seatDepth + (depth - seatDepth) / 2));
     sc.stands.push({
-      path, box, rows, aisles, roof, label,
+      path, box, rows, aisles, roof, label, side,
+      front, back, mid: pts(i0, i1, side, o1 + seatDepth),
       seat: SEAT_COLORS[sc.stands.length % SEAT_COLORS.length],
       roofAd: {
         x: rx, y: ry, a: ang(mid),
@@ -224,7 +236,7 @@ export function buildScenery(t) {
       }
     }
     if (inGroup++ % 3 === 0) adCursor++;
-    sc.boards.push({ x, y, a: ang(k), len: 12, h: 1.4, ad: ads[adCursor % ads.length] });
+    sc.boards.push({ x, y, a: ang(k), side, len: 12, h: 1.4, ad: ads[adCursor % ads.length] });
   };
   for (const c of corners) for (let k = c.i - 50; k <= c.i + 8; k += 7) addBoard(k, c.side);
   for (let k = -60; k <= 100; k += 7) addBoard(k, mainSide);

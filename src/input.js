@@ -8,7 +8,7 @@ const KEYS = {
 };
 
 // Standard gamepad mapping (Xbox layout names).
-const PAD = { a: 0, b: 1, y: 3, lb: 4, rb: 5, lt: 6, rt: 7, back: 8, start: 9, left: 14, right: 15 };
+const PAD = { a: 0, b: 1, x: 2, y: 3, lb: 4, rb: 5, lt: 6, rt: 7, back: 8, start: 9, left: 14, right: 15 };
 const DEADZONE = 0.12;
 
 // `onPad(action)` is called once per press of a gamepad menu button.
@@ -20,7 +20,8 @@ export function createInput(touchRoot, { onPad } = {}) {
 
   addEventListener('keydown', (e) => {
     const k = KEYS[e.code];
-    if (!k || e.target.closest?.('input, select, textarea')) return;
+    // Menus and dialogs keep their keys: Space presses a focused button there.
+    if (!k || e.target.closest?.('input, select, textarea, .overlay')) return;
     held[k] = true;
     e.preventDefault();
   });
@@ -62,7 +63,7 @@ export function createInput(touchRoot, { onPad } = {}) {
     for (const p of pads) {
       if (!p || !p.connected) continue;
       const btn = (i) => p.buttons[i]?.value || (p.buttons[i]?.pressed ? 1 : 0);
-      for (const [name, action] of [['start', 'pause'], ['back', 'restart'], ['y', 'reset']]) {
+      for (const [name, action] of [['start', 'pause'], ['back', 'restart'], ['y', 'reset'], ['x', 'keep']]) {
         const on = btn(PAD[name]) > 0.5;
         if (on && !padWas[name]) onPad?.(action);
         padWas[name] = on;

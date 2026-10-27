@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="Top-down F1 time trials on six real Grand Prix circuits. Race your ghost, chase purple sectors. Runs in your browser, no install.">
+  <meta name="description" content="Top-down formula racing on six real-world circuits. Race your ghost, chase purple sectors. Runs in your browser, no install.">
   <title>Late Brake · Play</title>
   <link rel="canonical" href="https://ayush-0309.github.io/late-brake/play.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Late Brake · F1 time trials in your browser">
-  <meta property="og:description" content="Six real Grand Prix circuits. Race your ghost, chase purple sectors. Free, no install.">
+  <meta property="og:title" content="Late Brake · Formula racing in your browser">
+  <meta property="og:description" content="Six real-world circuits. Race your ghost, chase purple sectors. Free, no install.">
   <meta property="og:image" content="https://ayush-0309.github.io/late-brake/og.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -25,6 +25,7 @@
 </head>
 <body>
   <canvas id="game" aria-label="Race view"></canvas>
+  <canvas id="game3d" aria-label="Cockpit view"></canvas>
 
   <div id="hud" hidden>
     <div class="panel timing">
@@ -32,11 +33,15 @@
         <span class="label">Lap <b id="lapNum">1</b></span>
         <span class="label track-label" id="trackLabel"></span>
       </div>
-      <div id="lapTime" class="lap-time">0:00.000</div>
+      <div class="lap-line">
+        <div id="lapTime" class="lap-time">0:00.000</div>
+        <div id="racePos" class="race-pos"></div>
+      </div>
       <div class="timing-row">
         <div id="delta" class="delta"></div>
         <div id="invalidBadge" class="badge">Lap invalid</div>
       </div>
+      <button id="keepLapBtn" class="keep-lap" title="Watch an ad to keep this lap (K)">Keep lap <span aria-hidden="true">▶</span> <small>ad</small></button>
       <div class="sectors">
         <div id="s0" class="sector">S1</div>
         <div id="s1" class="sector">S2</div>
@@ -66,6 +71,7 @@
         <div class="map-stat"><span class="label">Best</span><span id="bestTime">--:--.---</span></div>
         <div class="map-stat"><span class="label">Last</span><span id="lastTime">--:--.---</span></div>
       </div>
+      <ol id="standings" class="standings"></ol>
     </div>
 
     <div class="cluster">
@@ -105,16 +111,53 @@
     <div class="menu">
       <header class="menu-top">
         <a class="logo" href="./">LATE<span>BRAKE</span></a>
+        <div class="menu-top-buttons">
+        <button class="icon-btn account-btn" id="accountBtn" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          <span id="accountLabel">Sign in</span>
+        </button>
         <button class="icon-btn" data-open="settings" aria-label="Settings">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
           <span>Settings</span>
         </button>
+        </div>
       </header>
 
       <div class="menu-body">
         <section class="circuits" aria-label="Circuits">
+          <div id="challengeCard" class="challenge-card" hidden>
+            <div>
+              <div class="label">Daily challenge</div>
+              <div class="challenge-track" id="challengeTrack"></div>
+              <div class="challenge-ends" id="challengeEnds"></div>
+            </div>
+            <button id="challengeBtn" class="secondary">Play</button>
+          </div>
           <div class="menu-heading">Circuits</div>
           <div id="trackList" class="track-list" role="listbox" aria-label="Pick a circuit"></div>
+          <div class="menu-heading mode-heading">Mode</div>
+        <div class="modes">
+          <button class="mode" data-mode="trial">Time trial <small>Race your ghost</small></button>
+          <button class="mode" data-mode="race">Race vs AI <small>Up to 3 rivals</small></button>
+          <button class="mode" data-mode="online" disabled>Online race <small>Coming soon</small></button>
+        </div>
+        <div id="raceOptions" class="race-options" hidden>
+          <div class="race-option" id="rivalsOption"><span class="label">Rivals</span>
+            <div class="segmented" data-setting="opponents" role="radiogroup" aria-label="Rivals">
+              <button data-value="1" role="radio">1</button><button data-value="2" role="radio">2</button><button data-value="3" role="radio">3</button>
+            </div>
+          </div>
+          <div class="race-option"><span class="label">Laps</span>
+            <div class="segmented" data-setting="raceLaps" role="radiogroup" aria-label="Laps">
+              <button data-value="3" role="radio">3</button><button data-value="5" role="radio">5</button><button data-value="10" role="radio">10</button>
+            </div>
+          </div>
+          <div class="race-option"><span class="label">Difficulty</span>
+            <div class="segmented" data-setting="difficulty" role="radiogroup" aria-label="Difficulty">
+              <button data-value="easy" role="radio">Easy</button><button data-value="medium" role="radio">Medium</button><button data-value="hard" role="radio">Hard</button>
+            </div>
+          </div>
+        </div>
         </section>
 
         <section class="detail" aria-live="polite">
@@ -128,10 +171,18 @@
               <div><dt>Best lap</dt><dd id="detailBest"></dd></div>
               <div><dt>Best sectors</dt><dd id="detailSectors"></dd></div>
             </dl>
+            <p id="versusNote" class="versus-note" hidden></p>
           </div>
-          <div class="modes">
-            <button class="mode selected" aria-pressed="true">Time trial <small>Race your ghost</small></button>
-            <button class="mode" disabled>Race vs AI <small>Coming soon</small></button>
+          <div id="board" class="board" hidden>
+            <div class="board-head">
+              <span class="label">Leaderboard</span>
+              <div id="boardTabs" class="board-tabs" hidden>
+                <button data-tab="all" aria-pressed="true">All time</button>
+                <button data-tab="today" aria-pressed="false">Today</button>
+              </div>
+            </div>
+            <ol id="boardList" class="board-list"></ol>
+            <button id="shareBtn" class="link-btn" hidden>Share your ghost</button>
           </div>
           <button id="startBtn" class="primary">Start <kbd class="keys-only">Enter</kbd></button>
         </section>
@@ -148,7 +199,13 @@
         <span><kbd>C</kbd> camera</span>
         <span><kbd>M</kbd> sound</span>
         <span><kbd>Esc</kbd> pause</span>
+        <span><kbd>K</kbd> keep lap</span>
         <span class="pad-hint">Gamepad works too</span>
+      </div>
+
+      <div class="menu-foot">
+        <span class="soon">Supporter pack: liveries, helmets, no ads <em>Coming soon</em></span>
+        <a href="sponsors.html">Advertise on the track</a>
       </div>
     </div>
   </div>
@@ -170,7 +227,82 @@
       <div class="line-legend" id="helpLegend" aria-hidden="true"><span class="swatch go"></span><span class="swatch lift"></span><span class="swatch stop"></span></div>
       <button id="helpLine" class="primary">Turn on line &amp; restart lap</button>
       <button id="helpRestart" class="secondary">Just restart lap</button>
+      <button id="helpRescue" class="secondary" hidden>Watch an ad to keep this lap</button>
       <button id="helpKeep" class="secondary">Keep driving</button>
+    </div>
+  </div>
+
+  <div id="results" class="overlay results-overlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="resultsTitle">
+      <div class="results-head">
+        <div>
+          <div class="label" id="resultsTrack"></div>
+          <h2 class="sheet-title" id="resultsTitle">Race result</h2>
+        </div>
+        <div id="resultsPos" class="results-pos"></div>
+      </div>
+      <table class="results-table">
+        <thead><tr><th>Pos</th><th>Driver</th><th>Time</th><th>Best lap</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+      <button id="raceAgainBtn" class="primary">Race again</button>
+      <button id="resultsMenuBtn" class="secondary">Change circuit</button>
+    </div>
+  </div>
+
+  <div id="lobby" class="overlay" hidden>
+    <div class="sheet small lobby-sheet" role="dialog" aria-modal="true" aria-labelledby="lobbyTitle">
+      <div class="label" id="lobbyTrack"></div>
+      <h2 class="sheet-title" id="lobbyTitle">Online race</h2>
+      <div class="lobby-code">
+        <div><span class="label">Room</span><b id="lobbyCode"></b></div>
+        <button id="lobbyInvite" class="secondary">Invite</button>
+      </div>
+      <ol id="lobbyPlayers" class="lobby-players"></ol>
+      <div id="lobbyHostOnly">
+        <label class="check"><input type="checkbox" id="lobbyAi" checked> Fill empty places with AI drivers</label>
+        <div class="lobby-ai" id="lobbyAiNote"></div>
+      </div>
+      <p class="sheet-text lobby-status" id="lobbyStatus" role="status"></p>
+      <button id="lobbyStart" class="primary">Start race</button>
+      <form id="lobbyJoin" class="lobby-join">
+        <input id="lobbyJoinCode" maxlength="5" placeholder="Room code" aria-label="Room code to join" autocomplete="off">
+        <button class="secondary" type="submit">Join</button>
+      </form>
+      <button id="lobbyLeave" class="secondary">Leave</button>
+    </div>
+  </div>
+
+  <div id="account" class="overlay" hidden>
+    <div class="sheet small account-sheet" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="accountTitle">Account</h2>
+        <button class="icon-btn" id="accountClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <form id="signinForm" class="account-view" data-view="signin">
+        <div id="account-signin">
+          <p class="sheet-text">Sign in to put your laps on the leaderboards, share your ghost and race online. We email you a link: no password.</p>
+          <label class="field"><span>Email</span><input id="emailInput" type="email" autocomplete="email" required></label>
+          <button class="primary" type="submit">Email me a link</button>
+        </div>
+      </form>
+      <div id="account-sent" hidden>
+        <p class="sheet-text">Check your inbox for a sign-in link. Open it on this device and you'll come back here signed in.</p>
+      </div>
+      <form id="nameForm">
+        <div id="account-name" hidden>
+          <p class="sheet-text">Pick the name other drivers will see on the leaderboards.</p>
+          <label class="field"><span>Driver name</span><input id="nameInput" maxlength="20" autocomplete="nickname" required></label>
+          <button class="primary" type="submit">Save</button>
+        </div>
+      </form>
+      <div id="account-me" hidden>
+        <p class="sheet-text">Signed in as <b id="accountName"></b><br><small id="accountEmail"></small></p>
+        <button id="signOutBtn" class="secondary">Sign out</button>
+      </div>
+      <p id="accountError" class="field-error" role="alert"></p>
     </div>
   </div>
 
@@ -186,10 +318,11 @@
       <div class="setting">
         <div class="setting-text">
           <div class="setting-name">Camera</div>
-          <div class="setting-help">Chase turns with the car, so left is always left.</div>
+          <div class="setting-help">Chase turns with the car, so left is always left. Cockpit puts you in the driver's seat.</div>
         </div>
         <div class="segmented" data-setting="camera" role="radiogroup" aria-label="Camera">
           <button data-value="chase" role="radio">Chase</button>
+          <button data-value="cockpit" role="radio">Cockpit</button>
           <button data-value="fixed" role="radio">Top-down</button>
         </div>
       </div>

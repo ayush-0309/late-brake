@@ -2,6 +2,9 @@
 
 import { TRACKS } from './track.js';
 import { CIRCUITS } from './circuits.js';
+import { initAnalytics } from './analytics.js';
+
+initAnalytics();
 
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

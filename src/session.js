@@ -13,8 +13,12 @@ const GRID_BACK = 8;               // start this many meters behind the line
 const GRID_LAT = -3;               // and this far left of center
 
 export class Session {
-  constructor(track, saved) {
+  // opts.versus: { name, time, ghost } to race someone else's lap instead of
+  // your own best. opts.challenge: this run counts for the daily challenge.
+  constructor(track, saved, opts = {}) {
     this.track = track;
+    this.versus = opts.versus || null;
+    this.challenge = !!opts.challenge;
     this.best = saved?.best || null;               // { time, sectors, ghost, splits }
     this.bestSectors = saved?.bestSectors || [null, null, null];
     this.reset();
@@ -43,10 +47,31 @@ export class Session {
     this.offTime = 0;
     this.excursion = 0;                // seconds of the current trip off track
     this.valid = true;
+    this.rescued = false;              // this lap was kept with a rescue
+    this.forgiving = false;            // rescued while still off: ignore until back on
     this.laps = [];
     this.events = [];
     this.splits = [];
     this.rec = null;
+  }
+
+  // A lap that went over the limits can be kept once (a rewarded ad).
+  get canRescue() {
+    return this.phase === 'running' && !this.valid && !this.rescued;
+  }
+
+  // Keeps the current lap after a trip off track. It then counts for
+  // personal bests and ghosts but is marked as rescued, which keeps it off
+  // any public leaderboard. The trip in progress is forgiven; going off again
+  // after rejoining invalidates the lap for good.
+  rescue() {
+    if (!this.canRescue) return false;
+    this.valid = true;
+    this.rescued = true;
+    this.offTime = 0;
+    this.forgiving = true;
+    this.events.push({ type: 'rescued' });
+    return true;
   }
 
   get lapTime() {
@@ -96,7 +121,9 @@ export class Session {
     const prev = this.progress;
     this.progress += ds;
 
-    if (Math.abs(pj.lat) > t.halfW + OFF_LIMIT) {
+    const off = Math.abs(pj.lat) > t.halfW + OFF_LIMIT;
+    if (!off) this.forgiving = false;
+    if (off && !this.forgiving) {
       this.offTime += DT;
       if (this.valid && this.offTime > OFF_ALLOWED) {
         this.valid = false;
@@ -170,24 +197,22 @@ export class Session {
     const sectors = this.sectorTimes;
     const classes = this.sectorClasses;
     const valid = this.valid;
+    const rescued = this.rescued;
     const prevBest = this.best?.time ?? null;
     const isBest = valid && (prevBest === null || time < prevBest);
 
     this.sample(this.rec);
+    const ghost = { t0: this.rec.t0, every: GHOST_EVERY * DT, pts: this.rec.pts };
     if (isBest) {
-      this.best = {
-        time, sectors,
-        ghost: { t0: this.rec.t0, every: GHOST_EVERY * DT, pts: this.rec.pts },
-        splits: this.splits,
-      };
+      this.best = { time, sectors, rescued, ghost, splits: this.splits };
     }
     if (valid) {
       sectors.forEach((st, i) => {
         if (this.bestSectors[i] === null || st < this.bestSectors[i]) this.bestSectors[i] = st;
       });
     }
-    this.laps.push({ lap: this.lap, time, sectors, classes, valid });
-    this.events.push({ type: 'lap', lap: this.lap, time, sectors, valid, isBest, prevBest });
+    this.laps.push({ lap: this.lap, time, sectors, classes, valid, rescued });
+    this.events.push({ type: 'lap', lap: this.lap, time, sectors, valid, rescued, isBest, prevBest, ghost });
 
     this.lap++;
     this.lapStart = at;
@@ -196,6 +221,8 @@ export class Session {
     this.sectorClasses = [];
     this.offTime = 0;
     this.valid = true;
+    this.rescued = false;
+    this.forgiving = false;
     this.splits = [];
     this.startRecording(at);
   }
@@ -234,9 +261,10 @@ export class Session {
     rec.pts.push(round(c.x), round(c.y), Math.round(c.a * 1000) / 1000);
   }
 
-  // Best-lap ghost pose at the current lap time.
+  // Ghost pose at the current lap time: the lap you're racing against
+  // (someone else's, or your own best).
   ghostPose() {
-    const g = this.best?.ghost;
+    const g = this.versus?.ghost || this.best?.ghost;
     if (!g || this.phase !== 'running') return null;
     const f = (this.lapTime - g.t0) / g.every;
     const count = g.pts.length / 3;

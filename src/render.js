@@ -99,6 +99,14 @@ export function createRenderer(canvas, minimap) {
     const x = lerp(car.px, car.x, alpha), y = lerp(car.py, car.y, alpha);
     const a = lerpAngle(car.pa, car.a, alpha);
 
+    // Another view (the 3D cockpit) is drawing the world: just keep the map
+    // up to date, and snap the camera when this view comes back.
+    if (opts.camera === 'none') {
+      cam.ready = false;
+      drawMinimap(session, opts.ghost ? session.ghostPose() : null, x, y, a, poses(session.opponents, alpha));
+      return;
+    }
+
     // Chase camera turns with the car so "left" is always screen-left, and
     // sits the car low on screen to show the road ahead. Fixed camera keeps
     // north up and leads the car. Both pull back with speed.
@@ -204,12 +212,17 @@ export function createRenderer(canvas, minimap) {
 
     const ghost = opts.ghost ? session.ghostPose() : null;
     if (ghost) drawCar(ctx, ghost.x, ghost.y, ghost.a, 0, C.ghost, 0.5);
+    const rivals = poses(session.opponents, alpha);
+    for (const r of rivals) {
+      if (r.x < view.x0 - 6 || r.x > view.x1 + 6 || r.y < view.y0 - 6 || r.y > view.y1 + 6) continue;
+      drawCar(ctx, r.x, r.y, r.a, r.steer, r.color, 1);
+    }
     drawCar(ctx, x, y, a, car.steer, C.player, 1);
 
-    drawMinimap(session, ghost, x, y, a);
+    drawMinimap(session, ghost, x, y, a, rivals);
   }
 
-  function drawMinimap(session, ghost, x, y, a) {
+  function drawMinimap(session, ghost, x, y, a, rivals = []) {
     if (minimap.width !== Math.round(minimap.clientWidth * dpr)) resize();
     const mw = minimap.width, mh = minimap.height;
     if (!mw || !mh) return;
@@ -243,6 +256,15 @@ export function createRenderer(canvas, minimap) {
       mctx.beginPath();
       mctx.arc(ghost.x, ghost.y, px(3.5), 0, Math.PI * 2);
       mctx.fill();
+    }
+    for (const r of rivals) {
+      mctx.fillStyle = r.color;
+      mctx.strokeStyle = 'rgba(0,0,0,0.6)';
+      mctx.lineWidth = px(1.2);
+      mctx.beginPath();
+      mctx.arc(r.x, r.y, px(3.6), 0, Math.PI * 2);
+      mctx.fill();
+      mctx.stroke();
     }
     // The player is an arrow pointing where the car is heading.
     mctx.save();
@@ -322,102 +344,249 @@ function drawStartLine(ctx, t) {
 }
 
 // Top-down open-wheeler. Local frame: +x forward, +y right, meters.
+// Static shapes are built once as Path2D; only the steered front wheels and
+// colours change per frame.
+const CAR_SHAPES = buildCarShapes();
+let carShadow = null;
+let bodyShade = null;
+
 function drawCar(ctx, x, y, a, steer, color, alpha) {
+  const S = CAR_SHAPES;
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(a);
   ctx.globalAlpha = alpha;
-  const dark = '#15171b';
+  const carbon = '#16181c';
 
+  // Soft shadow, always falling the same way on the ground whatever the heading.
   if (alpha === 1) {
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(0.1, 0.35, 2.9, 1.05, 0, 0, Math.PI * 2);
-    ctx.fill();
+    carShadow ||= makeCarShadow();
+    const ox = Math.cos(a) * 0.35 + Math.sin(a) * 0.45, oy = -Math.sin(a) * 0.35 + Math.cos(a) * 0.45;
+    ctx.drawImage(carShadow.canvas, -carShadow.w / 2 + ox, -carShadow.h / 2 + oy, carShadow.w, carShadow.h);
   }
 
-  // Tyres: fronts steer, rears are wider.
-  ctx.fillStyle = dark;
-  for (const wy of [-0.8, 0.8]) {
+  ctx.fillStyle = carbon;
+  ctx.fill(S.floor);
+
+  // Tyres: dark rubber, a worn band down the middle, the compound line outside.
+  const tyre = (cx, cy, l, w, rot, side) => {
     ctx.save();
-    ctx.translate(1.85, wy);
-    ctx.rotate(steer * 0.4);
-    ctx.fillRect(-0.36, -0.16, 0.72, 0.32);
+    ctx.translate(cx, cy);
+    if (rot) ctx.rotate(rot);
+    ctx.fillStyle = '#141518';
+    roundRect(ctx, -l / 2, -w / 2, l, w, 0.1);
+    ctx.fill();
+    ctx.fillStyle = '#26282d';
+    ctx.fillRect(-l / 2 + 0.06, -w * 0.18, l - 0.12, w * 0.36);
+    ctx.fillStyle = '#e8302a';
+    ctx.fillRect(-l / 2 + 0.1, side * (w / 2 - 0.035) - 0.015, l - 0.2, 0.03);
     ctx.restore();
-    ctx.fillRect(-1.75 - 0.37, wy * 0.98 - 0.21, 0.74, 0.42);
+  };
+  for (const side of [-1, 1]) {
+    tyre(-1.75, side * 0.78, 0.74, 0.42, 0, side);
+    tyre(1.85, side * 0.8, 0.72, 0.32, steer * 0.4, side);
   }
 
-  // Suspension arms.
-  ctx.strokeStyle = dark;
-  ctx.lineWidth = 0.07;
-  ctx.beginPath();
-  for (const wy of [-0.8, 0.8]) {
-    ctx.moveTo(1.85, wy * 0.8); ctx.lineTo(1.2, wy * 0.2);
-    ctx.moveTo(1.85, wy * 0.8); ctx.lineTo(1.75, wy * 0.2);
-    ctx.moveTo(-1.75, wy * 0.75); ctx.lineTo(-1.3, wy * 0.35);
-  }
-  ctx.stroke();
+  ctx.strokeStyle = carbon;
+  ctx.lineWidth = 0.06;
+  ctx.stroke(S.suspension);
 
-  // Front wing and rear wing.
+  // Front wing: main plane in the livery, a white flap, carbon endplates.
   ctx.fillStyle = color;
-  ctx.fillRect(2.45, -0.95, 0.32, 1.9);
-  ctx.fillStyle = dark;
-  ctx.fillRect(2.45, -0.98, 0.32, 0.1);
-  ctx.fillRect(2.45, 0.88, 0.32, 0.1);
-  ctx.fillRect(-2.8, -0.7, 0.42, 1.4);
+  ctx.fill(S.frontMain);
+  ctx.fillStyle = '#f2f2f2';
+  ctx.fill(S.frontFlap);
+  ctx.fillStyle = carbon;
+  ctx.fill(S.frontPlates);
+
+  // Body, then shading across it so it reads as rounded.
   ctx.fillStyle = color;
-  ctx.fillRect(-2.74, -0.62, 0.3, 1.24);
+  ctx.fill(S.body);
+  bodyShade ||= makeBodyShade(ctx);
+  ctx.fillStyle = bodyShade;
+  ctx.fill(S.body);
+  ctx.fillStyle = carbon;
+  ctx.fill(S.inlets);
+  ctx.fillStyle = '#f2f2f2';
+  ctx.fill(S.stripe);
 
-  // Chassis: nose, cockpit section, sidepods tapering to the gearbox.
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(2.6, -0.1);
-  ctx.lineTo(2.6, 0.1);
-  ctx.lineTo(1.0, 0.28);
-  ctx.lineTo(0.55, 0.3);
-  ctx.quadraticCurveTo(0.25, 0.72, -0.35, 0.72);
-  ctx.lineTo(-1.1, 0.62);
-  ctx.quadraticCurveTo(-1.9, 0.4, -2.4, 0.22);
-  ctx.lineTo(-2.4, -0.22);
-  ctx.quadraticCurveTo(-1.9, -0.4, -1.1, -0.62);
-  ctx.lineTo(-0.35, -0.72);
-  ctx.quadraticCurveTo(0.25, -0.72, 0.55, -0.3);
-  ctx.lineTo(1.0, -0.28);
-  ctx.closePath();
-  ctx.fill();
-
-  // Livery stripe along the spine.
-  ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.beginPath();
-  ctx.moveTo(2.55, -0.04); ctx.lineTo(2.55, 0.04); ctx.lineTo(0.9, 0.09); ctx.lineTo(0.9, -0.09);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillRect(-2.35, -0.08, 1.9, 0.16);
-
-  // Cockpit, driver's helmet and the halo.
-  ctx.fillStyle = dark;
-  roundRect(ctx, -0.25, -0.26, 0.95, 0.52, 0.2);
-  ctx.fill();
+  // Cockpit, driver and airbox.
+  ctx.fillStyle = '#0d0e10';
+  ctx.fill(S.cockpit);
   ctx.fillStyle = '#ffd23f';
   ctx.beginPath();
-  ctx.arc(0.05, 0, 0.17, 0, Math.PI * 2);
+  ctx.arc(-0.06, 0, 0.16, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = '#9aa0a8';
-  ctx.lineWidth = 0.09;
+  ctx.strokeStyle = '#15171b';
+  ctx.lineWidth = 0.05;
   ctx.beginPath();
-  ctx.moveTo(-0.3, -0.3);
-  ctx.quadraticCurveTo(0.75, -0.34, 0.8, 0);
-  ctx.quadraticCurveTo(0.75, 0.34, -0.3, 0.3);
-  ctx.moveTo(0.8, 0);
-  ctx.lineTo(1.0, 0);
+  ctx.arc(-0.06, 0, 0.115, -0.75, 0.75);
   ctx.stroke();
+  ctx.fillStyle = carbon;
+  ctx.fill(S.airbox);
 
-  // Airbox behind the driver.
-  ctx.fillStyle = dark;
-  roundRect(ctx, -0.75, -0.14, 0.4, 0.28, 0.1);
-  ctx.fill();
+  // Halo: a hoop round the driver's head on one strut.
+  ctx.strokeStyle = '#2b2e34';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 0.07;
+  ctx.stroke(S.halo);
+  ctx.lineCap = 'butt';
+
+  // Mirrors and the rear wing on top.
+  ctx.fillStyle = carbon;
+  ctx.fill(S.mirrors);
+  ctx.fillStyle = color;
+  ctx.fill(S.rearMain);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fill(S.rearFlap);
+  ctx.fillStyle = color;
+  ctx.fill(S.rearPlates);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fill(S.rearPlates);
 
   ctx.restore();
+}
+
+function buildCarShapes() {
+  const P = () => new Path2D();
+  const rect = (path, x0, x1, y0, y1) => path.rect(Math.min(x0, x1), Math.min(y0, y1), Math.abs(x1 - x0), Math.abs(y1 - y0));
+  const both = (fn) => { fn(1); fn(-1); };
+
+  // Body outline: nose, sidepods and engine cover, smoothed through these
+  // right-hand points and mirrored.
+  const half = [
+    [2.66, 0.05], [2.45, 0.09], [2.1, 0.13], [1.6, 0.18], [1.1, 0.22], [0.66, 0.27],
+    [0.44, 0.42], [0.38, 0.7], [0.18, 0.79], [-0.4, 0.77], [-1.0, 0.6], [-1.5, 0.42],
+    [-2.0, 0.22], [-2.42, 0.12],
+  ];
+  const outline = [...half, ...half.slice().reverse().map(([x, y]) => [x, -y])];
+  const body = smoothClosed(outline);
+
+  const inlets = P();
+  both((s) => {
+    inlets.moveTo(0.43, s * 0.44);
+    inlets.lineTo(0.38, s * 0.7);
+    inlets.lineTo(0.3, s * 0.68);
+    inlets.lineTo(0.35, s * 0.45);
+    inlets.closePath();
+  });
+
+  const stripe = P();
+  stripe.moveTo(2.6, -0.025); stripe.lineTo(2.6, 0.025); stripe.lineTo(0.7, 0.05); stripe.lineTo(0.7, -0.05); stripe.closePath();
+  stripe.moveTo(-0.95, -0.05); stripe.lineTo(-0.95, 0.05); stripe.lineTo(-2.35, 0.025); stripe.lineTo(-2.35, -0.025); stripe.closePath();
+
+  const cockpit = P();
+  cockpit.moveTo(0.62, 0);
+  cockpit.bezierCurveTo(0.6, 0.2, 0.2, 0.24, -0.45, 0.23);
+  cockpit.quadraticCurveTo(-0.62, 0.2, -0.62, 0);
+  cockpit.quadraticCurveTo(-0.62, -0.2, -0.45, -0.23);
+  cockpit.bezierCurveTo(0.2, -0.24, 0.6, -0.2, 0.62, 0);
+
+  const airbox = P();
+  airbox.ellipse(-0.78, 0, 0.14, 0.09, 0, 0, Math.PI * 2);
+
+  const halo = P();
+  halo.moveTo(0.72, 0);
+  halo.lineTo(0.33, 0);
+  halo.moveTo(-0.5, -0.29);
+  halo.bezierCurveTo(-0.3, -0.46, 0.3, -0.42, 0.33, 0);
+  halo.bezierCurveTo(0.3, 0.42, -0.3, 0.46, -0.5, 0.29);
+
+  const floor = P();
+  floor.moveTo(1.0, -0.5);
+  floor.quadraticCurveTo(0.9, -0.86, 0.6, -0.86);
+  floor.lineTo(-1.75, -0.86);
+  floor.lineTo(-2.45, -0.6);
+  floor.lineTo(-2.45, 0.6);
+  floor.lineTo(-1.75, 0.86);
+  floor.lineTo(0.6, 0.86);
+  floor.quadraticCurveTo(0.9, 0.86, 1.0, 0.5);
+  floor.closePath();
+
+  const suspension = P();
+  both((s) => {
+    for (const [x0, y0, x1, y1] of [
+      [1.85, 0.64, 1.5, 0.22], [1.85, 0.64, 2.2, 0.18], [1.83, 0.6, 1.62, 0.24],
+      [-1.75, 0.58, -1.42, 0.22], [-1.75, 0.58, -2.08, 0.16],
+    ]) {
+      suspension.moveTo(x0, s * y0);
+      suspension.lineTo(x1, s * y1);
+    }
+  });
+
+  const frontMain = P(), frontFlap = P(), frontPlates = P();
+  rect(frontMain, 2.46, 2.82, -0.95, 0.95);
+  both((s) => {
+    rect(frontFlap, 2.36, 2.46, s * 0.14, s * 0.95);
+    rect(frontPlates, 2.26, 2.86, s * 0.94, s * 0.99);
+  });
+
+  const rearMain = P(), rearFlap = P(), rearPlates = P();
+  rect(rearMain, -2.95, -2.62, -0.6, 0.6);
+  rect(rearFlap, -2.98, -2.82, -0.6, 0.6);
+  both((s) => rect(rearPlates, -3.02, -2.45, s * 0.6, s * 0.65));
+
+  const mirrors = P();
+  both((s) => {
+    rect(mirrors, 0.24, 0.36, s * 0.56, s * 0.72);
+    rect(mirrors, 0.28, 0.31, s * 0.48, s * 0.58);
+  });
+
+  return { body, inlets, stripe, cockpit, airbox, halo, floor, suspension, frontMain, frontFlap, frontPlates, rearMain, rearFlap, rearPlates, mirrors };
+}
+
+// Closed shape through the points, smoothed with curves through midpoints.
+function smoothClosed(pts) {
+  const p = new Path2D();
+  const n = pts.length;
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  const start = mid(pts[n - 1], pts[0]);
+  p.moveTo(start[0], start[1]);
+  for (let i = 0; i < n; i++) {
+    const m = mid(pts[i], pts[(i + 1) % n]);
+    p.quadraticCurveTo(pts[i][0], pts[i][1], m[0], m[1]);
+  }
+  p.closePath();
+  return p;
+}
+
+// Darker towards the edges with a soft highlight down the spine, so the
+// flat-coloured body looks rounded. Gradients live in car space.
+function makeBodyShade(ctx) {
+  const g = ctx.createLinearGradient(0, -0.8, 0, 0.8);
+  g.addColorStop(0, 'rgba(0,0,0,0.42)');
+  g.addColorStop(0.32, 'rgba(0,0,0,0.06)');
+  g.addColorStop(0.44, 'rgba(255,255,255,0.22)');
+  g.addColorStop(0.56, 'rgba(255,255,255,0.04)');
+  g.addColorStop(0.7, 'rgba(0,0,0,0.08)');
+  g.addColorStop(1, 'rgba(0,0,0,0.45)');
+  return g;
+}
+
+// Blurred silhouette, drawn once. Uses shadowBlur (supported everywhere) by
+// drawing the shape off the canvas and offsetting its shadow back on.
+function makeCarShadow() {
+  const PX = 40, w = 7.2, h = 3.0;
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * PX);
+  c.height = Math.round(h * PX);
+  const g = c.getContext('2d');
+  const off = c.width * 2;
+  g.translate(c.width / 2 - off, c.height / 2);
+  g.scale(PX, PX);
+  g.shadowColor = 'rgba(0,0,0,0.5)';
+  g.shadowBlur = 10;
+  g.shadowOffsetX = off;
+  g.fillStyle = '#000';
+  g.fill(CAR_SHAPES.floor);
+  g.fill(CAR_SHAPES.body);
+  g.fillRect(2.26, -0.98, 0.6, 1.96);
+  g.fillRect(-3.02, -0.65, 0.57, 1.3);
+  for (const s of [-1, 1]) {
+    g.fillRect(-2.12, s * 0.78 - 0.21, 0.74, 0.42);
+    g.fillRect(1.49, s * 0.8 - 0.16, 0.72, 0.32);
+  }
+  return { canvas: c, w, h };
 }
 
 // One path per zone. Runs start at a zone change so none is split at index 0,
@@ -479,6 +648,15 @@ function roundRect(ctx, x, y, w, h, r) {
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
+}
+
+// Interpolated poses of a race's rival cars (none in a time trial).
+export function poses(rivals, alpha) {
+  if (!rivals) return [];
+  return rivals.map((r) => ({
+    x: lerp(r.car.px, r.car.x, alpha), y: lerp(r.car.py, r.car.y, alpha),
+    a: lerpAngle(r.car.pa, r.car.a, alpha), steer: r.car.steer, color: r.color,
+  }));
 }
 
 function angleDiff(a, b) {
