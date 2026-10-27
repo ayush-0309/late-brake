@@ -230,6 +230,7 @@ export function createRenderer(canvas, minimap) {
     mctx.clearRect(0, 0, mw, mh);
     const t = session.track, b = t.bounds, pad = 12 * dpr;
     const sc = Math.min((mw - pad * 2) / (b.maxX - b.minX), (mh - pad * 2) / (b.maxY - b.minY));
+    if (!(sc > 0)) return; // map too small to draw into
     const ox = (mw - (b.maxX - b.minX) * sc) / 2 - b.minX * sc;
     const oy = (mh - (b.maxY - b.minY) * sc) / 2 - b.minY * sc;
     const px = (u) => u * dpr / sc; // screen pixels to map units

@@ -3,7 +3,7 @@
 
 export const CONFIG = {
   // Where advertisers write to from the sponsor page.
-  sponsorEmail: 'hello.thezerowork@outlook.com',
+  sponsorEmail: 'officialayushgarg@gmail.com',
 
   // Privacy-friendly analytics, off when null. One of:
   //   { provider: 'plausible', domain: 'ayush-0309.github.io' }

@@ -5,165 +5,438 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0d10">
   <title>Advertise on Late Brake</title>
-  <meta name="description" content="Put your brand on the track: trackside boards, runoff logos, grandstand roofs and sponsored challenges in Late Brake, a browser formula racing game.">
+  <meta name="description" content="Put your brand on the track: trackside boards, runoff logos, grandstand roofs, circuit takeovers and sponsored challenges in Late Brake, a free formula racing game played in the browser.">
   <link rel="canonical" href="https://ayush-0309.github.io/late-brake/sponsors.html">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Late Brake">
   <meta property="og:title" content="Advertise on Late Brake">
-  <meta property="og:description" content="Trackside boards, runoff logos, grandstand roofs and sponsored challenges in a browser racing game.">
-  <meta property="og:image" content="https://ayush-0309.github.io/late-brake/media/sponsor-trackside.jpg">
+  <meta property="og:description" content="Trackside boards, runoff logos, grandstand roofs and circuit takeovers in a browser racing game.">
+  <meta property="og:image" content="https://ayush-0309.github.io/late-brake/media/sponsor-og.jpg">
+  <meta property="og:image:width" content="2400">
+  <meta property="og:image:height" content="1260">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" as="image" href="media/sponsor-hero.webp" type="image/webp">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0d10; --surface: #13161b; --line: rgba(255,255,255,.1); --text: #f3f4f6; --muted: #949ba7;
-      --accent: #e8112d; --accent-hi: #ff2d48; --yellow: #f5c542;
+      --bg: #0b0d10; --bg-2: #0f1216; --surface: #14171c; --surface-2: #1a1e25; --line: rgba(255,255,255,.09); --line-2: rgba(255,255,255,.16);
+      --text: #f3f4f6; --soft: #c3c8d0; --muted: #8f96a2;
+      --accent: #e8112d; --accent-hi: #ff2d48; --brand: #1d4ed8; --brand-hi: #3b6ff0; --yellow: #f5c542; --green: #34d27b;
       --font: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+      --wrap: 1140px;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); -webkit-font-smoothing: antialiased; }
     a { color: inherit; }
-    a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
-    .wrap { width: min(1080px, 100%); margin: 0 auto; padding-left: 20px; padding-right: 20px; }
-    nav { display: flex; justify-content: space-between; align-items: center; padding-top: 18px; padding-bottom: 18px; }
-    .logo { font-size: 30px; font-weight: 800; font-style: italic; text-decoration: none; }
+    a:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    img { display: block; max-width: 100%; height: auto; }
+    .wrap { width: min(var(--wrap), 100%); margin: 0 auto; padding-left: 20px; padding-right: 20px; }
+
+    /* ---------- nav ---------- */
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(11,13,16,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 60px; }
+    .logo { font-size: 28px; font-weight: 800; font-style: italic; text-decoration: none; letter-spacing: .01em; }
     .logo span { color: var(--accent); }
-    nav .play { font-size: 18px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; color: var(--muted); }
-    nav .play:hover { color: var(--text); }
+    .nav-links { display: flex; align-items: center; gap: 22px; font-size: 17px; font-weight: 600; }
+    .nav-links a { text-decoration: none; color: var(--muted); }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .pill { color: var(--text); border: 1px solid var(--line-2); padding: 6px 14px; border-radius: 999px; }
 
-    header { padding-top: 40px; padding-bottom: 36px; }
-    .kicker { font-size: 15px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-hi); }
-    h1 { font-size: clamp(48px, 8vw, 92px); font-style: italic; font-weight: 800; margin: 8px 0 0; line-height: .9; }
-    .lede { font-size: clamp(20px, 2.4vw, 25px); color: #c3c8d0; max-width: 34ch; margin: 18px 0 28px; line-height: 1.25; }
-    .btn { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 22px; font-weight: 800;
-      letter-spacing: .08em; text-transform: uppercase; padding: 14px 32px; border-radius: 12px;
-      background: linear-gradient(180deg, var(--accent-hi), var(--accent)); color: #fff; box-shadow: 0 10px 30px rgba(232,17,45,.3); }
-    .btn:hover { filter: brightness(1.08); }
+    /* ---------- buttons ---------- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; font-size: 20px; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase; padding: 14px 28px; border-radius: 12px; border: 1px solid transparent; transition: filter .15s, background .15s; }
+    .btn-primary { background: linear-gradient(180deg, var(--accent-hi), var(--accent)); color: #fff; box-shadow: 0 10px 30px rgba(232,17,45,.32); }
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-ghost { border-color: var(--line-2); background: rgba(255,255,255,.04); }
+    .btn-ghost:hover { background: rgba(255,255,255,.09); }
 
-    .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    figure { margin: 0; }
-    figure img { width: 100%; display: block; border-radius: 14px; border: 1px solid var(--line); aspect-ratio: 16 / 9; object-fit: cover; }
-    figcaption { font-size: 16px; color: var(--muted); margin-top: 8px; }
+    /* ---------- hero ---------- */
+    .hero { position: relative; padding-top: 64px; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: -20% -10% auto; height: 640px; pointer-events: none;
+      background: radial-gradient(ellipse at 75% 20%, rgba(29,78,216,.28), transparent 55%), radial-gradient(ellipse at 15% 0%, rgba(232,17,45,.18), transparent 50%); }
+    .hero .wrap { position: relative; }
+    .kicker { font-size: 15px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--accent-hi); }
+    h1 { font-size: clamp(52px, 8.4vw, 104px); font-weight: 800; font-style: italic; line-height: .88; letter-spacing: -.01em; margin: 12px 0 0; max-width: 14ch; }
+    h1 em { font-style: italic; color: var(--brand-hi); }
+    .lede { font-size: clamp(20px, 2.2vw, 24px); color: var(--soft); line-height: 1.3; max-width: 40ch; margin: 22px 0 28px; }
+    .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+    .facts { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 30px 0 0; padding: 0; list-style: none; }
+    .facts li { font-size: 17px; font-weight: 600; color: var(--soft); display: flex; align-items: center; gap: 8px; }
+    .facts svg { color: var(--green); flex-shrink: 0; }
+    .hero-shot { margin: 48px 0 0; position: relative; }
+    .hero-shot img { width: 100%; border-radius: 18px; border: 1px solid var(--line-2); box-shadow: 0 40px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03); }
+    .hero-shot figcaption { position: absolute; left: 16px; bottom: 16px; font-size: 15px; font-weight: 600; letter-spacing: .04em;
+      background: rgba(11,13,16,.78); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-2); }
+    .hero-shot figcaption b { color: var(--brand-hi); }
 
-    section { padding-top: 48px; padding-bottom: 8px; }
-    h2 { font-size: 13px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
-    .card { padding: 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
-    .card h3 { margin: 0 0 6px; font-size: 24px; font-weight: 800; }
-    .card p { margin: 0; font-size: 17px; color: #c3c8d0; line-height: 1.35; }
-    .card .tag { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--yellow); }
+    /* ---------- sections ---------- */
+    section { padding-top: 96px; }
+    .eyebrow { font-size: 14px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+    h2 { font-size: clamp(36px, 5vw, 58px); font-weight: 800; font-style: italic; line-height: .95; margin: 0; max-width: 18ch; }
+    .section-lede { font-size: 20px; color: var(--soft); line-height: 1.35; max-width: 56ch; margin: 14px 0 0; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 17px; }
-    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-    th { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    /* Why */
+    .why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px; }
+    .why div { padding: 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .why .ico { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; background: rgba(29,78,216,.18); color: var(--brand-hi); margin-bottom: 14px; }
+    .why h3 { font-size: 24px; font-weight: 800; margin: 0 0 6px; }
+    .why p { font-size: 17px; color: var(--soft); line-height: 1.35; margin: 0; }
+
+    /* Slots */
+    .slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 36px; }
+    .slot { border-radius: 18px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+    .slot-img { overflow: hidden; aspect-ratio: 16 / 10; background: #10151a; }
+    .slot-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+    .slot:hover .slot-img img { transform: scale(1.04); }
+    .slot-body { padding: 18px 20px 20px; }
+    .slot-body h3 { font-size: 26px; font-weight: 800; margin: 0 0 6px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+    .slot-body h3 small { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--yellow); white-space: nowrap; }
+    .slot-body p { font-size: 17px; color: var(--soft); line-height: 1.35; margin: 0; }
+
+    /* Takeover */
+    .feature { display: grid; grid-template-columns: 1.25fr 1fr; gap: 40px; align-items: center; margin-top: 36px; }
+    .feature img { border-radius: 18px; border: 1px solid var(--line-2); box-shadow: 0 30px 70px rgba(0,0,0,.45); }
+    .ticks { list-style: none; padding: 0; margin: 20px 0 26px; display: grid; gap: 10px; }
+    .ticks li { display: flex; gap: 10px; font-size: 18px; color: var(--soft); line-height: 1.3; }
+    .ticks svg { color: var(--green); flex-shrink: 0; margin-top: 3px; }
+
+    /* Packages */
+    .packages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px; align-items: stretch; }
+    .pack { position: relative; padding: 24px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; }
+    .pack.featured { background: linear-gradient(180deg, rgba(29,78,216,.22), rgba(29,78,216,.04) 60%), var(--surface); border-color: rgba(59,111,240,.55); }
+    .pack .badge { position: absolute; top: 18px; right: 18px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--brand); }
+    .pack h3 { font-size: 30px; font-weight: 800; font-style: italic; margin: 0; }
+    .pack .for { font-size: 16px; color: var(--muted); margin: 4px 0 16px; }
+    .pack ul { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 8px; }
+    .pack li { display: flex; gap: 8px; font-size: 17px; color: var(--soft); line-height: 1.3; }
+    .pack li svg { color: var(--green); flex-shrink: 0; margin-top: 2px; }
+    .pack .btn { margin-top: auto; font-size: 17px; padding: 12px 18px; }
+    .addon { margin-top: 14px; padding: 16px 20px; border-radius: 14px; border: 1px dashed var(--line-2); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 18px; color: var(--soft); }
+    .addon b { color: var(--text); }
+
+    /* Everywhere (phone) */
+    .everywhere { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center; }
+    .phone { width: 280px; border-radius: 44px; padding: 12px; background: linear-gradient(160deg, #2a2e36, #121418); box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.08); position: relative; }
+    .phone img { border-radius: 34px; width: 100%; }
+    .phone::after { content: ''; position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 84px; height: 22px; border-radius: 999px; background: #08090b; }
+    .stats { display: grid; grid-template-columns: repeat(3, auto); gap: 8px 36px; margin-top: 26px; justify-content: start; }
+    .stats b { display: block; font-size: 44px; font-weight: 800; font-style: italic; line-height: 1; }
+    .stats span { font-size: 15px; color: var(--muted); letter-spacing: .04em; }
+
+    /* Steps */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px; counter-reset: step; }
+    .steps li { list-style: none; padding: 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); position: relative; }
+    .steps li::before { counter-increment: step; content: counter(step); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent); font-size: 20px; font-weight: 800; margin-bottom: 14px; }
+    .steps h3 { font-size: 22px; font-weight: 800; margin: 0 0 6px; }
+    .steps p { font-size: 17px; color: var(--soft); line-height: 1.35; margin: 0; }
+    .steps-list { padding: 0; margin: 0; }
+
+    /* Specs */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); margin-top: 30px; }
+    table { width: 100%; border-collapse: collapse; font-size: 17px; min-width: 620px; }
+    th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    th { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: rgba(255,255,255,.02); }
     td:first-child { font-weight: 700; white-space: nowrap; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    td code { font-family: inherit; font-weight: 700; color: var(--yellow); }
 
-    .contact { margin-top: 48px; padding: 28px; border-radius: 18px; background: radial-gradient(ellipse at 80% 0%, rgba(232,17,45,.2), transparent 60%), var(--surface); border: 1px solid var(--line); }
-    .contact h2 { color: var(--text); font-size: 34px; letter-spacing: 0; text-transform: none; font-weight: 800; font-style: italic; margin-bottom: 8px; }
-    .contact p { font-size: 19px; color: #c3c8d0; margin: 0 0 20px; max-width: 52ch; line-height: 1.3; }
-    .contact small { display: block; margin-top: 14px; font-size: 15px; color: var(--muted); }
+    /* FAQ */
+    .faq { margin-top: 30px; display: grid; gap: 10px; }
+    details { border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    summary { cursor: pointer; list-style: none; padding: 18px 20px; font-size: 21px; font-weight: 700; display: flex; justify-content: space-between; gap: 12px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-size: 26px; line-height: .8; color: var(--muted); transition: transform .2s; }
+    details[open] summary::after { transform: rotate(45deg); }
+    details p { margin: 0; padding: 0 20px 18px; font-size: 18px; color: var(--soft); line-height: 1.4; max-width: 70ch; }
 
-    footer { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 24px; padding-bottom: 40px; color: var(--muted); font-size: 15px; }
-    @media (max-width: 700px) { .shots { grid-template-columns: 1fr; } }
+    /* Final CTA */
+    .final { margin-top: 96px; padding: 56px 40px; border-radius: 24px; position: relative; overflow: hidden; border: 1px solid var(--line-2);
+      background: linear-gradient(100deg, rgba(11,13,16,.97) 35%, rgba(11,13,16,.6) 70%, rgba(11,13,16,.35)), url('media/slot-roof.webp') 70% 40% / cover; }
+    .final h2 { max-width: 16ch; }
+    .final p { font-size: 20px; color: var(--soft); max-width: 46ch; margin: 14px 0 26px; line-height: 1.35; }
+    .final small { display: block; margin-top: 16px; font-size: 16px; color: var(--muted); }
+    .final small a { color: var(--text); }
+
+    footer { margin-top: 64px; padding: 26px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+    footer a { color: var(--soft); }
+
+    @media (max-width: 900px) {
+      .why, .packages { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .feature { grid-template-columns: 1fr; gap: 24px; }
+      .everywhere { grid-template-columns: 1fr; gap: 32px; justify-items: center; }
+      .everywhere > div:first-child { justify-self: stretch; }
+      .nav-links a:not(.pill) { display: none; }
+    }
+    @media (max-width: 640px) {
+      section { padding-top: 72px; }
+      .slots, .steps { grid-template-columns: 1fr; }
+      .hero { padding-top: 40px; }
+      .hero-shot figcaption { position: static; display: inline-block; margin-top: 10px; }
+      .final { padding: 36px 22px; background: linear-gradient(0deg, rgba(11,13,16,.98) 62%, rgba(11,13,16,.6)), url('media/slot-roof.webp') 70% 0 / cover; }
+      /* Artwork table: one card per slot instead of sideways scrolling. */
+      table { min-width: 0; }
+      thead { display: none; }
+      table, tbody, tr, td { display: block; }
+      tr { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+      tr:last-child { border-bottom: 0; }
+      td { padding: 2px 0; border: 0; }
+      td:first-child { font-size: 20px; }
+      .stats b { font-size: 36px; }
+      .phone { width: 240px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .slot-img img { transition: none; } }
   </style>
 </head>
 <body>
-  <nav class="wrap">
-    <a class="logo" href="./">LATE<span>BRAKE</span></a>
-    <a class="play" href="play.html">Play</a>
+  <nav class="nav" aria-label="Main">
+    <div class="wrap">
+      <a class="logo" href="./">LATE<span>BRAKE</span></a>
+      <div class="nav-links">
+        <a href="#slots">Ad slots</a>
+        <a href="#packages">Packages</a>
+        <a href="#specs">Artwork</a>
+        <a href="play.html">Play</a>
+        <a class="pill js-contact" href="#contact">Contact</a>
+      </div>
+    </div>
   </nav>
 
-  <header class="wrap">
-    <div class="kicker">Advertise</div>
-    <h1>Put your brand on the track</h1>
-    <p class="lede">Late Brake is a free formula racing game played in the browser, on desktop and phones. Every board, runoff logo and grandstand roof around its six circuits can carry your brand.</p>
-    <a class="btn" id="contactTop" href="#contact">Get in touch</a>
+  <header class="hero">
+    <div class="wrap">
+      <div class="kicker">Advertise on Late Brake</div>
+      <h1>Put your brand <em>on the track</em></h1>
+      <p class="lede">Late Brake is a free formula racing game played in the browser, on desktop and phones. Every board, runoff and grandstand roof around its circuits can carry your brand, seen from above and from the cockpit, on every lap.</p>
+      <div class="ctas">
+        <a class="btn btn-primary js-contact" href="#contact">Get in touch</a>
+        <a class="btn btn-ghost" href="#slots">See the ad slots</a>
+      </div>
+      <ul class="facts">
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>6 real-world circuits</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Desktop and mobile</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Part of the world, never in the way</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Live within a day</li>
+      </ul>
+      <figure class="hero-shot">
+        <img src="media/sponsor-hero.webp" width="2880" height="1440" alt="Top-down view of the start straight: four cars racing past a grandstand whose roof, and every trackside board, carry the same blue brand">
+        <figcaption>Example: <b>your brand</b> on every slot at Silverstone</figcaption>
+      </figure>
+    </div>
   </header>
 
   <main>
-    <div class="wrap shots">
-      <figure>
-        <img src="media/sponsor-trackside.jpg" alt="Top-down view of the main straight: a grandstand with a roof ad and a line of trackside boards" width="1200" height="675">
-        <figcaption>From above: boards line the barriers, and roofs carry big logos.</figcaption>
-      </figure>
-      <figure>
-        <img src="media/sponsor-cockpit.jpg" alt="Cockpit view down a street circuit with trackside boards along the barriers" width="1200" height="675">
-        <figcaption>From the cockpit: boards are in view on every straight.</figcaption>
-      </figure>
-    </div>
-
-    <section class="wrap" aria-labelledby="slotsTitle">
-      <h2 id="slotsTitle">Where your brand goes</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>Trackside boards</h3>
-          <p>12-metre boards behind the barriers, grouped in braking zones and along the main straight, where players look hardest.</p>
-          <span class="tag">Per circuit or everywhere</span>
+    <section class="wrap" aria-labelledby="whyTitle">
+      <p class="eyebrow">Why it works</p>
+      <h2 id="whyTitle">Seen where players look hardest</h2>
+      <div class="why">
+        <div>
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <h3>On screen every lap</h3>
+          <p>Boards line the braking zones and the main straight. Players study them lap after lap to find their braking points.</p>
         </div>
-        <div class="card">
-          <h3>Runoff logos</h3>
-          <p>Your logo painted large on the tarmac runoff on the outside of corners. Hard to miss when a player runs wide.</p>
-          <span class="tag">Per corner</span>
+        <div>
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3z"/></svg></span>
+          <h3>Part of the world</h3>
+          <p>Your brand sits on the circuit like at a real race. It never covers the game or interrupts a lap, so players don't learn to skip it.</p>
         </div>
-        <div class="card">
-          <h3>Grandstand and pit roofs</h3>
-          <p>The biggest canvases on the circuit: grandstand roofs and the pit building, seen from above on every lap.</p>
-          <span class="tag">Per circuit</span>
-        </div>
-        <div class="card">
-          <h3>Circuit takeover</h3>
-          <p>Every slot on one circuit in your colours, from the boards to the roofs. A natural fit for an event or launch.</p>
-          <span class="tag">Exclusive</span>
-        </div>
-        <div class="card">
-          <h3>Sponsored challenge</h3>
-          <p>A weekly time challenge under your name, with your branding round the circuit and an optional prize for the fastest lap.</p>
-          <span class="tag">Weekly</span>
+        <div>
+          <span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></span>
+          <h3>Quick to launch and change</h3>
+          <p>Send a logo or just your name and colours. It's live within a day, and you can change the artwork whenever you like.</p>
         </div>
       </div>
     </section>
 
-    <section class="wrap" aria-labelledby="specsTitle">
+    <section class="wrap" id="slots" aria-labelledby="slotsTitle">
+      <p class="eyebrow">Ad slots</p>
+      <h2 id="slotsTitle">Where your brand appears</h2>
+      <p class="section-lede">Every circuit has all of these. Take one slot on one circuit, or all of them everywhere.</p>
+      <div class="slots">
+        <article class="slot">
+          <div class="slot-img"><img src="media/slot-boards.webp" width="1600" height="1040" loading="lazy" alt="A row of blue and white trackside boards along the barrier, in front of a full grandstand"></div>
+          <div class="slot-body">
+            <h3>Trackside boards <small>12 m each</small></h3>
+            <p>Boards behind the barriers, grouped in braking zones and along the main straight.</p>
+          </div>
+        </article>
+        <article class="slot">
+          <div class="slot-img"><img src="media/slot-runoff.webp" width="1600" height="1040" loading="lazy" alt="A car taking a corner past a huge brand logo painted on the tarmac runoff"></div>
+          <div class="slot-body">
+            <h3>Runoff logos <small>Per corner</small></h3>
+            <p>Your logo painted huge on the tarmac on the outside of corners. Impossible to miss when a player runs wide.</p>
+          </div>
+        </article>
+        <article class="slot">
+          <div class="slot-img"><img src="media/slot-roof.webp" width="1600" height="1040" loading="lazy" alt="A grandstand roof covered by a giant brand logo, above a packed crowd"></div>
+          <div class="slot-body">
+            <h3>Grandstand and pit roofs <small>Per circuit</small></h3>
+            <p>The biggest canvases on the circuit, seen from above every time a player passes.</p>
+          </div>
+        </article>
+        <article class="slot">
+          <div class="slot-img"><img src="media/slot-cockpit.webp" width="1920" height="1080" loading="lazy" alt="The view from the driver's seat down a street circuit, with a grandstand and branded boards ahead"></div>
+          <div class="slot-body">
+            <h3>From the cockpit <small>Included</small></h3>
+            <p>Players who race in first person see the same boards at eye level, rushing towards them.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="takeoverTitle">
+      <div class="feature">
+        <img src="media/slot-takeover.webp" width="2400" height="1350" loading="lazy" alt="A street circuit seen from above where every board, roof and grandstand carries the same brand">
+        <div>
+          <p class="eyebrow">Circuit takeover</p>
+          <h2 id="takeoverTitle">Make a whole circuit yours</h2>
+          <ul class="ticks">
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Every board, runoff logo and roof on one circuit, in your colours</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>No other brand on that circuit while it runs</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>A natural fit for a product launch, an event or a race weekend</li>
+          </ul>
+          <a class="btn btn-primary js-contact" href="#contact">Ask about a takeover</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="packages" aria-labelledby="packagesTitle">
+      <p class="eyebrow">Packages</p>
+      <h2 id="packagesTitle">Pick how big to go</h2>
+      <p class="section-lede">Prices depend on the circuits, the slots and how long you run. Tell us what you have in mind and we'll reply with a quote.</p>
+      <div class="packages">
+        <div class="pack">
+          <h3>Trackside</h3>
+          <p class="for">A strong presence on one circuit</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Boards in the braking zones and along the main straight</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Shared with other brands</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Artwork changes any time</li>
+          </ul>
+          <a class="btn btn-ghost js-contact" href="#contact">Ask for a quote</a>
+        </div>
+        <div class="pack featured">
+          <span class="badge">Most visible</span>
+          <h3>Circuit takeover</h3>
+          <p class="for">One circuit, entirely yours</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Every board, runoff logo and roof</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Exclusive on that circuit</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Seen from above and from the cockpit</li>
+          </ul>
+          <a class="btn btn-primary js-contact" href="#contact">Ask for a quote</a>
+        </div>
+        <div class="pack">
+          <h3>Season partner</h3>
+          <p class="for">Everywhere in the game</p>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Boards on every circuit</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>A takeover of the circuit of your choice</li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17l9-10"/></svg>Your name on the daily challenge</li>
+          </ul>
+          <a class="btn btn-ghost js-contact" href="#contact">Ask for a quote</a>
+        </div>
+      </div>
+      <div class="addon">
+        <span><b>Add-on: sponsored challenge.</b> A weekly time challenge under your name, with an optional prize for the fastest lap.</span>
+        <a class="js-contact" href="#contact">Ask about it</a>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="everywhereTitle">
+      <div class="everywhere">
+        <div>
+          <p class="eyebrow">Reach</p>
+          <h2 id="everywhereTitle">On every screen, no install</h2>
+          <p class="section-lede">Late Brake runs in the browser on desktop, tablets and phones. Players arrive from a link and are racing in seconds, with keyboard, gamepad or touch.</p>
+          <div class="stats">
+            <div><b>6</b><span>Real-world circuits</span></div>
+            <div><b>3</b><span>Camera views</span></div>
+            <div><b>0</b><span>Installs needed</span></div>
+          </div>
+        </div>
+        <div class="phone"><img src="media/slot-phone.webp" width="1170" height="2532" loading="lazy" alt="Late Brake on a phone: four cars on the grid at the start lights, with branded boards and touch controls"></div>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="stepsTitle">
+      <p class="eyebrow">How it works</p>
+      <h2 id="stepsTitle">From email to the track in a day</h2>
+      <ol class="steps steps-list">
+        <li><h3>Tell us what you want</h3><p>Which slots, which circuits and for how long.</p></li>
+        <li><h3>Send your artwork</h3><p>A logo file, or just your name and two colours and we set it in type.</p></li>
+        <li><h3>Go live</h3><p>Your brand is on the track within a day of artwork.</p></li>
+        <li><h3>See how it did</h3><p>We share player and lap numbers for your circuits.</p></li>
+      </ol>
+    </section>
+
+    <section class="wrap" id="specs" aria-labelledby="specsTitle">
+      <p class="eyebrow">Artwork</p>
       <h2 id="specsTitle">What to send</h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Slot</th><th>Shape</th><th>Artwork</th></tr></thead>
           <tbody>
-            <tr><td>Trackside board</td><td>About 9 : 1</td><td>PNG or SVG, 1800 × 210 px or larger. Or just your name and two brand colours, and we set it in type.</td></tr>
-            <tr><td>Runoff logo</td><td>About 4.5 : 1</td><td>PNG or SVG on a transparent background, 1350 × 300 px or larger. It's painted onto dark tarmac.</td></tr>
-            <tr><td>Roofs</td><td>Wide, 8 : 1 to 18 : 1</td><td>PNG or SVG, at least 1800 px wide.</td></tr>
+            <tr><td>Trackside board</td><td><code>9 : 1</code></td><td>PNG or SVG, 1800 × 210 px or larger. Or your name and two brand colours, and we set it in type.</td></tr>
+            <tr><td>Runoff logo</td><td><code>4.5 : 1</code></td><td>PNG or SVG on a transparent background, 1350 × 300 px or larger. It's painted onto dark tarmac, so light colours work best.</td></tr>
+            <tr><td>Roofs</td><td><code>8 : 1</code> to <code>18 : 1</code></td><td>PNG or SVG, at least 1800 px wide.</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
+    <section class="wrap" aria-labelledby="faqTitle">
+      <p class="eyebrow">Questions</p>
+      <h2 id="faqTitle">Good to know</h2>
+      <div class="faq">
+        <details><summary>Do the ads interrupt the game?</summary><p>No. Trackside slots are part of the circuit, like the boards at a real race. They never cover the screen or pause a lap.</p></details>
+        <details><summary>Can we change the artwork during a campaign?</summary><p>Yes, as often as you like. A new creative goes live within a day.</p></details>
+        <details><summary>Can we have a circuit to ourselves?</summary><p>Yes: that's the circuit takeover. No other brand appears on that circuit while it runs.</p></details>
+        <details><summary>How do we know it worked?</summary><p>We share player and lap numbers for the circuits you're on, from privacy-friendly analytics with no tracking cookies.</p></details>
+        <details><summary>Is the game tied to a racing series?</summary><p>No. Late Brake is an independent game and isn't affiliated with any racing series, team or circuit.</p></details>
+      </div>
+    </section>
+
     <div class="wrap">
-      <div class="contact" id="contact">
-        <h2>Talk to us</h2>
-        <p>Tell us which slots and circuits you're interested in, and for how long. We'll reply with current player numbers, availability and prices.</p>
-        <a class="btn" id="contactBtn" href="#contact">Email us</a>
+      <div class="final" id="contact">
+        <p class="eyebrow">Contact</p>
+        <h2>Let's put your brand on the track</h2>
+        <p>Tell us which slots and circuits you're interested in, and for how long. We'll reply with player numbers, availability and a quote.</p>
+        <a class="btn btn-primary js-contact" href="#contact">Email us</a>
         <small id="contactText"></small>
       </div>
     </div>
   </main>
 
-  <footer class="wrap">
-    Late Brake is an independent game and isn't affiliated with any racing series, team or circuit. <a href="./">Home</a> · <a href="play.html">Play</a>
+  <footer>
+    <div class="wrap">
+      <span>Late Brake is an independent game and isn't affiliated with any racing series, team or circuit.</span>
+      <span><a href="./">Home</a> · <a href="play.html">Play</a></span>
+    </div>
   </footer>
 
   <script type="module">
     import { CONFIG } from './src/config.js';
-    import { initAnalytics } from './src/analytics.js';
+    import { initAnalytics, track } from './src/analytics.js';
     initAnalytics();
     const email = CONFIG.sponsorEmail;
     if (email) {
-      const href = `mailto:${email}?subject=${encodeURIComponent('Advertising on Late Brake')}`;
-      for (const id of ['contactTop', 'contactBtn']) document.getElementById(id).href = href;
-      document.getElementById('contactText').textContent = `Or write to ${email}`;
+      const body = "Hi Late Brake team,\n\nWe're interested in: (trackside boards / runoff logos / roofs / circuit takeover / sponsored challenge)\nCircuits:\nWhen and for how long:\n\nThanks,\n";
+      const href = `mailto:${email}?subject=${encodeURIComponent('Advertising on Late Brake')}&body=${encodeURIComponent(body)}`;
+      for (const a of document.querySelectorAll('.js-contact')) {
+        a.href = href;
+        a.addEventListener('click', () => track('Sponsor contact', { from: a.textContent.trim() }));
+      }
+      document.getElementById('contactText').innerHTML = 'Or write to <a></a>';
+      const link = document.querySelector('#contactText a');
+      link.href = href;
+      link.textContent = email;
     }
   </script>
 </body>
