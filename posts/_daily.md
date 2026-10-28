@@ -30,6 +30,9 @@ Look at what was published in the last 24 hours (72 hours on a Monday, to cover 
 For official decisions (penalties, rules, calendar) check Formula 1's own news (https://www.formula1.com/en/latest/all)
 and the FIA (https://www.fia.com/news).
 
+Read the feeds with `curl -s -L -A 'LateBrakeBlog/1.0 (https://www.latebrake.in/contact.html)' <url>`: the WebFetch tool
+can't open the BBC feed. WebFetch is fine for reading articles and Wikipedia pages.
+
 ## 2. Pick the four posts
 
 Check the titles and descriptions of posts in `posts/` from the last 14 days so nothing repeats.

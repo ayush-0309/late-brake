@@ -87,8 +87,20 @@ race or circuit (for example "Kimi Antonelli 2026" or "Buddh International Circu
 landscape photo of the car or place the post is about. Check the file's licence on its Commons page: CC BY, CC BY-SA,
 CC0 or public domain only.
 
-Download the 1280px-wide version, save it as `media/blog/<post file name>.jpg` (keep it under about 300 KB) and add
-to the front matter:
+**How to fetch from Commons.** Wikimedia rate-limits anonymous scripts, so every request (curl or otherwise) must send
+the header `User-Agent: LateBrakeBlog/1.0 (https://www.latebrake.in/contact.html)`. Search and read licences in one
+call to the API, asking for a 1280px thumbnail:
+
+```
+https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8
+  &gsrsearch=<words>&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1280
+```
+
+Each result's `extmetadata` has `LicenseShortName`, `LicenseUrl` and `Artist`, and `thumburl` is the image to download.
+Download exactly that `thumburl`: Wikimedia only serves certain thumbnail widths and refuses others with a 400. If
+Commons answers 429 (too many requests), wait 30 seconds and try again, at most three times.
+
+Save the photo as `media/blog/<post file name>.jpg` (keep it under about 300 KB) and add to the front matter:
 
 ```
 image: antonelli-wins-austin-title-in-mexico.jpg
