@@ -10,7 +10,7 @@ npm run dev
 
 Then open http://localhost:5173 (landing page) or http://localhost:5173/play.html (the game). Any static file server works; the page just has to be served over HTTP (not opened as a file) because it uses ES modules.
 
-Live at https://ayush-0309.github.io/late-brake/. GitHub Pages serves the repo root as-is: there's no build step, and `404.html` handles missing pages.
+Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no build step, and `404.html` handles missing pages. The blog is the one generated part: see "Blog" below.
 
 ## Layout
 
@@ -70,6 +70,18 @@ Accounts, leaderboards, the daily challenge, shared ghost links and online races
 Red Bull Ring, Monza, Silverstone, Spa-Francorchamps, Monaco and Interlagos, at real scale and in race direction.
 
 To add another, put its id in `IDS` in `tools/import-circuits.mjs`, run `node tools/import-circuits.mjs`, then add its settings to `SETTINGS` in `src/track.js`, with medal times from `node tools/medal-times.mjs`. Ids are listed in `data/f1-circuits.geojson` (40 circuits). Circuits that cross themselves, like Suzuka, need bridge support first.
+
+## Blog
+
+Posts are Markdown files in `posts/`; `node tools/build-blog.mjs` turns them into `blog/` (one page per post, the
+index and an RSS feed), `sitemap.xml`, `robots.txt` and the "From the blog" cards on the home page. Commit what it
+writes. How posts are written (voice, layout, rules, the game tie-in) is in `posts/_guide.md`; change that file to
+change the style. Every post ends with a button into the game, on the post's circuit when it sets `circuit:`.
+
+Posts go live at their `date:` (India time, like `2026-10-29 09:00`). Until then the build leaves them out, and the
+`Publish blog` GitHub Action (`.github/workflows/publish-blog.yml`) rebuilds and commits at 9:00, 12:00, 15:00 and
+18:00 India time, and whenever posts land on `main`. A Claude routine writes each day's four posts at 3:30am following
+`posts/_daily.md`. `node tools/build-blog.mjs --drafts` shows scheduled posts locally; don't commit that build.
 
 ## Medals and car colours
 

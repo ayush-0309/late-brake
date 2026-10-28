@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#0b0d10">
   <title>Late Brake · Formula racing in your browser</title>
   <meta name="description" content="Top-down formula racing on six real-world circuits. Race your ghost, chase purple sectors. Free, no install, plays on keyboard, gamepad or touch.">
-  <link rel="canonical" href="https://ayush-0309.github.io/late-brake/">
+  <link rel="canonical" href="https://www.latebrake.in/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Late Brake">
   <meta property="og:title" content="Late Brake · Formula racing in your browser">
   <meta property="og:description" content="Six real-world circuits. Race your ghost, chase purple sectors. Free, no install.">
-  <meta property="og:url" content="https://ayush-0309.github.io/late-brake/">
-  <meta property="og:image" content="https://ayush-0309.github.io/late-brake/og.png">
+  <meta property="og:url" content="https://www.latebrake.in/">
+  <meta property="og:image" content="https://www.latebrake.in/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -47,6 +47,7 @@
       border: 1px solid rgba(59,111,240,.6); background: rgba(29,78,216,.18); color: #f3f4f6; }
     .advertise-link:hover { background: rgba(29,78,216,.32); }
     .advertise-link span { color: #3b6ff0; }
+    .blog-link { margin-left: 8px; }
     .kicker { font-size: 15px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--accent-hi); }
     h1 { font-size: clamp(64px, 13vw, 148px); font-style: italic; font-weight: 800; margin: 6px 0 0; line-height: .85; letter-spacing: -.01em; }
     h1 span { color: var(--accent); }
@@ -75,6 +76,13 @@
     .card { padding: 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
     .card h3 { margin: 0 0 10px; font-size: 22px; font-weight: 800; }
     .card ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 17px; color: #c3c8d0; }
+    .card.post { display: block; text-decoration: none; transition: border-color .15s; }
+    .card.post:hover { border-color: rgba(255,255,255,.25); }
+    .card.post p { margin: 0; font-size: 17px; color: #c3c8d0; line-height: 1.35; }
+    .card.post img { display: block; width: calc(100% + 36px); max-width: none; height: auto; margin: -18px -18px 14px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px 14px 0 0; }
+    .post-date { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .more { margin: 14px 0 0; font-size: 18px; font-weight: 700; }
+    .more a { color: var(--text); }
     kbd { font-family: inherit; font-weight: 700; font-size: 14px; padding: 1px 7px; border: 1px solid rgba(255,255,255,.22);
       border-bottom-width: 2px; border-radius: 4px; color: var(--text); margin-right: 3px; }
     .sectors { display: flex; gap: 6px; margin-top: 4px; }
@@ -122,6 +130,7 @@
         <a class="btn ghost" href="#how">How to play</a>
       </div>
       <a class="advertise-link" href="sponsors.html">Advertise on Late Brake <span aria-hidden="true">→</span></a>
+      <a class="advertise-link blog-link" href="blog/">Read the blog <span aria-hidden="true">→</span></a>
       <div class="chips">
         <span>Free, no install</span><span>Cockpit or top-down view</span><span>Keyboard, gamepad or touch</span><span>Saves your best laps</span>
       </div>
@@ -133,6 +142,32 @@
       <h2 id="circuitsTitle">The circuits</h2>
       <div class="grid" id="circuits"></div>
     </section>
+    <!-- blog:start -->
+    <section class="wrap" aria-labelledby="blogTitle">
+      <h2 id="blogTitle">From the blog</h2>
+      <div class="grid">
+        <a class="card post" href="blog/antonelli-wins-austin-title-in-mexico.html">
+          <img src="media/blog/antonelli-wins-austin-title-in-mexico.jpg" alt="" width="1280" height="720" loading="lazy">
+          <span class="post-date">News · 28 October 2026</span>
+          <h3>Antonelli wins US Grand Prix to move two points from the title</h3>
+          <p>Kimi Antonelli led from pole to win his ninth race of 2026 and can become Formula 1&#39;s youngest world champion in Mexico on Sunday.</p>
+        </a>
+        <a class="card post" href="blog/on-this-day-28-october.html">
+          <img src="media/blog/on-this-day-28-october.jpg" alt="" width="1280" height="720" loading="lazy">
+          <span class="post-date">On this day · 28 October 2026</span>
+          <h3>On this day: Vettel wins in India, Hamilton crowned in Mexico</h3>
+          <p>On 28 October, Sebastian Vettel won the 2012 Indian Grand Prix from pole, and Lewis Hamilton clinched his fifth world title in Mexico in 2018.</p>
+        </a>
+        <a class="card post" href="blog/when-formula-1-came-to-india.html">
+          <img src="media/blog/when-formula-1-came-to-india.jpg" alt="" width="1280" height="853" loading="lazy">
+          <span class="post-date">History · 28 October 2026</span>
+          <h3>The rise and fall of the Indian Grand Prix</h3>
+          <p>For three years, Formula 1 raced at the Buddh International Circuit near Delhi. Sebastian Vettel won every race. Then a tax dispute ended it.</p>
+        </a>
+      </div>
+      <p class="more"><a href="blog/">All posts →</a></p>
+    </section>
+    <!-- blog:end -->
 
     <section class="wrap" aria-labelledby="sponsorTitle">
       <h2 id="sponsorTitle">Advertise</h2>
@@ -190,7 +225,7 @@
       <p>Circuit outlines from <a href="https://github.com/bacinger/f1-circuits">bacinger/f1-circuits</a> (MIT). Engine sound by <a href="https://freesound.org/s/181187/">Ears68</a> (CC0).</p>
       <p>Want your brand on the track? <a href="sponsors.html">Advertise on Late Brake</a>.</p>
       <p>Late Brake is an independent game and isn't affiliated with any racing series, team or circuit. <a href="https://github.com/ayush-0309/late-brake">Source on GitHub</a>.</p>
-      <p><a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="refunds.html">Refunds</a> · <a href="contact.html">Contact</a></p>
+      <p><a href="blog/">Blog</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="refunds.html">Refunds</a> · <a href="contact.html">Contact</a></p>
     </div>
   </footer>
 

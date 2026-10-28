@@ -6,7 +6,7 @@ export const CONFIG = {
   sponsorEmail: 'officialayushgarg@gmail.com',
 
   // Privacy-friendly analytics, off when null. One of:
-  //   { provider: 'plausible', domain: 'ayush-0309.github.io' }
+  //   { provider: 'plausible', domain: 'www.latebrake.in' }
   //   { provider: 'goatcounter', code: 'latebrake' }   // latebrake.goatcounter.com
   analytics: null,
 
