@@ -81,7 +81,7 @@ change the style. Every post ends with a button into the game, on the post's cir
 Posts go live at their `date:` (India time, like `2026-10-29 09:00`). Until then the build leaves them out, and the
 `Publish blog` GitHub Action (`.github/workflows/publish-blog.yml`) rebuilds and commits at 9:00, 12:00, 15:00 and
 18:00 India time, and whenever posts land on `main`. A Claude routine writes each day's four posts at 3:30am following
-`posts/_daily.md`. `node tools/build-blog.mjs --drafts` shows scheduled posts locally; don't commit that build.
+`posts/_daily.md`. `node tools/build-blog.mjs --drafts` shows scheduled posts locally; don't commit that build. Post photos come from Wikimedia Commons via `node tools/commons-photo.mjs "File:<title>.jpg" media/blog/<post>.jpg`.
 
 ## Medals and car colours
 

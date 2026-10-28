@@ -87,20 +87,28 @@ race or circuit (for example "Kimi Antonelli 2026" or "Buddh International Circu
 landscape photo of the car or place the post is about. Check the file's licence on its Commons page: CC BY, CC BY-SA,
 CC0 or public domain only.
 
-**How to fetch from Commons.** Wikimedia rate-limits anonymous scripts, so every request (curl or otherwise) must send
-the header `User-Agent: LateBrakeBlog/1.0 (https://www.latebrake.in/contact.html)`. Search and read licences in one
-call to the API, asking for a 1280px thumbnail:
+**How to find and download it.** Commons' API is often rate-limited from the cloud (HTTP 429), so:
 
-```
-https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8
-  &gsrsearch=<words>&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1280
-```
+1. **Search** with the WebFetch tool on this API address, asking for each result's file title, width, licence
+   (`LicenseShortName`) and author (`Artist`), copied exactly:
 
-Each result's `extmetadata` has `LicenseShortName`, `LicenseUrl` and `Artist`, and `thumburl` is the image to download.
-Download exactly that `thumburl`: Wikimedia only serves certain thumbnail widths and refuses others with a 400. If
-Commons answers 429 (too many requests), wait 30 seconds and try again, at most three times.
+   ```
+   https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8
+     &gsrsearch=<words>&prop=imageinfo&iiprop=size|extmetadata
+   ```
 
-Save the photo as `media/blog/<post file name>.jpg` (keep it under about 300 KB) and add to the front matter:
+   Pick a JPEG at least 1280 pixels wide with an allowed licence.
+2. **Download** it with the repo's tool, which works out Commons' 1280px thumbnail address from the file title and
+   retries if Commons is busy:
+
+   ```
+   node tools/commons-photo.mjs "File:<exact title>.jpg" media/blog/<post file name>.jpg
+   ```
+
+   If it fails, try another photo; if none works, publish the post without one.
+
+Then add to the front matter (the credit links to the photo's Commons page, `https://commons.wikimedia.org/wiki/File:…`
+with spaces as underscores):
 
 ```
 image: antonelli-wins-austin-title-in-mexico.jpg

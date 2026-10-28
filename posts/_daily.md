@@ -61,8 +61,8 @@ something can't be confirmed, leave it out.
 ## 4. Write and build
 
 Write each post as the guide says, with its slot's `date:` from the schedule and a short, new file name in `posts/`.
-Find each post a photo on Wikimedia Commons as the guide's "Photos" section explains (its search API,
-`https://commons.wikimedia.org/w/api.php`, returns licences and authors). Then run `node tools/build-blog.mjs` (no
+Find each post a photo on Wikimedia Commons as the guide's "Photos" section explains: search with WebFetch, download
+with `node tools/commons-photo.mjs`. Then run `node tools/build-blog.mjs` (no
 flags) and make sure it finishes without errors: it checks every post, including scheduled ones, and stops on em or
 en dashes and on photos missing their alt text or credit. Scheduled posts are left out of the built pages until their
 time, so expect "4 scheduled for later".
