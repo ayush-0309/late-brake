@@ -80,3 +80,17 @@ footer a[aria-current="page"] { color: var(--text); text-decoration-color: var(-
   .post-card.has-image img { grid-row: auto; margin-bottom: 6px; }
 }
 article h1 { font-size: clamp(36px, 6.5vw, 52px); font-style: normal; text-transform: none; line-height: 1.02; letter-spacing: -.005em; }
+
+/* Circuit pages. */
+.track-map { margin: 6px 0 22px; }
+.track-map svg { display: block; width: 100%; height: auto; border-radius: 12px; background: var(--surface); }
+.track-map figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
+.circuit-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 0 0 26px; }
+.circuit-facts div { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.circuit-facts dt { font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.circuit-facts dd { margin: 2px 0 0; font-family: var(--display); font-size: 24px; font-weight: 700; color: var(--text); }
+.post-card svg { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; background: var(--bg); }
+.post-card.has-image svg { grid-row: 1 / span 3; }
+@media (max-width: 600px) { .post-card.has-image svg { grid-row: auto; margin-bottom: 6px; } }
+.drive-more { display: block; margin-top: 14px; color: var(--soft); }
+.related .meta { font-size: 14px; margin-left: 6px; }

@@ -42,7 +42,7 @@ for (const t of TRACKS) {
   const info = CIRCUITS.find((c) => c.id === t.id);
   const a = document.createElement('a');
   a.className = 'circuit';
-  a.href = `play.html?track=${encodeURIComponent(t.id)}`;
+  a.href = `circuits/${t.slug}.html`;
   a.innerHTML = `<canvas aria-hidden="true"></canvas><div><b>${t.name}</b><small>${t.country} · ${(info.length / 1000).toFixed(3)} km</small></div>`;
   list.appendChild(a);
   const c = a.querySelector('canvas');

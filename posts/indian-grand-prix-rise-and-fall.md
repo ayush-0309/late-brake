@@ -1,14 +1,14 @@
 ---
 title: The rise and fall of the Indian Grand Prix
-description: For three years, Formula 1 raced at the Buddh International Circuit near Delhi. Sebastian Vettel won every race. Then a tax dispute ended it.
+description: For three years, the world championship raced at the Buddh International Circuit near Delhi. Sebastian Vettel won every race. Then a tax dispute ended it.
 date: 2026-10-28
 kind: history
-image: when-formula-1-came-to-india.jpg
+image: indian-grand-prix-rise-and-fall.jpg
 alt: The multi-storey Paddock Club building beside the main straight at the Buddh International Circuit
 caption: The Paddock Club at the Buddh International Circuit during the 2013 Indian Grand Prix.
 credit: [Shobhit Gosain](https://commons.wikimedia.org/wiki/File:Paddock_Club_of_Buddh_International_Circuit,_Oct_2013.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0), via Wikimedia Commons
 ---
-Formula 1's Indian adventure lasted just three races.
+The world championship's Indian adventure lasted just three races.
 
 From 2011 to 2013, the sport came to the Buddh International Circuit in Greater Noida, on the edge of Delhi. Fans
 filled the grandstands, Indian drivers raced at home and one man won every time. Then, as quickly as it arrived, the
@@ -33,7 +33,7 @@ Sebastian Vettel won all three Indian Grands Prix for Red Bull.
 
 ## Home heroes
 
-Narain Karthikeyan, India's first Formula 1 driver, raced at home for HRT in 2011 and 2012, finishing 18th and then
+Narain Karthikeyan, India's first world championship driver, raced at home for HRT in 2011 and 2012, finishing 18th and then
 21st.
 
 At the first race, Karun Chandhok drove in Friday practice for Team Lotus and set the first flying lap the circuit had
@@ -45,7 +45,7 @@ After 2013, the race was dropped from the 2014 calendar, with a return planned f
 
 A tax dispute with the Uttar Pradesh government was the main reason. The state reportedly treated the race as
 entertainment rather than sport and taxed it accordingly, and the circuit also faced a large annual fee to host it.
-Formula 1 has not raced in India since.
+The championship has not raced in India since.
 
 ## Race it on Late Brake
 

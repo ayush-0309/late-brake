@@ -1,0 +1,13 @@
+# Not part of the website: sources, tooling and notes. Vercel leaves these out of
+# the deployment, so they can't be read or indexed at latebrake.in (posts/
+# holds tomorrow's posts before they go live).
+posts/
+tools/
+supabase/
+data/
+.github/
+.claude/
+README.md
+serve.mjs
+.nojekyll
+content/

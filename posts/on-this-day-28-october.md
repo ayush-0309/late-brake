@@ -4,7 +4,7 @@ description: On 28 October, Sebastian Vettel won the 2012 Indian Grand Prix from
 date: 2026-10-28
 kind: on-this-day
 image: on-this-day-28-october.jpg
-alt: Lewis Hamilton's silver Mercedes on track at the 2018 Azerbaijan Grand Prix
+alt: Lewis Hamilton's silver car on track at the 2018 Azerbaijan Grand Prix
 caption: Lewis Hamilton at the 2018 Azerbaijan Grand Prix. He won his fifth title later that season.
 credit: [ibrahimferhadli](https://commons.wikimedia.org/wiki/File:Lewis_Hamilton_2018_Azerbaijan_GP.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0), via Wikimedia Commons
 ---

@@ -5,11 +5,11 @@ date: 2026-10-29 18:00
 kind: history
 circuit: it-1922
 image: surtees-1964-mexico-title-decider.jpg
-alt: John Surtees, in a white helmet, driving a red Ferrari number 2 past a crowd behind straw bales
-caption: John Surtees drives his 1964 title-winning Ferrari 158 at the Goodwood Festival of Speed in 2014.
+alt: John Surtees, in a white helmet, driving a red car, number 2, past a crowd behind straw bales
+caption: John Surtees drives his 1964 title-winning car at a motoring festival in England in 2014.
 credit: [Nic Redhead](https://commons.wikimedia.org/wiki/File:John_Surtees_Ferrari_158_at_Goodwood_2014_001.jpg), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0), via Wikimedia Commons
 ---
-This weekend Kimi Antonelli could wrap up the 2026 title in Mexico City. Sixty-two years ago, the same circuit staged one of the closest title deciders in Formula 1 history, and the lead changed hands on the final laps.
+This weekend Kimi Antonelli could wrap up the 2026 title in Mexico City. Sixty-two years ago, the same circuit staged one of the closest title deciders in the championship's history, and the lead changed hands on the final laps.
 
 ## Three drivers, one race
 

@@ -4,28 +4,29 @@
 import { CIRCUITS } from './circuits.js';
 
 // Game settings per circuit. Geometry comes from circuits.js.
+// `slug`: the circuit's page, circuits/<slug>.html.
 // `medals`: bronze, silver and gold lap times (s), the best laps of a lone
 // easy, medium and hard AI driver rounded up to the half second. Retune them
 // if the car's handling or the AI changes.
 const SETTINGS = [
-  { id: 'at-1969', name: 'Red Bull Ring', country: 'Austria', width: 14, runoff: 14,
+  { id: 'at-1969', slug: 'spielberg', name: 'Spielberg', country: 'Austria', width: 14, runoff: 14,
     medals: [79, 74.5, 71.5],
     blurb: 'Short and fast. Three heavy stops uphill, then flat-out through the valley.' },
-  { id: 'it-1922', name: 'Monza', country: 'Italy', width: 14, runoff: 12,
+  { id: 'it-1922', slug: 'monza', name: 'Monza', country: 'Italy', width: 14, runoff: 12,
     medals: [96.5, 90, 86.5],
     blurb: 'The temple of speed. Huge straights, tight chicanes, brake as late as you dare.' },
-  { id: 'gb-1948', name: 'Silverstone', country: 'Great Britain', width: 15, runoff: 14,
+  { id: 'gb-1948', slug: 'silverstone', name: 'Silverstone', country: 'Great Britain', width: 15, runoff: 14,
     medals: [114, 106, 100.5],
     blurb: 'High-speed flow. Maggotts, Becketts and Chapel reward commitment.' },
-  { id: 'be-1925', name: 'Spa-Francorchamps', country: 'Belgium', width: 14, runoff: 12,
+  { id: 'be-1925', slug: 'spa-francorchamps', name: 'Spa-Francorchamps', country: 'Belgium', width: 14, runoff: 12,
     medals: [127.5, 118, 115],
     blurb: 'Seven kilometres through the Ardennes. Eau Rouge, Pouhon, the Bus Stop.' },
-  { id: 'mc-1929', name: 'Monaco', country: 'Monaco', width: 12, runoff: 1.5, setting: 'city',
+  { id: 'mc-1929', slug: 'monaco', name: 'Monaco', country: 'Monaco', width: 12, runoff: 1.5, setting: 'city',
     medals: [85.5, 81, 78],
     blurb: 'Barriers everywhere. The hairpin, the tunnel, the swimming pool. No room for error.' },
-  { id: 'br-1940', name: 'Interlagos', country: 'Brazil', width: 14, runoff: 12,
+  { id: 'br-1940', slug: 'interlagos', name: 'Interlagos', country: 'Brazil', width: 14, runoff: 12,
     medals: [87, 80.5, 77],
-    blurb: 'Anticlockwise and bumpy. The Senna S into a long climb to the line.' },
+    blurb: 'Anticlockwise and bumpy. Tight esses after the start, then a long climb to the line.' },
 ];
 
 export const TRACKS = SETTINGS.map((cfg) => {
@@ -80,6 +81,7 @@ export function buildTrack(def) {
 
   return {
     id: def.id,
+    slug: def.slug,
     name: def.name,
     country: def.country,
     blurb: def.blurb,

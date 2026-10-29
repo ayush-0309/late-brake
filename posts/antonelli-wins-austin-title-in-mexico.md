@@ -1,15 +1,15 @@
 ---
 title: Antonelli wins US Grand Prix to move two points from the title
-description: Kimi Antonelli led from pole to win his ninth race of 2026 and can become Formula 1's youngest world champion in Mexico on Sunday.
+description: Kimi Antonelli led from pole to win his ninth race of 2026 and can become the sport's youngest world champion in Mexico on Sunday.
 date: 2026-10-28
 kind: news
 circuit: br-1940
 image: antonelli-wins-austin-title-in-mexico.jpg
-alt: Kimi Antonelli's Mercedes at speed during qualifying at the 2026 Chinese Grand Prix
+alt: Kimi Antonelli's car at speed during qualifying at the 2026 Chinese Grand Prix
 caption: Kimi Antonelli in qualifying at the 2026 Chinese Grand Prix.
 credit: [Liauzh](https://commons.wikimedia.org/wiki/File:2026_Chinese_GP_-_Mercedes_-_Kimi_Antonelli_-_Qualifying.jpg), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0), via Wikimedia Commons
 ---
-Kimi Antonelli is one good Sunday away from becoming Formula 1's youngest world champion.
+Kimi Antonelli is one good Sunday away from becoming the youngest world champion in the sport's history.
 
 The 20-year-old Mercedes driver won the United States Grand Prix in Austin from pole position, crossing the line
 13.078 seconds clear of Ferrari's Charles Leclerc. It was his ninth victory of the season.

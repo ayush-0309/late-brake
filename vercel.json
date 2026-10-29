@@ -1,0 +1,7 @@
+{
+  "redirects": [
+    { "source": "/blog/f1-facts-that-sound-made-up.html", "destination": "/blog/grand-prix-facts-that-sound-made-up.html", "permanent": true },
+    { "source": "/blog/when-formula-1-came-to-india.html", "destination": "/blog/indian-grand-prix-rise-and-fall.html", "permanent": true },
+    { "source": "/blog/perez-signs-cadillac-extension-to-2029.html", "destination": "/blog/perez-extends-contract-to-2029.html", "permanent": true }
+  ]
+}

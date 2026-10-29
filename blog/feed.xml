@@ -3,21 +3,28 @@
   <channel>
     <title>Late Brake blog</title>
     <link>https://www.latebrake.in/blog/</link>
-    <description>Formula 1 news, history, fun facts and what happened on this day.</description>
+    <description>Grand Prix racing news, history, fun facts and what happened on this day.</description>
     <language>en</language>
     <item>
-      <title>Perez signs new Cadillac deal to stay until 2029</title>
-      <link>https://www.latebrake.in/blog/perez-signs-cadillac-extension-to-2029.html</link>
-      <guid>https://www.latebrake.in/blog/perez-signs-cadillac-extension-to-2029.html</guid>
+      <title>Mexico City Grand Prix 2026: race time in India and full schedule</title>
+      <link>https://www.latebrake.in/blog/mexico-city-grand-prix-2026-schedule.html</link>
+      <guid>https://www.latebrake.in/blog/mexico-city-grand-prix-2026-schedule.html</guid>
+      <pubDate>Thu, 29 Oct 2026 04:00:00 GMT</pubDate>
+      <description>The Mexico City Grand Prix starts at 1:30am on Monday in India. Here is every session in India time, and why Kimi Antonelli could be crowned champion.</description>
+    </item>
+    <item>
+      <title>Perez signs contract extension to race on until 2029</title>
+      <link>https://www.latebrake.in/blog/perez-extends-contract-to-2029.html</link>
+      <guid>https://www.latebrake.in/blog/perez-extends-contract-to-2029.html</guid>
       <pubDate>Thu, 29 Oct 2026 03:30:00 GMT</pubDate>
-      <description>Sergio Perez has extended his contract with Cadillac until at least 2029, days before his 300th Grand Prix start at his home race in Mexico.</description>
+      <description>Sergio Perez has extended his contract until at least 2029, days before his 300th Grand Prix start at his home race in Mexico.</description>
     </item>
     <item>
       <title>Antonelli wins US Grand Prix to move two points from the title</title>
       <link>https://www.latebrake.in/blog/antonelli-wins-austin-title-in-mexico.html</link>
       <guid>https://www.latebrake.in/blog/antonelli-wins-austin-title-in-mexico.html</guid>
       <pubDate>Tue, 27 Oct 2026 18:30:00 GMT</pubDate>
-      <description>Kimi Antonelli led from pole to win his ninth race of 2026 and can become Formula 1&#39;s youngest world champion in Mexico on Sunday.</description>
+      <description>Kimi Antonelli led from pole to win his ninth race of 2026 and can become the sport&#39;s youngest world champion in Mexico on Sunday.</description>
     </item>
     <item>
       <title>On this day: Vettel wins in India, Hamilton crowned in Mexico</title>
@@ -28,17 +35,17 @@
     </item>
     <item>
       <title>The rise and fall of the Indian Grand Prix</title>
-      <link>https://www.latebrake.in/blog/when-formula-1-came-to-india.html</link>
-      <guid>https://www.latebrake.in/blog/when-formula-1-came-to-india.html</guid>
+      <link>https://www.latebrake.in/blog/indian-grand-prix-rise-and-fall.html</link>
+      <guid>https://www.latebrake.in/blog/indian-grand-prix-rise-and-fall.html</guid>
       <pubDate>Tue, 27 Oct 2026 18:30:00 GMT</pubDate>
-      <description>For three years, Formula 1 raced at the Buddh International Circuit near Delhi. Sebastian Vettel won every race. Then a tax dispute ended it.</description>
+      <description>For three years, the world championship raced at the Buddh International Circuit near Delhi. Sebastian Vettel won every race. Then a tax dispute ended it.</description>
     </item>
     <item>
-      <title>Five F1 facts that sound made up, but are true</title>
-      <link>https://www.latebrake.in/blog/f1-facts-that-sound-made-up.html</link>
-      <guid>https://www.latebrake.in/blog/f1-facts-that-sound-made-up.html</guid>
+      <title>Five Grand Prix facts that sound made up, but are true</title>
+      <link>https://www.latebrake.in/blog/grand-prix-facts-that-sound-made-up.html</link>
+      <guid>https://www.latebrake.in/blog/grand-prix-facts-that-sound-made-up.html</guid>
       <pubDate>Tue, 27 Oct 2026 18:30:00 GMT</pubDate>
-      <description>A Grand Prix that lasted one lap, a race with six cars and India&#39;s first points. Five true stories from Formula 1 history.</description>
+      <description>A Grand Prix that lasted one lap, a race with six cars and India&#39;s first points. Five true stories from world championship history.</description>
     </item>
   </channel>
 </rss>

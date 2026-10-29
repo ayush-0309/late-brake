@@ -1,8 +1,9 @@
 # Puts scheduled blog posts live. Posts carry their go-live time (see
-# tools/build-blog.mjs); this rebuilds the blog every 15 minutes through the
-# day and whenever posts land on main, then commits whatever has become due so
-# Vercel deploys it. GitHub starts scheduled runs late or skips them when it's
-# busy, so checking often means a late run costs minutes, not hours.
+# tools/build-blog.mjs); this rebuilds the blog and circuit pages every 15
+# minutes through the day and whenever posts or pages land on main, commits
+# whatever has become due so Vercel deploys it, then tells IndexNow search
+# engines about the new pages. GitHub starts scheduled runs late or skips them
+# when it's busy, so checking often means a late run costs minutes, not hours.
 name: Publish blog
 
 on:
@@ -10,7 +11,7 @@ on:
     - cron: '*/15 3-13 * * *'   # every 15 minutes, 08:30 to 19:15 India time
   push:
     branches: [main]
-    paths: ['posts/**', 'media/blog/**', 'tools/build-blog.mjs', '.github/workflows/publish-blog.yml']
+    paths: ['posts/**', 'content/**', 'media/blog/**', 'tools/build-blog.mjs', '.github/workflows/publish-blog.yml']
   workflow_dispatch:
 
 permissions:
@@ -25,16 +26,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      # Pages changed since: the commit before this push, or this checkout on a schedule.
+      - name: Note where this run started
+        run: |
+          BEFORE='${{ github.event.before }}'
+          if [ -z "$BEFORE" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then BEFORE=$(git rev-parse HEAD); fi
+          echo "BASE=$BEFORE" >> "$GITHUB_ENV"
       - run: node tools/build-blog.mjs
       - name: Commit the posts that are due
         run: |
-          git add -A blog sitemap.xml robots.txt index.html
+          git add -A blog circuits sitemap.xml sitemap-news.xml robots.txt index.html
           if git diff --cached --quiet; then echo "Nothing new is due."; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Publish scheduled blog posts"
           git pull --rebase origin main
           git push origin HEAD:main
+      - name: Tell search engines about new pages
+        run: git diff --name-only "$BASE" HEAD -- blog circuits | xargs -r node tools/indexnow.mjs

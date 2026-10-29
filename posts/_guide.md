@@ -5,7 +5,7 @@ Change it to change what gets written: it's the one place the blog's style lives
 
 ## Who we're writing for
 
-Formula 1 fans, many of them in India, from casual race-day viewers to people who know every corner name. Most find us
+Grand Prix racing fans, many of them in India, from casual race-day viewers to people who know every corner name. Most find us
 through Google or a shared link. Give them something worth reading first; then, where it fits naturally, invite them
 to drive the circuits themselves.
 
@@ -13,9 +13,9 @@ to drive the circuits themselves.
 
 Four kinds of post. Every day should have some news, plus one of the other three.
 
-1. **News updates.** One story per post: race, sprint and qualifying results, title fights, confirmed team and driver
+1. **News updates.** One story per post, plus a schedule post in race weeks (see `posts/_daily.md`): race, sprint and qualifying results, title fights, confirmed team and driver
    announcements, rule and calendar changes. 300 to 600 words.
-2. **On this day.** Two or three things that happened in Formula 1 on today's date in past years: wins, titles, debuts,
+2. **On this day.** Two or three things that happened in Grand Prix racing on today's date in past years: wins, titles, debuts,
    famous moments. 300 to 500 words.
 3. **History.** One story from the past told properly: a famous race, a forgotten team, a circuit that's gone, a rivalry.
    400 to 700 words. Stories with an Indian angle (Narain Karthikeyan, Karun Chandhok, Force India, the Indian Grand Prix)
@@ -68,7 +68,7 @@ Write like the top sports news sites (BBC Sport, Autosport, The Race): the news 
 ## Rules
 
 - **Facts come from sources, and every source is linked.** News comes from the outlets in `posts/_daily.md`; history and
-  fun facts from Formula 1, the FIA or Wikipedia's race and driver pages. If sources disagree or something isn't
+  fun facts from the championship's own site, the governing body or Wikipedia's race and driver pages. If sources disagree or something isn't
   confirmed, leave it out.
 - **Never copy.** Write everything in your own words. At most one short quote per post, under 15 words, in quotation
   marks and credited.
@@ -76,9 +76,15 @@ Write like the top sports news sites (BBC Sport, Autosport, The Race): the news 
   that could be unfair or damaging to a named person.
 - **Exact numbers:** results, gaps and lap times exactly as the source reports them, or not at all.
 - **Photos only from Wikimedia Commons**, under CC BY, CC BY-SA, CC0 or public domain, and always credited (see
-  below). Never photos from news sites, agencies, teams or Formula 1, never photos of TV screens, and never satellite
+  below). Never photos from news sites, agencies, teams or the championship itself, never photos of TV screens, and never satellite
   or map images.
-- **"F1" and "Formula 1" only describe the real sport.** Never suggest Late Brake is official or endorsed.
+- **No trademarked names, anywhere on the page.** Never write the championship's own name or its short form, or a
+  circuit's sponsored name. Say "the world championship", "Grand Prix racing" or "the sport", and name circuits by their
+  town: Spielberg, not the name on the gate. In titles, descriptions, alt text and captions, also leave out team,
+  sponsor and company names where plain words work ("his car", "the sport's governing body"); in the story itself,
+  name a team or company only to report a fact. Link labels follow the same rule (`[the championship's official
+  site](https://…)`), though the link address itself can be anything. The build stops if it finds one of these names.
+- **Never suggest Late Brake is official or endorsed** by any series, team or circuit.
 
 ## Photos
 
@@ -124,7 +130,7 @@ If no suitable free photo exists, leave the photo out rather than use one that d
 
 | `circuit:` | Circuit | Country | Bronze | Silver | Gold |
 |---|---|---|---|---|---|
-| `at-1969` | Red Bull Ring | Austria | 1:19 | 1:14.5 | 1:11.5 |
+| `at-1969` | Spielberg | Austria | 1:19 | 1:14.5 | 1:11.5 |
 | `it-1922` | Monza | Italy | 1:36.5 | 1:30 | 1:26.5 |
 | `gb-1948` | Silverstone | Great Britain | 1:54 | 1:46 | 1:40.5 |
 | `be-1925` | Spa-Francorchamps | Belgium | 2:07.5 | 1:58 | 1:55 |

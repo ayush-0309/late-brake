@@ -14,7 +14,7 @@ minutes and puts each post live within about 15 minutes of its slot (straight aw
 | Slot | `date:` | Post |
 |---|---|---|
 | Morning | `YYYY-MM-DD 09:00` | News: the biggest story since yesterday |
-| Lunchtime | `YYYY-MM-DD 12:00` | On this day |
+| Lunchtime | `YYYY-MM-DD 12:00` | On this day, or in a race week the race's schedule (see below) |
 | Afternoon | `YYYY-MM-DD 15:00` | News: the second biggest story, or a history post if there isn't one |
 | Evening | `YYYY-MM-DD 18:00` | History or fun facts, taking turns day by day |
 
@@ -27,7 +27,7 @@ Look at what was published in the last 24 hours (72 hours on a Monday, to cover 
 - Motorsport.com: https://www.motorsport.com/rss/f1/news/
 - The Race: https://www.the-race.com/category/formula-1/feed/
 
-For official decisions (penalties, rules, calendar) check Formula 1's own news (https://www.formula1.com/en/latest/all)
+For official decisions (penalties, rules, calendar) check the championship's own news site (https://www.formula1.com/en/latest/all)
 and the FIA (https://www.fia.com/news).
 
 Read the feeds with `curl -s -L -A 'LateBrakeBlog/1.0 (https://www.latebrake.in/contact.html)' <url>`: the WebFetch tool
@@ -37,10 +37,23 @@ can't open the BBC feed. WebFetch is fine for reading articles and Wikipedia pag
 
 Check the titles and descriptions of posts in `posts/` from the last 14 days so nothing repeats.
 
+**Race weeks.** If a Grand Prix weekend starts within the next three days and the blog has no schedule post for it
+yet, the lunchtime slot is that race's schedule instead of On this day. Fans in India search for these every race week.
+
+- Title: `<Race name> <year>: race time in India and full schedule`, for example "Mexico City Grand Prix 2026: race
+  time in India and full schedule". File name like `mexico-city-grand-prix-2026-schedule.md`.
+- Open with the race's start in India time (and its day, which is often the next day in India), then list every
+  session (practice, sprint, qualifying, race) with its day and start time in India time, in order.
+- Then what's at stake (the title fight, records) and the circuit in a sentence or two.
+- Take the times from the championship's official schedule page or The Race's schedule article for that race, and
+  convert to India time (UTC+5:30) carefully. Say plainly when a session starts after midnight in India.
+- `kind: news`, and `circuit:` when the race is at one of the game's six circuits.
+
 For news, choose the biggest stories the blog hasn't covered yet, in order of preference:
 
 1. Race, sprint and qualifying results, and the title fight.
-2. Confirmed announcements from teams, drivers, Formula 1 or the FIA (signings, penalties, rule and calendar changes).
+2. Confirmed announcements from teams, drivers, the championship or its governing body (signings, penalties, rule and
+   calendar changes).
 3. Stories with a clear link to one of the game's circuits.
 
 Skip rumours, "sources say" transfer gossip, anything about drivers' health or private lives, and opinion pieces.
@@ -54,8 +67,8 @@ game's circuits.
 ## 3. Check the facts
 
 News: every result, time, gap and quote must appear in at least two of the sources above, or in one official source
-(Formula 1, the FIA or the team). History and fun facts: check each fact against Wikipedia's page for that race or
-driver, or Formula 1's own site. Note which sources you used; every one gets linked at the end of the post. If
+(the championship, its governing body or the team). History and fun facts: check each fact against Wikipedia's page for
+that race or driver, or the championship's own site. Note which sources you used; every one gets linked at the end of the post. If
 something can't be confirmed, leave it out.
 
 ## 4. Write and build

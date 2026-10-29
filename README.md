@@ -67,7 +67,7 @@ Accounts, leaderboards, the daily challenge, shared ghost links and online races
 
 ## Circuits
 
-Red Bull Ring, Monza, Silverstone, Spa-Francorchamps, Monaco and Interlagos, at real scale and in race direction.
+Spielberg, Monza, Silverstone, Spa-Francorchamps, Monaco and Interlagos, at real scale and in race direction.
 
 To add another, put its id in `IDS` in `tools/import-circuits.mjs`, run `node tools/import-circuits.mjs`, then add its settings to `SETTINGS` in `src/track.js`, with medal times from `node tools/medal-times.mjs`. Ids are listed in `data/f1-circuits.geojson` (40 circuits). Circuits that cross themselves, like Suzuka, need bridge support first.
 
@@ -82,6 +82,16 @@ Posts go live at their `date:` (India time, like `2026-10-29 09:00`). Until then
 `Publish blog` GitHub Action (`.github/workflows/publish-blog.yml`) rebuilds and commits every 15 minutes from 8:30am
 to 7:15pm India time, and whenever posts land on `main`, so a post goes live within about 15 minutes of its time. A Claude routine writes each day's four posts at 3:30am following
 `posts/_daily.md`. `node tools/build-blog.mjs --drafts` shows scheduled posts locally; don't commit that build. Post photos come from Wikimedia Commons via `node tools/commons-photo.mjs "File:<title>.jpg" media/blog/<post>.jpg`.
+
+## Circuit pages and search
+
+`content/circuits/<slug>.md` holds each circuit's history and corners; the same build turns them into
+`circuits/<slug>.html` (with the track map drawn from the game's geometry, its medal times and related posts) and the
+`circuits/` index. The build also writes `sitemap.xml`, `sitemap-news.xml` (the last two days' posts) and robots.txt,
+and stops on em or en dashes or on trademarked names (`TRADEMARKS` in `tools/build-blog.mjs`): pages say "the world
+championship" or "Grand Prix racing", and name circuits by their town. After publishing, the Action tells IndexNow
+search engines about new pages with `tools/indexnow.mjs`, using the key file at the site root. `.vercelignore` keeps
+sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `vercel.json` redirects renamed posts.
 
 ## Medals and car colours
 

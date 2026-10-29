@@ -4,11 +4,11 @@ description: On 29 October, Michael Schumacher equalled the record for wins in a
 date: 2026-10-29 12:00
 kind: on-this-day
 image: on-this-day-29-october.jpg
-alt: Max Verstappen's dark blue Red Bull, number 33, on the main straight in Mexico City
+alt: Max Verstappen's dark blue car, number 33, on the main straight in Mexico City
 caption: Max Verstappen in Mexico City on 29 October 2017, the day he won the Mexican Grand Prix.
 credit: [Gobierno CDMX](https://commons.wikimedia.org/wiki/File:F1_2017_-i---i-_%2826299298269%29.jpg), [CC0](https://creativecommons.org/publicdomain/zero/1.0), via Wikimedia Commons
 ---
-A record-equalling win at Suzuka and two Mexican victories for Max Verstappen, one of which settled a championship. Here is what happened in Formula 1 on 29 October.
+A record-equalling win at Suzuka and two Mexican victories for Max Verstappen, one of which settled a championship. Here is what happened in Grand Prix racing on 29 October.
 
 ## 1995: Schumacher equals the record for wins in a season
 
@@ -32,7 +32,7 @@ Hamilton recovered to ninth. With Vettel only fourth, that was enough to make Ha
 
 ## 2023: Verstappen sets a new record
 
-Six years later, Verstappen won in Mexico City again. It was his 16th win of the 2023 season, a new Formula 1 record.
+Six years later, Verstappen won in Mexico City again. It was his 16th win of the 2023 season, a new record for a single season.
 
 Hamilton finished second, 13.875 seconds behind, and Charles Leclerc was third after starting from pole.
 
@@ -40,7 +40,7 @@ The race was stopped with a red flag after Kevin Magnussen crashed heavily at tu
 
 ## Race it on Late Brake
 
-None of today's races were held at a circuit in Late Brake. The free browser game has six real circuits instead: the Red Bull Ring, Monza, Silverstone, Spa-Francorchamps, Monaco and Interlagos. Pick one, race the AI rivals or your own ghost, and chase a gold medal time.
+None of today's races were held at a circuit in Late Brake. The free browser game has six real circuits instead: Spielberg, Monza, Silverstone, Spa-Francorchamps, Monaco and Interlagos. Pick one, race the AI rivals or your own ghost, and chase a gold medal time.
 
 Sources: [1995 Japanese Grand Prix](https://en.wikipedia.org/wiki/1995_Japanese_Grand_Prix),
 [2017 Mexican Grand Prix](https://en.wikipedia.org/wiki/2017_Mexican_Grand_Prix),

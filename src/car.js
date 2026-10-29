@@ -3,7 +3,7 @@
 
 export const DT = 1 / 60;
 
-// Tuned to feel like an F1 car rather than match one exactly: grip grows with
+// Tuned to feel like a formula car rather than match one exactly: grip grows with
 // speed (downforce), so fast corners are flat and slow ones need care.
 export const CAR = {
   length: 5.6,

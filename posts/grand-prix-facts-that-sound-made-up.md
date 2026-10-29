@@ -1,15 +1,15 @@
 ---
-title: Five F1 facts that sound made up, but are true
-description: A Grand Prix that lasted one lap, a race with six cars and India's first points. Five true stories from Formula 1 history.
+title: Five Grand Prix facts that sound made up, but are true
+description: A Grand Prix that lasted one lap, a race with six cars and India's first points. Five true stories from world championship history.
 date: 2026-10-28
 kind: facts
 circuit: be-1925
-image: f1-facts-that-sound-made-up.jpg
+image: grand-prix-facts-that-sound-made-up.jpg
 alt: Crews pushing carts stacked with tyres onto the grid at the 2005 United States Grand Prix
 caption: Tyre carts on the grid at Indianapolis in 2005, the day only six cars raced.
 credit: [Rdsmith4](https://commons.wikimedia.org/wiki/File:Tyre_carts_on_grid_at_USGP_2005.jpg), [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5), via Wikimedia Commons
 ---
-Formula 1 has been racing since 1950, long enough for some genuinely strange things to happen. Here are five that
+The world championship has been running since 1950, long enough for some genuinely strange things to happen. Here are five that
 sound invented.
 
 ## 1. A Grand Prix that lasted one lap
@@ -30,7 +30,7 @@ reached. Only the six cars on Bridgestone tyres took the start.
 
 ## 3. India's first points came from that race
 
-One of those six cars was a Jordan driven by Narain Karthikeyan, India's first Formula 1 driver.
+One of those six cars was a Jordan driven by Narain Karthikeyan, India's first world championship driver.
 
 He started 19th and finished fourth, scoring five points: India's first in the sport.
 

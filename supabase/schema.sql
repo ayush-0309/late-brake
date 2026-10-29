@@ -23,7 +23,7 @@ create table if not exists public.tracks (
   min_time real not null
 );
 insert into public.tracks (id, name, min_time) values
-  ('at-1969', 'Red Bull Ring', 62),
+  ('at-1969', 'Spielberg', 62),
   ('it-1922', 'Monza', 75),
   ('gb-1948', 'Silverstone', 89),
   ('be-1925', 'Spa-Francorchamps', 99),

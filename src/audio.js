@@ -1,4 +1,4 @@
-// Game audio with Web Audio. The engine is a real F1 recording (a loop cut
+// Game audio with Web Audio. The engine is a real racing car recording (a loop cut
 // by tools/make-engine-loops.mjs, pitched with rpm); everything else is
 // synthesized. Continuous layers (engine, tyres, kerbs, grass) follow the car
 // every frame; one-shots (impacts, shifts, beeps, chimes) fire on game events.
