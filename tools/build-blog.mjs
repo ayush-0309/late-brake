@@ -3,8 +3,8 @@
 // (sitemap.xml), robots.txt and the "From the blog" cards on the home page.
 // No dependencies: run `node tools/build-blog.mjs` and commit what it writes.
 // A post goes live at its date and time (India time): until then it's left out
-// of everything, and the publish-blog GitHub Action rebuilds at 9:00, 12:00,
-// 15:00 and 18:00 to put due posts up. `--drafts` builds scheduled posts too,
+// of everything, and the publish-blog GitHub Action rebuilds every 15 minutes
+// through the day to put due posts up. `--drafts` builds scheduled posts too,
 // for a local look only: never commit that build.
 //
 // A post starts with front matter:

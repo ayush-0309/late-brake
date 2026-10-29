@@ -1,15 +1,16 @@
 # Puts scheduled blog posts live. Posts carry their go-live time (see
-# tools/build-blog.mjs); this rebuilds the blog at 9:00, 12:00, 15:00 and 18:00
-# India time, and whenever posts land on main, then commits whatever changed so
-# Vercel deploys it. GitHub can start scheduled runs a few minutes late.
+# tools/build-blog.mjs); this rebuilds the blog every 15 minutes through the
+# day and whenever posts land on main, then commits whatever has become due so
+# Vercel deploys it. GitHub starts scheduled runs late or skips them when it's
+# busy, so checking often means a late run costs minutes, not hours.
 name: Publish blog
 
 on:
   schedule:
-    - cron: '30 3,6,9,12 * * *'   # 09:00, 12:00, 15:00 and 18:00 India time
+    - cron: '*/15 3-13 * * *'   # every 15 minutes, 08:30 to 19:15 India time
   push:
     branches: [main]
-    paths: ['posts/**', 'media/blog/**', 'tools/build-blog.mjs']
+    paths: ['posts/**', 'media/blog/**', 'tools/build-blog.mjs', '.github/workflows/publish-blog.yml']
   workflow_dispatch:
 
 permissions:

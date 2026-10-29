@@ -8,8 +8,8 @@ a person approve each day's posts first, change this line to "Review: pull reque
 
 ## The day's schedule
 
-Each post's `date:` is today's date (India time) plus its slot. The publish-blog GitHub Action puts posts live at
-these times, so a merged post appears at its slot, or straight away if its slot has already passed.
+Each post's `date:` is today's date (India time) plus its slot. The publish-blog GitHub Action checks every 15
+minutes and puts each post live within about 15 minutes of its slot (straight away if the slot has already passed).
 
 | Slot | `date:` | Post |
 |---|---|---|
