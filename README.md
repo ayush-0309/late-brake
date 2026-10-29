@@ -30,6 +30,7 @@ Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no 
 | `src/analytics.js` | Privacy-friendly analytics and error reports (Plausible or GoatCounter), off until configured |
 | `src/config.js` | Switches for production: sponsor email, analytics, ad portal, Supabase |
 | `sponsors.html`, `media/` | Page for advertisers, with screenshots of the ad slots |
+| `itch/` | The itch.io listing: its text (`listing.md`), cover, screenshots and the launcher that opens the game here (not deployed) |
 | `supabase/` | Database setup for the online features: see `supabase/README.md` |
 | `src/line.js` | Racing line (minimum curvature within the track) and speed profile per circuit: throttle / lift / brake zones and braking board positions (no DOM) |
 | `src/render.js` | Canvas drawing: chase or top-down camera, track, cars, ghost, skid marks, minimap, menu previews |

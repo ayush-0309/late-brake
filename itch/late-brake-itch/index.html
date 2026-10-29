@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Late Brake</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,800&display=swap" rel="stylesheet">
+  <style>
+    /* The itch.io page for Late Brake: a launcher that opens the game on latebrake.in. */
+    :root { --bg: #0b0d10; --text: #f3f4f6; --soft: #c3c8d0; --accent: #e8112d; --display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid; place-items: center; padding: 24px; text-align: center; color: var(--text);
+      font: 17px/1.4 system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, rgba(11, 13, 16, .55), rgba(11, 13, 16, .92) 70%), url(bg.jpg) center / cover, var(--bg);
+    }
+    .logo { margin: 0; font-family: var(--display); font-size: clamp(56px, 13vw, 104px); font-weight: 800; font-style: italic; line-height: .9; }
+    .logo span { color: var(--accent); }
+    .tagline { margin: 10px 0 26px; font-family: var(--display); font-size: clamp(20px, 4.5vw, 28px); font-weight: 600; color: var(--soft); }
+    .play {
+      display: inline-block; padding: 16px 44px; border-radius: 12px; background: var(--accent); color: #fff; text-decoration: none;
+      font-family: var(--display); font-size: 28px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      box-shadow: 0 10px 30px rgba(232, 17, 45, .35); transition: transform .15s, box-shadow .15s;
+    }
+    .play:hover, .play:focus-visible { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(232, 17, 45, .5); }
+    .note { margin: 14px 0 0; font-size: 15px; color: var(--soft); }
+    .note a { color: var(--text); }
+    .circuits { margin: 22px 0 0; font-family: var(--display); font-size: 18px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 class="logo">LATE<span>BRAKE</span></h1>
+    <p class="tagline">Six real circuits at true scale. Brake late, chase the perfect lap.</p>
+    <a class="play" href="https://www.latebrake.in/play.html?utm_source=itch.io&amp;utm_medium=launcher" target="_blank" rel="noopener">Play now</a>
+    <p class="note">Opens <a href="https://www.latebrake.in/?utm_source=itch.io&amp;utm_medium=launcher" target="_blank" rel="noopener">latebrake.in</a> in a new tab. Free, no download.</p>
+    <p class="circuits">Monza · Spa · Silverstone · Monaco · Interlagos · Spielberg</p>
+  </main>
+</body>
+</html>
