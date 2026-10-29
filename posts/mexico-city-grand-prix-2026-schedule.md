@@ -1,6 +1,6 @@
 ---
-title: Mexico City Grand Prix 2026: race time in India and full schedule
-description: The Mexico City Grand Prix starts at 1:30am on Monday in India. Here is every session in India time, and why Kimi Antonelli could be crowned champion.
+title: "F1 Mexico City Grand Prix 2026: race time in India and full schedule"
+description: The F1 Mexico City Grand Prix starts at 1:30am on Monday in India. Here is every session in India time, and why Kimi Antonelli could be crowned champion.
 date: 2026-10-29 09:30
 kind: news
 circuit: br-1940
@@ -28,7 +28,7 @@ Saturday, and the race starts at 2pm on Sunday.
 ## What's at stake
 
 Kimi Antonelli arrives with a lead of 123 points over George Russell and 124 over Lewis Hamilton, with five rounds
-left. Two points on Sunday are enough to make the 20-year-old the youngest world champion in the sport's history.
+left. Two points on Sunday are enough to make the 20-year-old the youngest world champion in Formula 1 history.
 
 ## The circuit
 

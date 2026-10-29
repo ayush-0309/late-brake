@@ -88,8 +88,9 @@ to 7:15pm India time, and whenever posts land on `main`, so a post goes live wit
 `content/circuits/<slug>.md` holds each circuit's history and corners; the same build turns them into
 `circuits/<slug>.html` (with the track map drawn from the game's geometry, its medal times and related posts) and the
 `circuits/` index. The build also writes `sitemap.xml`, `sitemap-news.xml` (the last two days' posts) and robots.txt,
-and stops on em or en dashes or on trademarked names (`TRADEMARKS` in `tools/build-blog.mjs`): pages say "the world
-championship" or "Grand Prix racing", and name circuits by their town. After publishing, the Action tells IndexNow
+and stops on em or en dashes, or on trademarked names (`TRADEMARKS` in `tools/build-blog.mjs`) anywhere in the game:
+its code, its pages and the circuit pages say "the world championship" or "Grand Prix racing", and name circuits by
+their town. Blog posts are news and history, so they say F1 and Formula 1. After publishing, the Action tells IndexNow
 search engines about new pages with `tools/indexnow.mjs`, using the key file at the site root. `.vercelignore` keeps
 sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `vercel.json` redirects renamed posts.
 

@@ -24,8 +24,9 @@
 // then Markdown: ## and ### headings, paragraphs, - and 1. lists, > quotes,
 // ---, **bold**, *italic*, `code` and [links](https://…). Files whose names
 // start with _ (like _guide.md) aren't posts. Em and en dashes stop the build
-// (use commas, colons, brackets or "to"), and so do trademarked names outside
-// link addresses (see TRADEMARKS).
+// (use commas, colons, brackets or "to"). Posts may say F1 and Formula 1, but
+// the game may not: trademarked names in the circuit pages, the site's own
+// pages or the game's code stop the build too (see TRADEMARKS).
 
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
 import { TRACKS, buildTrack } from '../src/track.js';
@@ -37,12 +38,21 @@ const HOME_POSTS = 3;
 // Kinds of post, in the order same-day posts are listed.
 const KINDS = { news: 'News', 'on-this-day': 'On this day', history: 'History', facts: 'Fun facts' };
 const kindOrder = (p) => Object.keys(KINDS).indexOf(p.kind);
-// Words the site doesn't use: the championship's own marks and branded circuit
-// names. Say "the world championship", "Grand Prix racing" or the town instead.
+// The championship's own marks and branded circuit names. Blog posts are news
+// and history, so they use them; the game is what earns money, so it never
+// does: not in its code, its pages (home, play, the shop's policy pages) or the
+// circuit pages that lead into it. Cards linking to posts are the posts' words.
 const TRADEMARKS = /\bF1\b|\bFormula[ -]?(1|One)\b|\bRed Bull Ring\b/i;
+const GAME = [...PAGES.map((p) => p === '/' ? 'index.html' : p.slice(1)), '404.html', 'manifest.webmanifest',
+  ...readdirSync(new URL('src/', ROOT)).filter((f) => f.endsWith('.js')).map((f) => `src/${f}`)];
 const NEWS_HOURS = 48; // how far back sitemap-news.xml looks
 
 const DRAFTS = process.argv.includes('--drafts');
+for (const f of GAME) {
+  const text = readFileSync(new URL(f, ROOT), 'utf8');
+  // The home page's blog cards are left out, keeping line numbers.
+  noTrademarks(f, f === 'index.html' ? text.replace(/<!-- blog:start -->[\s\S]*<!-- blog:end -->/, (s) => s.replace(/[^\n]/g, '')) : text);
+}
 // Every post is read (so a bad one fails now, not at its publish time); only due ones are built.
 const all = readdirSync(new URL('posts/', ROOT))
   .filter((f) => f.endsWith('.md') && !f.startsWith('_'))
@@ -75,7 +85,7 @@ if (DRAFTS) console.log('Scheduled posts are included: this build is for a local
 
 // ---------- reading ----------
 
-// Front matter and body of a Markdown file, after the dash and trademark checks.
+// Front matter and body of a Markdown file, after the dash check.
 function readMarkdown(path) {
   const text = readFileSync(new URL(path, ROOT), 'utf8');
   const m = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
@@ -83,9 +93,6 @@ function readMarkdown(path) {
   const lines = text.split('\n');
   const dash = lines.findIndex((line) => /[\u2013\u2014]/.test(line));
   if (dash >= 0) throw new Error(`${path}:${dash + 1}: em or en dash; use a comma, colon, brackets or "to"`);
-  // Link addresses can't be reworded, so only the words around them count.
-  const mark = lines.findIndex((line) => TRADEMARKS.test(line.replace(/\]\([^)]*\)/g, ']').replace(/https?:\/\/\S+/g, '')));
-  if (mark >= 0) throw new Error(`${path}:${mark + 1}: trademarked name "${lines[mark].match(TRADEMARKS)[0]}"; say "the world championship", "Grand Prix racing" or the town instead`);
   const meta = Object.fromEntries(m[1].split('\n').filter(Boolean).map((line) => {
     const i = line.indexOf(':');
     return [line.slice(0, i).trim(), line.slice(i + 1).trim().replace(/^(["'])(.*)\1$/, '$2')];
@@ -93,7 +100,17 @@ function readMarkdown(path) {
   return { meta, body: m[2] };
 }
 
+// Stops the build at the first trademarked name in a game file. Link addresses
+// can't be reworded, so only the words around them count.
+function noTrademarks(path, text) {
+  const words = (line) => line.replace(/\]\([^)]*\)/g, ']').replace(/https?:\/\/[^\s"'<>)]+/g, '');
+  const lines = text.split('\n');
+  const i = lines.findIndex((line) => TRADEMARKS.test(words(line)));
+  if (i >= 0) throw new Error(`${path}:${i + 1}: trademarked name "${words(lines[i]).match(TRADEMARKS)[0]}" in the game; say "the world championship", "Grand Prix racing" or the town instead`);
+}
+
 function readCircuit(file) {
+  noTrademarks(`content/circuits/${file}`, readFileSync(new URL(`content/circuits/${file}`, ROOT), 'utf8'));
   const { meta, body } = readMarkdown(`content/circuits/${file}`);
   for (const key of ['id', 'title', 'description', 'place', 'country_code', 'direction']) if (!meta[key]) throw new Error(`${file}: no ${key}`);
   const def = TRACKS.find((t) => t.id === meta.id);
@@ -327,13 +344,13 @@ ${p.image ? `          <img src="../media/blog/${p.image.file}" alt="" width="${
         </a>
       </li>`).join('\n');
   return page({
-    title: 'Grand Prix news, history and fun facts · Late Brake', type: 'website', url: `${SITE}/blog/`,
-    description: 'Grand Prix racing news, history, fun facts and what happened on this day, with every circuit we cover one click away in a free racing game.',
+    title: 'F1 news, history and fun facts · Late Brake', type: 'website', url: `${SITE}/blog/`,
+    description: 'Formula 1 news, race weekend times in India, history, fun facts and what happened on this day in F1.',
     head: `<link rel="alternate" type="application/rss+xml" title="Late Brake blog" href="feed.xml">`,
     body: `
   <main class="wrap">
     <h1>Blog</h1>
-    <p class="lead">Grand Prix racing news, history, fun facts and what happened on this day. When we write about a circuit that's in the game, it's one click away.</p>
+    <p class="lead">Formula 1 news, history, fun facts and what happened on this day. When we write about a circuit that's in the game, it's one click away.</p>
     <ul class="post-list">
 ${cards || '      <li>The first posts are on their way.</li>'}
     </ul>
@@ -419,7 +436,7 @@ function feed(list) {
   <channel>
     <title>Late Brake blog</title>
     <link>${SITE}/blog/</link>
-    <description>Grand Prix racing news, history, fun facts and what happened on this day.</description>
+    <description>Formula 1 news, history, fun facts and what happened on this day.</description>
     <language>en</language>
 ${items}
   </channel>

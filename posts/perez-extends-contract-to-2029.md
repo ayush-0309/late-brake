@@ -1,23 +1,23 @@
 ---
-title: Perez signs contract extension to race on until 2029
-description: Sergio Perez has extended his contract until at least 2029, days before his 300th Grand Prix start at his home race in Mexico.
+title: Perez signs new Cadillac deal to stay until 2029
+description: Sergio Perez has extended his contract with Cadillac until at least 2029, days before his 300th Grand Prix start at his home race in Mexico.
 date: 2026-10-29 09:00
 kind: news
 circuit: it-1922
 image: perez-extends-contract-to-2029.jpg
-alt: Sergio Perez driving his white and black car on track at Monza
+alt: Sergio Perez driving his white and black Cadillac on track at Monza
 caption: Sergio Perez in qualifying for the 2026 Italian Grand Prix at Monza.
 credit: [Eustace Bagge](https://commons.wikimedia.org/wiki/File:Sergio_Perez_2026_Italian_Grand_Prix_qualifying.jpg), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0), via Wikimedia Commons
 ---
-Sergio Perez will stay with Cadillac until at least 2029 after signing a contract extension with the championship's newest team.
+Sergio Perez will stay with Cadillac until at least 2029 after signing a contract extension with Formula 1's newest team.
 
 The deal was announced on the eve of the Mexico City Grand Prix, where the 36-year-old is set to make his 300th Grand Prix start.
 
 ## A longer commitment
 
-Perez joined Cadillac alongside Valtteri Bottas for the team's first season in 2026 after a year out of the sport.
+Perez joined Cadillac alongside Valtteri Bottas for the team's first season in 2026 after a year out of Formula 1.
 
-His new contract now covers the rest of the decade. If he sees it out, 2029 will be his 18th season in the world championship.
+His new contract now covers the rest of the decade. If he sees it out, 2029 will be his 18th season in Formula 1.
 
 ## A difficult first year
 
@@ -25,7 +25,7 @@ Cadillac has found the going hard in its debut season. With five rounds left, ne
 
 ## A long career
 
-Perez made his debut with Sauber at the 2011 Australian Grand Prix. He has won six Grands Prix.
+Perez made his Formula 1 debut with Sauber at the 2011 Australian Grand Prix. He has won six Grands Prix.
 
 The first came for Racing Point at the 2020 Sakhir Grand Prix. The other five came for Red Bull: Azerbaijan in 2021, Monaco and Singapore in 2022, and Saudi Arabia and Azerbaijan in 2023.
 

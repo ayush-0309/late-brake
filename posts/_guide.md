@@ -5,7 +5,7 @@ Change it to change what gets written: it's the one place the blog's style lives
 
 ## Who we're writing for
 
-Grand Prix racing fans, many of them in India, from casual race-day viewers to people who know every corner name. Most find us
+F1 fans, many of them in India, from casual race-day viewers to people who know every corner name. Most find us
 through Google or a shared link. Give them something worth reading first; then, where it fits naturally, invite them
 to drive the circuits themselves.
 
@@ -15,7 +15,7 @@ Four kinds of post. Every day should have some news, plus one of the other three
 
 1. **News updates.** One story per post, plus a schedule post in race weeks (see `posts/_daily.md`): race, sprint and qualifying results, title fights, confirmed team and driver
    announcements, rule and calendar changes. 300 to 600 words.
-2. **On this day.** Two or three things that happened in Grand Prix racing on today's date in past years: wins, titles, debuts,
+2. **On this day.** Two or three things that happened in F1 on today's date in past years: wins, titles, debuts,
    famous moments. 300 to 500 words.
 3. **History.** One story from the past told properly: a famous race, a forgotten team, a circuit that's gone, a rivalry.
    400 to 700 words. Stories with an Indian angle (Narain Karthikeyan, Karun Chandhok, Force India, the Indian Grand Prix)
@@ -78,12 +78,12 @@ Write like the top sports news sites (BBC Sport, Autosport, The Race): the news 
 - **Photos only from Wikimedia Commons**, under CC BY, CC BY-SA, CC0 or public domain, and always credited (see
   below). Never photos from news sites, agencies, teams or the championship itself, never photos of TV screens, and never satellite
   or map images.
-- **No trademarked names, anywhere on the page.** Never write the championship's own name or its short form, or a
-  circuit's sponsored name. Say "the world championship", "Grand Prix racing" or "the sport", and name circuits by their
-  town: Spielberg, not the name on the gate. In titles, descriptions, alt text and captions, also leave out team,
-  sponsor and company names where plain words work ("his car", "the sport's governing body"); in the story itself,
-  name a team or company only to report a fact. Link labels follow the same rule (`[the championship's official
-  site](https://…)`), though the link address itself can be anything. The build stops if it finds one of these names.
+- **Say F1 and Formula 1 in posts, never about the game.** In the story, titles, descriptions, alt text and captions,
+  use "F1", "Formula 1", team, sponsor and circuit names as the news does: they're what readers search for, and
+  "F1" in a title helps. The game is different, because it's what earns money: the "Race it on Late Brake" section
+  names circuits the way the game does (Spielberg, not the name on the gate) and never puts the championship's name
+  beside Late Brake (not "race F1 circuits on Late Brake", but "six real circuits in Late Brake"). The game itself,
+  its pages and the circuit pages in `content/circuits/` never use these names, and the build stops if they do.
 - **Never suggest Late Brake is official or endorsed** by any series, team or circuit.
 
 ## Photos
