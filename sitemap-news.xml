@@ -40,36 +40,4 @@
       <news:title>Perez signs new Cadillac deal to stay until 2029</news:title>
     </news:news>
   </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/antonelli-wins-austin-title-in-mexico.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-28T00:00:00+05:30</news:publication_date>
-      <news:title>Antonelli wins US Grand Prix to move two points from the title</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-28-october.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-28T00:00:00+05:30</news:publication_date>
-      <news:title>On this day: Vettel wins in India, Hamilton crowned in Mexico</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/indian-grand-prix-rise-and-fall.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-28T00:00:00+05:30</news:publication_date>
-      <news:title>The rise and fall of the Indian Grand Prix</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/grand-prix-facts-that-sound-made-up.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-28T00:00:00+05:30</news:publication_date>
-      <news:title>Five F1 facts that sound made up, but are true</news:title>
-    </news:news>
-  </url>
 </urlset>
