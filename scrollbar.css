@@ -1,0 +1,27 @@
+/* The page scrollbar as a strip of track: asphalt between red and white kerbs,
+   with a race car for the thumb that drives down the page as you scroll.
+   Chrome, Edge and Safari draw it; Firefox only takes colours, so it gets a red
+   thumb on asphalt. Phones hide scrollbars while you scroll, so nothing changes
+   there. Only the page's own scrollbar is styled, never ones inside the page.
+   Linked from the site's pages (pages.css imports it), not from the game. */
+
+html::-webkit-scrollbar { width: 16px; }
+
+html::-webkit-scrollbar-track {
+  background:
+    repeating-linear-gradient(180deg, #e8112d 0 10px, #f3f4f6 10px 20px) left / 2px 100% no-repeat,
+    repeating-linear-gradient(180deg, #e8112d 0 10px, #f3f4f6 10px 20px) right / 2px 100% no-repeat,
+    #2a2d33;
+}
+
+/* The thumb itself is see-through: only the car shows, in its middle, nose down. */
+html::-webkit-scrollbar-thumb {
+  min-height: 44px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 62'%3E%3Crect x='3' y='1' width='18' height='4' rx='1' fill='%23e8112d'/%3E%3Crect x='7' y='4' width='10' height='3' fill='%230b0d10'/%3E%3Crect x='0' y='8' width='5' height='12' rx='2' fill='%230b0d10'/%3E%3Crect x='19' y='8' width='5' height='12' rx='2' fill='%230b0d10'/%3E%3Cpath d='M9 6h6l4 8v14l-4 6-1.5 23h-3L9 34l-4-6V14z' fill='%23e8112d'/%3E%3Crect x='1' y='39' width='5' height='10' rx='2' fill='%230b0d10'/%3E%3Crect x='18' y='39' width='5' height='10' rx='2' fill='%230b0d10'/%3E%3Cpath d='M6 43h12' stroke='%230b0d10' stroke-width='1.2'/%3E%3Crect x='2' y='56' width='20' height='4' rx='1' fill='%23e8112d'/%3E%3Cellipse cx='12' cy='24' rx='2.6' ry='4.2' fill='%230b0d10'/%3E%3Ccircle cx='12' cy='25' r='1.7' fill='%23ffd23f'/%3E%3Cpath d='M12 34v22' stroke='%23f3f4f6' stroke-width='1'/%3E%3C/svg%3E") center / 12px auto no-repeat;
+}
+
+html::-webkit-scrollbar-corner { background: #2a2d33; }
+
+@supports (-moz-appearance: none) {
+  html { scrollbar-color: #e8112d #2a2d33; }
+}

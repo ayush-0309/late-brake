@@ -1,5 +1,7 @@
 /* The plain text pages: terms, privacy, refunds and contact. Headings use
    the game's condensed face; long text is set in the system face to read easily. */
+@import url(scrollbar.css);
+
 :root {
   --bg: #0b0d10; --surface: #14171c; --line: rgba(255, 255, 255, .09); --line-2: rgba(255, 255, 255, .16);
   --text: #f3f4f6; --soft: #c3c8d0; --muted: #8f96a2; --accent: #e8112d;
