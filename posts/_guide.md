@@ -111,7 +111,8 @@ CC0 or public domain only.
    node tools/commons-photo.mjs "File:<exact title>.jpg" media/blog/<post file name>.jpg
    ```
 
-   If it fails, try another photo; if none works, publish the post without one.
+   It saves three sizes (`<post>.jpg`, `<post>-960.jpg` and `<post>-500.jpg`); commit all three, so phones
+   load the small ones. If it fails, try another photo; if none works, publish the post without one.
 
 Then add to the front matter (the credit links to the photo's Commons page, `https://commons.wikimedia.org/wiki/File:…`
 with spaces as underscores):

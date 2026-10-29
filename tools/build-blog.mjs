@@ -16,7 +16,8 @@
 //   date: 2026-10-29 09:00   (India time; a date alone means midnight)
 //   kind: news           (news, on-this-day, history or facts)
 //   circuit: br-1940     (optional: the game circuit the post's button opens)
-//   image: <slug>.jpg    (optional: a JPEG in media/blog/, with alt, caption and credit)
+//   image: <slug>.jpg    (optional: a JPEG in media/blog/, with alt, caption and credit;
+//                        its -960 and -500 copies are used too when they're there)
 //   alt: What the photo shows, for screen readers.
 //   caption: One line under the photo.
 //   credit: [Author](https://commons.wikimedia.org/…), CC BY 4.0
@@ -28,13 +29,17 @@
 // the game may not: trademarked names in the circuit pages, the site's own
 // pages or the game's code stop the build too (see TRADEMARKS).
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { TRACKS, buildTrack } from '../src/track.js';
 
 const ROOT = new URL('../', import.meta.url);
 const SITE = 'https://www.latebrake.in';
-const PAGES = ['/', '/play.html', '/sponsors.html', '/terms.html', '/privacy.html', '/refunds.html', '/contact.html'];
+const PAGES = ['/', '/play.html', '/about.html', '/sponsors.html', '/terms.html', '/privacy.html', '/refunds.html', '/contact.html'];
 const HOME_POSTS = 3;
+// Who posts are credited to. about.html says who that is and how posts are written.
+const AUTHOR = { name: 'Ayush Garg', url: `${SITE}/about.html` };
+// Smaller copies of post photos (tools/commons-photo.mjs saves them), for phones and cards.
+const PHOTO_WIDTHS = [500, 960];
 // Kinds of post, in the order same-day posts are listed.
 const KINDS = { news: 'News', 'on-this-day': 'On this day', history: 'History', facts: 'Fun facts' };
 const kindOrder = (p) => Object.keys(KINDS).indexOf(p.kind);
@@ -132,7 +137,8 @@ function readPost(file) {
   if (meta.image) {
     for (const key of ['alt', 'credit']) if (!meta[key]) throw new Error(`${file}: an image needs ${key}`);
     const size = jpegSize(readFileSync(new URL(`media/blog/${meta.image}`, ROOT)));
-    image = { file: meta.image, ...size, alt: meta.alt, caption: meta.caption || '', credit: meta.credit };
+    const widths = PHOTO_WIDTHS.filter((w) => existsSync(new URL(`media/blog/${sized(meta.image, w)}`, ROOT)));
+    image = { file: meta.image, ...size, widths, alt: meta.alt, caption: meta.caption || '', credit: meta.credit };
   }
   const words = source.split(/\s+/).filter(Boolean).length;
   return { ...meta, day: when[1], iso, at: Date.parse(iso), slug: file.replace(/\.md$/, ''), track, image, body: markdown(source), minutes: Math.max(1, Math.round(words / 220)) };
@@ -189,7 +195,7 @@ function postPage(p) {
       {
         '@type': 'BlogPosting',
         headline: p.title, description: p.description, datePublished: p.iso, dateModified: p.iso,
-        author: { '@type': 'Organization', name: 'Late Brake', url: SITE },
+        author: { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url },
         publisher: { '@type': 'Organization', name: 'Late Brake', logo: { '@type': 'ImageObject', url: `${SITE}/icon-512.png` } },
         image: shareImage(p), mainEntityOfPage: url,
       },
@@ -205,10 +211,12 @@ function postPage(p) {
       <p class="meta"><a href="./">Blog</a> · ${KINDS[p.kind]} · <time datetime="${p.iso}">${longDate(p.day)}</time> · ${p.minutes} min read</p>
       <h1>${esc(p.title)}</h1>
       <p class="lead">${esc(p.description)}</p>
+      <p class="byline">By <a href="../about.html" rel="author">${AUTHOR.name}</a></p>
 ${figure(p.image)}
       <div class="post-body">
 ${p.body}
       </div>
+      <p class="how">Researched and written with the help of AI, using the sources above. <a href="../about.html#how-posts-are-written">How we write posts</a></p>
     </article>
 ${drive(p.track)}
   </main>`,
@@ -338,7 +346,7 @@ function lapTime(s) {
 function indexPage(list) {
   const cards = list.map((p) => `      <li>
         <a class="post-card${p.image ? ' has-image' : ''}" href="${p.slug}.html">
-${p.image ? `          <img src="../media/blog/${p.image.file}" alt="" width="${p.image.w}" height="${p.image.h}" loading="lazy">\n` : ''}          <span class="meta">${KINDS[p.kind]} · <time datetime="${p.iso}">${longDate(p.day)}</time></span>
+${p.image ? `          ${photo(p.image, '../media/blog/', '(max-width: 600px) calc(100vw - 82px), 220px')}\n` : ''}          <span class="meta">${KINDS[p.kind]} · <time datetime="${p.iso}">${longDate(p.day)}</time></span>
           <strong>${esc(p.title)}</strong>
           <span>${esc(p.description)}</span>
         </a>
@@ -410,6 +418,7 @@ ${body}
       <nav aria-label="Site">
         <a href="../circuits/">Circuits</a>
         <a href="../blog/">Blog</a>
+        <a href="../about.html">About</a>
         <a href="../terms.html">Terms</a>
         <a href="../privacy.html">Privacy</a>
         <a href="../contact.html">Contact</a>
@@ -486,7 +495,7 @@ function updateHome(latest) {
       <h2 id="blogTitle">From the blog</h2>
       <div class="grid">
 ${latest.map((p) => `        <a class="card post" href="blog/${p.slug}.html">
-${p.image ? `          <img src="media/blog/${p.image.file}" alt="" width="${p.image.w}" height="${p.image.h}" loading="lazy">\n` : ''}          <span class="post-date">${KINDS[p.kind]} · ${longDate(p.day)}</span>
+${p.image ? `          ${photo(p.image, 'media/blog/', '(max-width: 651px) calc(100vw - 40px), (max-width: 963px) calc(50vw - 26px), 340px')}\n` : ''}          <span class="post-date">${KINDS[p.kind]} · ${longDate(p.day)}</span>
           <h3>${esc(p.title)}</h3>
           <p>${esc(p.description)}</p>
         </a>`).join('\n')}
@@ -503,9 +512,21 @@ ${p.image ? `          <img src="media/blog/${p.image.file}" alt="" width="${p.i
 function figure(image) {
   if (!image) return '';
   return `      <figure class="hero-photo">
-        <img src="../media/blog/${image.file}" alt="${esc(image.alt)}" width="${image.w}" height="${image.h}">
+        ${photo(image, '../media/blog/', '(max-width: 760px) calc(100vw - 40px), 720px', { alt: image.alt, lazy: false })}
         <figcaption>${image.caption ? `${inline(image.caption)} ` : ''}<span class="credit">Photo: ${inline(image.credit)}</span></figcaption>
       </figure>`;
+}
+
+// A post photo with its smaller copies, so each browser loads the smallest one
+// that fills `sizes` (the width it's shown at) on its screen.
+function photo(image, dir, sizes, { alt = '', lazy = true } = {}) {
+  const set = [...image.widths.map((w) => `${dir}${sized(image.file, w)} ${w}w`), `${dir}${image.file} ${image.w}w`];
+  return `<img src="${dir}${image.file}"${image.widths.length ? ` srcset="${set.join(', ')}" sizes="${sizes}"` : ''} alt="${esc(alt)}" width="${image.w}" height="${image.h}"${lazy ? ' loading="lazy"' : ''}>`;
+}
+
+// The name of a photo's smaller copy: antonelli.jpg at 500px is antonelli-500.jpg.
+function sized(file, width) {
+  return file.replace(/\.jpg$/, `-${width}.jpg`);
 }
 
 // Home › section › page, for search results.

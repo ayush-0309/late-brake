@@ -49,6 +49,10 @@ footer a[aria-current="page"] { color: var(--text); text-decoration-color: var(-
 .nav-links > a:not(.nav-play):hover { color: var(--text); }
 .meta { color: var(--muted); font-size: 15px; margin-bottom: 12px; }
 .meta a { color: var(--soft); }
+.byline { color: var(--muted); font-size: 15px; margin: -4px 0 20px; }
+.byline a { color: var(--soft); }
+.how { color: var(--muted); font-size: 14px; margin: 26px 0 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.how a { color: var(--soft); }
 .kicker { font-family: var(--display); font-size: 15px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #ff2d48; margin: 0 0 4px; }
 .post-body h2 { font-size: 30px; }
 .post-body blockquote { margin: 0 0 14px; padding: 4px 0 4px 18px; border-left: 3px solid var(--accent); color: var(--text); }
