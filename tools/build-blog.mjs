@@ -392,6 +392,7 @@ function page({ title, description, url, type, head, body, image = null }) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;1,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../pages.css">
+  <script src="../scrollbar.js" defer></script>
   ${head}
   <!-- Microsoft Clarity: heatmaps and session recordings -->
   <script type="text/javascript">
