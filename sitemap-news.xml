@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/mexican-grand-prix-facts.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-30T18:00:00+05:30</news:publication_date>
+      <news:title>Six F1 Mexican Grand Prix facts that sound made up</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/perez-300th-start-home-race-mexico.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-30T15:00:00+05:30</news:publication_date>
+      <news:title>Perez to start his 300th F1 race at home in Mexico</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-30-october.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
