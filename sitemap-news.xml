@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-30-october.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-30T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: India&#39;s first Grand Prix and two Mexico wins</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/alonso-rivals-reject-driving-standards-claim.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-30T09:00:00+05:30</news:publication_date>
+      <news:title>F1 rivals reject Alonso&#39;s claim on driving standards</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/surtees-1964-mexico-title-decider.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
