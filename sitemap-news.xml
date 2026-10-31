@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/force-india-spa-2009-pole-and-podium.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-31T18:00:00+05:30</news:publication_date>
+      <news:title>How Force India took pole and nearly won at Spa in 2009</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/beat-zehnder-to-leave-audi.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-31T15:00:00+05:30</news:publication_date>
+      <news:title>Sauber stalwart Beat Zehnder to leave Audi F1 team after 2026</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-31-october.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -46,22 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-10-30T09:00:00+05:30</news:publication_date>
       <news:title>F1 rivals reject Alonso&#39;s claim on driving standards</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/surtees-1964-mexico-title-decider.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-29T18:00:00+05:30</news:publication_date>
-      <news:title>How John Surtees won the 1964 title on the last lap in Mexico</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/ai-to-help-write-future-racing-rules.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-29T15:00:00+05:30</news:publication_date>
-      <news:title>FIA turns to Amazon&#39;s AI to help write future F1 rules</news:title>
     </news:news>
   </url>
 </urlset>
