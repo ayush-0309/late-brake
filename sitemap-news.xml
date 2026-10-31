@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-31-october.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-31T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Häkkinen&#39;s second title, Bell and Buemi born</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/leclerc-tops-mexico-practice.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-10-31T09:00:00+05:30</news:publication_date>
+      <news:title>Leclerc tops both Mexico practice sessions as Antonelli eyes title</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/mexican-grand-prix-facts.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -46,30 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-10-29T15:00:00+05:30</news:publication_date>
       <news:title>FIA turns to Amazon&#39;s AI to help write future F1 rules</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-29-october.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-29T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Schumacher equals record, Hamilton takes fourth title</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/mexico-city-grand-prix-2026-schedule.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-29T09:30:00+05:30</news:publication_date>
-      <news:title>F1 Mexico City Grand Prix 2026: race time in India and full schedule</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/perez-extends-contract-to-2029.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-29T09:00:00+05:30</news:publication_date>
-      <news:title>Perez signs new Cadillac deal to stay until 2029</news:title>
     </news:news>
   </url>
 </urlset>
