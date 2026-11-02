@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/leclerc-penalty-splits-ferrari-in-mexico.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-02T15:00:00+05:30</news:publication_date>
+      <news:title>Stewards explain lighter Leclerc penalty that angered Hamilton</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-2-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-02T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Hamilton&#39;s first title and his Austin win streak</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://www.latebrake.in/blog/antonelli-youngest-champion-verstappen-wins-mexico.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-02T09:00:00+05:30</news:publication_date>
+      <news:title>Antonelli becomes youngest F1 champion as Verstappen wins in Mexico</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/interlagos-facts-that-sound-made-up.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -38,30 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-10-31T18:00:00+05:30</news:publication_date>
       <news:title>How Force India took pole and nearly won at Spa in 2009</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/beat-zehnder-to-leave-audi.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-31T15:00:00+05:30</news:publication_date>
-      <news:title>Sauber stalwart Beat Zehnder to leave Audi F1 team after 2026</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-31-october.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-31T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Häkkinen&#39;s second title, Bell and Buemi born</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/leclerc-tops-mexico-practice.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-10-31T09:00:00+05:30</news:publication_date>
-      <news:title>Leclerc tops both Mexico practice sessions as Antonelli eyes title</news:title>
     </news:news>
   </url>
 </urlset>
