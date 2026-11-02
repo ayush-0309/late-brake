@@ -1,14 +1,15 @@
 // Car colour purchases with Dodo Payments (see supabase/README.md, "Selling
 // car colours"). The game calls it as the signed-in player:
-//   { action: 'checkout', colour, returnUrl }   starts a Dodo checkout session
-//   { action: 'status', sessionId }             asks Dodo whether it was paid
+//   { action: 'checkout', colour, currency, returnUrl }  starts a Dodo checkout session in that currency
+//   { action: 'status', sessionId }                      asks Dodo whether it was paid
 // Dodo's webhook calls it too: payment.succeeded, so a payment counts even
 // when the player closed the page before the game could check, and
 // refund.succeeded, which takes a refunded colour back.
 //
 // Secrets: DODO_API_KEY, DODO_WEBHOOK_SECRET (whsec_…), DODO_MODE ('test' or
 // 'live') and DODO_PRODUCTS, a JSON map of colour to Dodo product id, e.g.
-// {"green":"pdt_…","pearl":"pdt_…"}. Prices are set on those products.
+// {"green":"pdt_…","pearl":"pdt_…"}. Prices are set on those products, one
+// per currency (tools/dodo-products.mjs), and need Dodo's Adaptive Currency on.
 // Deploy with JWT verification off (the webhook has no Supabase token); the
 // game's calls are checked here instead.
 
@@ -45,12 +46,12 @@ Deno.serve(async (req) => {
   if (user.is_anonymous) return reply({ error: 'Continue with Google first, so the colour stays yours' }, 403);
 
   const body = await req.json().catch(() => ({}));
-  if (body.action === 'checkout') return checkout(user, body.colour, body.returnUrl);
+  if (body.action === 'checkout') return checkout(user, body.colour, body.currency, body.returnUrl);
   if (body.action === 'status') return status(user.id, body.sessionId);
   return reply({ error: 'Unknown action' }, 400);
 });
 
-async function checkout(user: { id: string; email?: string }, colour: string, returnUrl: string) {
+async function checkout(user: { id: string; email?: string }, colour: string, currency: string, returnUrl: string) {
   const product = PRODUCTS[colour];
   if (!product) return reply({ error: "That colour isn't for sale" }, 400);
   const { data: owned } = await db.from('purchases').select('id')
@@ -63,6 +64,8 @@ async function checkout(user: { id: string; email?: string }, colour: string, re
     body: JSON.stringify({
       product_cart: [{ product_id: product, quantity: 1 }],
       customer: user.email ? { email: user.email } : undefined,
+      // The currency the game showed the price in; without one, Dodo goes by the billing country.
+      billing_currency: /^[A-Z]{3}$/.test(String(currency)) ? currency : undefined,
       return_url: back,
       metadata: { user_id: user.id, colour },
     }),

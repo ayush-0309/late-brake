@@ -26,5 +26,5 @@ export const CONFIG = {
   // Selling car colours with Dodo Payments (needs the shop Edge Function,
   // see supabase/README.md). Off until that's set up; ?online=mock turns on
   // a pretend shop for trying it locally.
-  shop: false,
+  shop: true,
 };

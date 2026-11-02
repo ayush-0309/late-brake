@@ -7,7 +7,7 @@ import { getOnline, onlineEnabled } from './online.js';
 import { formatTime } from './storage.js';
 import { track } from './analytics.js';
 import { CONFIG } from './config.js';
-import { buyColour, resumeCheckout } from './shop.js';
+import { buyColour, resumeCheckout, PAYMENT_FAILED } from './shop.js';
 import { COLOURS } from './medals.js';
 
 // `game`: { tracks, selected(), select(track), startRun(opts), toast(...), ownedChanged() }
@@ -69,10 +69,12 @@ export function createOnlineUI(game) {
     game.ownedChanged();
   }
 
-  // A purchase a reload interrupted, now paid: say so and add it.
+  // Back from the checkout, or a reload cut it short: add the colour if it's
+  // paid, and say what happened either way.
   async function finishCheckout() {
-    const id = await resumeCheckout(online);
-    const colour = COLOURS.find((c) => c.id === id);
+    const result = await resumeCheckout(online);
+    if (result?.status === 'failed') game.toast('Car colour', 'Payment failed', PAYMENT_FAILED, '');
+    const colour = result?.paid && COLOURS.find((c) => c.id === result.colour);
     if (!colour) return;
     owned = new Set([...owned, colour.id]);
     game.ownedChanged();
@@ -82,10 +84,10 @@ export function createOnlineUI(game) {
   const shopOpen = () => !!online && (CONFIG.shop || !!online.mock);
 
   // Buying a colour (shop.js takes the payment): true once it's the player's.
-  async function buy(colour) {
-    if (!(await buyColour(online, colour))) return false;
+  async function buy(colour, currency) {
+    if (!(await buyColour(online, colour, currency))) return false;
     owned = new Set([...owned, colour.id]);
-    track('Buy colour', { colour: colour.name });
+    track('Buy colour', { colour: colour.name, currency });
     game.ownedChanged();
     return true;
   }

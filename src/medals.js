@@ -9,17 +9,17 @@ export const MEDALS = ['Bronze', 'Silver', 'Gold'];
 
 // Car colours, unlocked by medals across all circuits or bought outright.
 // A gold counts as three medals (it beats the silver and bronze times too),
-// so 18 is every circuit on gold. `price` is in rupees, as shown in the
-// game; what's charged is the price on each colour's Dodo Payments product,
-// so keep the two in step.
+// so 18 is every circuit on gold. `usd` is the list price in US dollars;
+// other currencies pay a share of it (src/prices.js, made from it by
+// tools/make-prices.mjs).
 export const COLOURS = [
-  { id: 'red', name: 'Late Brake Red', paint: '#e8112d', needs: 0, price: 0 },
-  { id: 'green', name: 'Racing Green', paint: '#0f7a45', needs: 2, price: 99 },
-  { id: 'pearl', name: 'Pearl', paint: '#eef0f2', needs: 4, price: 149 },
-  { id: 'purple', name: 'Purple Sector', paint: '#8a2be2', needs: 7, price: 199 },
-  { id: 'pink', name: 'Hot Pink', paint: '#ff3fa4', needs: 10, price: 249 },
-  { id: 'volt', name: 'Volt', paint: '#b5e61d', needs: 14, price: 349 },
-  { id: 'gold', name: 'Champion Gold', paint: '#c8961e', needs: 18, price: 499 },
+  { id: 'red', name: 'Late Brake Red', paint: '#e8112d', needs: 0, usd: 0 },
+  { id: 'green', name: 'Racing Green', paint: '#0f7a45', needs: 2, usd: 1.99 },
+  { id: 'pearl', name: 'Pearl', paint: '#eef0f2', needs: 4, usd: 2.99 },
+  { id: 'purple', name: 'Purple Sector', paint: '#8a2be2', needs: 7, usd: 3.99 },
+  { id: 'pink', name: 'Hot Pink', paint: '#ff3fa4', needs: 10, usd: 4.99 },
+  { id: 'volt', name: 'Volt', paint: '#b5e61d', needs: 14, usd: 6.99 },
+  { id: 'gold', name: 'Champion Gold', paint: '#c8961e', needs: 18, usd: 9.99 },
 ];
 
 // { [track id]: 1 bronze | 2 silver | 3 gold }

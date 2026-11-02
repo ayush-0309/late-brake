@@ -65,38 +65,55 @@ across the project; each racer sends 10 messages a second, so plan an upgrade be
 ## Selling car colours (optional)
 
 Players can buy locked car colours in the Garage with Dodo Payments (UPI, cards and more). Dodo is the merchant of
-record: it handles tax, invoices and payment methods, and pays you out. The checkout opens over the game, so players
-never leave it. It stays off until `shop: true` in `src/config.js`. Buying needs a Google account, so a purchase
-follows the player to any device.
+record: it handles tax, invoices and payment methods, and pays you out. The checkout opens over the game, and a bank
+step can take players away for a moment before bringing them back. It stays off until `shop: true` in
+`src/config.js`. Buying needs a Google account, so a purchase follows the player to any device.
+
+Prices are in the player's currency, 44 of them, guessed from the device's time zone and changeable in the Garage.
+The list price is in US dollars (`usd` in `COLOURS`, `src/medals.js`); other countries pay a share of it set by their
+price level (purchasing power parity), from 30% in India to 100% in the US and Switzerland, and never under about a
+dollar, since fees take most of a smaller payment. `tools/make-prices.mjs` works this out into `src/prices.js`.
+Players can pick any currency, and Dodo's checkout lets them switch too, so someone abroad could pay a cheaper
+country's price; for a cosmetic that's an accepted cost of fair prices.
 
 1. **Dodo account.** Sign up at https://dodopayments.com and complete business verification. Dodo reviews your
    website before live payments: have terms, a privacy policy, a refund policy and a contact page, with prices shown.
    Everything below starts in **Test mode** (no real money).
-2. **Products.** **Products → Create product**, one per colour, each a **one-time payment** in **INR**:
-   Racing Green ₹99, Pearl ₹149, Purple Sector ₹199, Hot Pink ₹249, Volt ₹349, Champion Gold ₹499. Make the price
-   tax-inclusive so players pay exactly what the game shows. Copy each product's id (`pdt_…`).
-3. **API key.** **Developer → API Keys → Add API key**, and copy it. It goes only into Supabase, never into the game.
-4. **Table.** Run `schema.sql` again in the **SQL Editor**. It adds `purchases` and leaves everything else as it is.
-5. **Function.** **Edge Functions → Deploy a new function → Via Editor**, name it `shop`, paste
-   `functions/shop/index.ts` and deploy. Then open its settings and turn **Verify JWT** off (Dodo's webhook has no
-   Supabase token; the function checks the player itself). With the Supabase CLI instead:
-   `supabase functions deploy shop --no-verify-jwt`.
-6. **Webhook.** In Dodo, **Developer → Webhooks → Add endpoint**: URL
+2. **Adaptive Currency.** In Dodo, **Settings → Business**: turn on **Adaptive Currency**, which lets the checkout
+   charge in the player's currency. Leave Dodo's **Purchasing Power Parity** off: the game's prices already include it.
+3. **API key.** **Developer → API Keys → Add API key**, with **Write** access to Products and to checkouts and at least
+   **Read** to Payments, and copy it. It goes only into Supabase and the products tool below, never into the game.
+4. **Products.** In a terminal in the game's folder, run `node tools/dodo-products.mjs` and paste the key when it
+   asks (it isn't shown or saved). It makes one product per colour, priced in rupees with tax included, gives each a
+   fixed price in every other currency from `src/prices.js`, then checks that Dodo's checkout charges what the
+   Garage shows. It ends by printing the product ids for step 8. Running it again updates the same products.
+5. **Table.** Run `schema.sql` again in the **SQL Editor**. It adds `purchases` and leaves everything else as it is.
+6. **Function.** **Edge Functions → Deploy a new function → Via Editor**, name it `shop`, paste
+   `functions/shop/index.ts` and deploy (if it's there already, open it, paste the new code and deploy again). Then
+   open its settings and turn **Verify JWT** off (Dodo's webhook has no Supabase token; the function checks the
+   player itself). With the Supabase CLI instead: `supabase functions deploy shop --no-verify-jwt`.
+7. **Webhook.** In Dodo, **Developer → Webhooks → Add endpoint**: URL
    `https://<project ref>.supabase.co/functions/v1/shop`, events **payment.succeeded** and **refund.succeeded**.
    Copy its signing secret (`whsec_…`). This makes a payment count even if the player closes the page before the
    game checks it, and takes a colour back when you refund it.
-7. **Secrets.** **Edge Functions → Secrets** in Supabase:
+8. **Secrets.** **Edge Functions → Secrets** in Supabase:
    - `DODO_API_KEY`: the key from step 3
-   - `DODO_WEBHOOK_SECRET`: the `whsec_…` secret from step 6
+   - `DODO_WEBHOOK_SECRET`: the `whsec_…` secret from step 7
    - `DODO_MODE`: `test`
-   - `DODO_PRODUCTS`: the product ids from step 2 as JSON, e.g.
+   - `DODO_PRODUCTS`: the line step 4 printed, like
      `{"green":"pdt_…","pearl":"pdt_…","purple":"pdt_…","pink":"pdt_…","volt":"pdt_…","gold":"pdt_…"}`
-8. **Switch it on.** Set `shop: true` in `src/config.js` and deploy the site.
+9. **Switch it on.** Set `shop: true` in `src/config.js` and deploy the site.
 
-Test with Dodo's test cards, then for real money make the products, API key and webhook again in **Live mode**,
-update the four secrets (`DODO_MODE` to `live`) and you're done; the game needs no change. The prices shown in the
-game are in `COLOURS` in `src/medals.js`: keep them the same as the products. Payments and refunds are in the Dodo
-dashboard; each checkout is also a row in `purchases`.
+Test with Dodo's test cards, then for real money switch Dodo to **Live mode**: turn on Adaptive Currency there too,
+make a live API key, run `node tools/dodo-products.mjs --live` with it, add the webhook again, and update the four
+secrets (`DODO_MODE` to `live`). The game needs no change. Payments and refunds are in the Dodo dashboard; each
+checkout is also a row in `purchases`, with the amount and currency paid.
+
+**Changing prices.** Edit the `usd` list prices in `src/medals.js`, or the settings at the top of
+`tools/make-prices.mjs`, then run `node tools/make-prices.mjs`. It also picks up today's exchange rates and the
+World Bank's latest price levels, so run it every few months even without changes. Check the table it prints, run
+`node tools/dodo-products.mjs` and `node tools/dodo-products.mjs --live`, then commit and deploy straight away, so
+the Garage and the checkout agree.
 
 ## How laps are checked
 

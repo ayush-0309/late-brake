@@ -13,6 +13,7 @@ export const DEFAULTS = {
   raceLaps: 3,
   difficulty: 'medium',   // 'easy' | 'medium' | 'hard'
   colour: 'red',          // car colour, an id from COLOURS in medals.js, painted only once unlocked
+  currency: null,         // shop prices in this currency (a code in prices.js); null guesses from the time zone
 };
 
 export const LINE_MODES = ['full', 'braking', 'off'];
@@ -36,6 +37,7 @@ export function loadSettings() {
   if ([3, 5, 10].includes(saved.raceLaps)) s.raceLaps = saved.raceLaps;
   if (['easy', 'medium', 'hard'].includes(saved.difficulty)) s.difficulty = saved.difficulty;
   if (typeof saved.colour === 'string') s.colour = saved.colour;
+  if (typeof saved.currency === 'string') s.currency = saved.currency;
   return s;
 }
 

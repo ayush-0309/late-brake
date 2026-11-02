@@ -44,7 +44,7 @@ Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no 
 | `src/storage.js` | Best laps and ghosts in localStorage |
 | `src/medals.js` | Bronze, silver and gold medals per circuit and the car colours they unlock (or that can be bought), in localStorage |
 | `terms.html`, `privacy.html`, `refunds.html`, `contact.html`, `pages.css` | Terms of use, privacy policy, refund policy and contact page (payment providers check for these); keep them in step with what the game collects and sells |
-| `src/shop.js` | Buying car colours: Dodo Payments checkout over the game, with payments checked by `supabase/functions/shop` |
+| `src/shop.js`, `src/prices.js` | Buying car colours: prices in the player's currency (`src/prices.js`, made by `tools/make-prices.mjs`), Dodo Payments checkout over the game, with payments checked by `supabase/functions/shop` |
 | `src/main.js` | Game loop, menus, HUD |
 
 Handling constants live in `CAR` at the top of `src/car.js`. The steering sensitivity setting multiplies the steering rate and lock (`SENSITIVITY` in `src/settings.js`).
@@ -55,7 +55,7 @@ Icons (`icon.svg`, `icon-*.png`), `manifest.webmanifest` and the share image `og
 
 - **Game portals.** On CrazyGames or Poki (detected automatically) the game shows an ad break between runs (never before the first), and a rewarded ad keeps a lap that went over the track limits (once per lap; the lap then counts as a personal best only and is never uploaded). Nothing shows on our own site. Try the flow locally with `?platform=test`. Check each portal's current SDK docs when submitting: the calls are in `src/platform.js`.
 - **Sponsors.** `sponsors.html` describes the ad slots and links to the email in `src/config.js`; the landing page and the menu link to it.
-- **Car colours.** Locked colours in the Garage can be bought with Dodo Payments (₹99 to ₹499: shown from `COLOURS` in `src/medals.js`, charged from each colour's Dodo product). Off until `shop: true` in `src/config.js`; setup is in `supabase/README.md`. Buying needs a Google account so the colour follows the player.
+- **Car colours.** Locked colours in the Garage can be bought with Dodo Payments, in the player's currency: $1.99 to $9.99 in the US, less where prices are lower (₹99 to ₹299 in India), from `src/prices.js`. Off until `shop: true` in `src/config.js`; setup, and how to change prices, is in `supabase/README.md`. Buying needs a Google account so the colour follows the player.
 - **Supporter pack.** Shown as "coming soon" in the menu; not built yet.
 
 ## Ads
@@ -97,7 +97,7 @@ sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `ve
 
 ## Medals and car colours
 
-Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock car colours in the Garage (`COLOURS` in `src/medals.js`); a gold counts as three, so all 18 medals is every circuit on gold. Players without the medals can buy a colour instead (₹99 to ₹499), once the shop is set up. Retune the times if the car's handling or the AI changes.
+Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock car colours in the Garage (`COLOURS` in `src/medals.js`); a gold counts as three, so all 18 medals is every circuit on gold. Players without the medals can buy a colour instead, once the shop is set up. Retune the times if the car's handling or the AI changes.
 
 ## Credits
 

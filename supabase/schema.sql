@@ -143,7 +143,7 @@ create table if not exists public.purchases (
   colour text not null,
   status text not null default 'created' check (status in ('created', 'paid', 'refunded')),
   payment_id text,
-  amount integer,                          -- smallest currency unit (paise), once paid
+  amount integer,                          -- in the currency's smallest unit (paise, cents), once paid
   currency text,
   created_at timestamptz not null default now(),
   paid_at timestamptz

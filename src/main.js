@@ -14,6 +14,7 @@ import { createPlatform } from './platform.js';
 import { initAnalytics, track, reportError } from './analytics.js';
 import { createOnlineUI } from './online-ui.js';
 import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, earnMedal, unlocked, colourFor } from './medals.js';
+import { CURRENCIES, shopCurrency, currencyName, priceText } from './shop.js';
 
 const $ = (id) => document.getElementById(id);
 const tracks = TRACKS.map(buildTrack);
@@ -305,8 +306,8 @@ $('resetRecords').addEventListener('click', () => {
 
 // ---------- garage ----------
 
-const rupees = (n) => `₹${n}`;
 let offered = null; // the locked colour shown for sale
+const price = (c) => priceText(c, shopCurrency(settings.currency));
 
 function openGarage() {
   renderGarage();
@@ -320,19 +321,27 @@ function closeGarage() {
 }
 
 // Car colours to pick from. A locked one says how many medals unlock it
-// and, when the shop is open, its price.
+// and, when the shop is open, its price in the player's currency.
 function renderGarage() {
   const count = medalCount(), max = tracks.length * MEDALS.length, shop = onlineUI.shopOpen;
   $('garageText').textContent = count >= max
     ? `All ${max} medals. Every colour is yours.`
     : `${count} of ${max} medals. Win medals on the circuits to unlock more colours${shop ? ', or buy the ones you want' : ''}. A gold counts as three.`;
+  const pick = $('currency');
+  if (!pick.options.length) {
+    pick.innerHTML = CURRENCIES.map((code) => ({ code, name: currencyName(code) }))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(({ code, name }) => `<option value="${code}">${name} (${code})</option>`).join('');
+  }
+  pick.value = shopCurrency(settings.currency);
+  show('currencyPick', shop && count < max);
   const list = $('colourList');
   list.innerHTML = COLOURS.map((c) => {
     const open = unlocked(c, onlineUI.owned);
     return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop ? '' : ' disabled'}>
       <canvas aria-hidden="true"></canvas>
       <span class="colour-name">${c.name}</span>
-      <small>${open ? '' : `${c.needs} medals${shop ? ` or ${rupees(c.price)}` : ''}`}</small>
+      <small>${open ? '' : `${c.needs} medals${shop ? ` or ${price(c)}` : ''}`}</small>
     </button>`;
   }).join('');
   hideOffer();
@@ -345,9 +354,9 @@ function offerColour(c) {
   offered = c;
   const guest = onlineUI.user?.guest;
   $('buyText').textContent = guest
-    ? `${c.name} costs ${rupees(c.price)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
-    : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${rupees(c.price)}. It stays yours on any device you sign in to with Google.`;
-  $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${rupees(c.price)}`;
+    ? `${c.name} costs ${price(c)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
+    : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`;
+  $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${price(c)}`;
   $('buyError').textContent = '';
   show('buyPanel', true);
   $('buyBtn').focus({ preventScroll: true });
@@ -373,7 +382,7 @@ $('buyBtn').addEventListener('click', async () => {
   $('buyBtn').disabled = true;
   try {
     if (onlineUI.user?.guest) await onlineUI.continueWithGoogle();
-    else if (await onlineUI.buy(c)) {
+    else if (await onlineUI.buy(c, shopCurrency(settings.currency))) {
       setSetting('colour', c.id);
       renderGarage();
       toast('Car colour', c.name, "It's yours on any device", 'best');
@@ -385,6 +394,12 @@ $('buyBtn').addEventListener('click', async () => {
   }
 });
 $('buyCancel').addEventListener('click', hideOffer);
+$('currency').addEventListener('change', (e) => {
+  const c = offered;
+  setSetting('currency', e.target.value);
+  renderGarage();
+  if (c) offerColour(c);
+});
 $('garageBtn').addEventListener('click', openGarage);
 $('garageClose').addEventListener('click', closeGarage);
 $('garageDone').addEventListener('click', closeGarage);

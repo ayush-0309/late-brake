@@ -143,8 +143,8 @@ async function createSupabaseOnline({ url, anonKey }) {
     },
     // Buying a colour: the shop function starts a Dodo Payments checkout
     // (shop.js opens it), then asks Dodo whether it was paid.
-    async startCheckout(colour, returnUrl) {
-      return shop({ action: 'checkout', colour, returnUrl });
+    async startCheckout(colour, returnUrl, currency) {
+      return shop({ action: 'checkout', colour, currency, returnUrl });
     },
     async checkPayment(sessionId) {
       return shop({ action: 'status', sessionId });
