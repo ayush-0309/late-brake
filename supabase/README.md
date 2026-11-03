@@ -115,6 +115,33 @@ World Bank's latest price levels, so run it every few months even without change
 `node tools/dodo-products.mjs` and `node tools/dodo-products.mjs --live`, then commit and deploy straight away, so
 the Garage and the checkout agree.
 
+## Publishing blog posts on time
+
+Posts go live at the time in their front matter (India time), when the publish-blog GitHub Action rebuilds the
+blog. GitHub's own timer for it starts runs hours late or not at all, so this project's cron starts it instead, a
+minute after every quarter hour from 08:31 to 19:16 India time (`publish-blog.sql`). GitHub's timer stays on as
+a backup.
+
+1. On GitHub: your picture → **Settings → Developer settings → Personal access tokens → Fine-grained tokens →
+   Generate new token**. Name it `Late Brake blog publisher`, pick the longest expiration offered, choose
+   **Only select repositories → late-brake**, and under **Repository permissions** set **Actions** to
+   **Read and write**. Generate it and copy it (GitHub shows it once).
+2. In Supabase, **SQL Editor**, run this with the token in place of `TOKEN`. It goes into the Vault, encrypted,
+   and not into the cron job:
+   ```sql
+   select vault.create_secret('TOKEN', 'github_publish_token');
+   ```
+3. Run the whole of `publish-blog.sql` from this folder in the SQL Editor.
+4. After the next quarter hour, **Integrations → Cron → Jobs** shows `publish-blog` with a run that succeeded, and
+   GitHub's **Actions → Publish blog** shows a run started by `workflow_dispatch`. If GitHub has no run, this shows
+   GitHub's answer (204 means it accepted):
+   ```sql
+   select created, status_code, content from net._http_response order by created desc limit 5;
+   ```
+
+When the token expires, GitHub answers 401: make a new one the same way and save it with
+`select vault.update_secret((select id from vault.secrets where name = 'github_publish_token'), 'TOKEN');`.
+
 ## How laps are checked
 
 Laps only get in through `submit_lap()`, which rejects:

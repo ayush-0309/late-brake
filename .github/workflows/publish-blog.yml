@@ -1,9 +1,11 @@
 # Puts scheduled blog posts live. Posts carry their go-live time (see
-# tools/build-blog.mjs); this rebuilds the blog and circuit pages every 15
-# minutes through the day and whenever posts or pages land on main, commits
+# tools/build-blog.mjs); this rebuilds the blog and circuit pages, commits
 # whatever has become due so Vercel deploys it, then tells IndexNow search
-# engines about the new pages. GitHub starts scheduled runs late or skips them
-# when it's busy, so checking often means a late run costs minutes, not hours.
+# engines about the new pages. It runs whenever posts or pages land on main,
+# and through the day when the Supabase project's cron starts it a minute
+# after every quarter hour (supabase/publish-blog.sql): GitHub starts its own
+# scheduled runs hours late or skips them, so the schedule below is only a
+# backup.
 name: Publish blog
 
 on:
