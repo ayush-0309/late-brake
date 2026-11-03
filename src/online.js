@@ -80,8 +80,10 @@ async function createSupabaseOnline({ url, anonKey }) {
     },
     // Google sign-in: leaves for Google and comes back to this page signed in.
     // A guest gets Google added to their account instead, keeping their laps.
+    // Google always asks which account: otherwise, after signing out, it
+    // quietly signs back in to the last one.
     async signInWithGoogle() {
-      const options = { redirectTo: back() };
+      const options = { redirectTo: back(), queryParams: { prompt: 'select_account' } };
       check(await (user?.guest ? db.auth.linkIdentity({ provider: 'google', options }) : db.auth.signInWithOAuth({ provider: 'google', options })));
     },
     // Sign-in methods switched on in the Supabase dashboard, e.g.
