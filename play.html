@@ -52,6 +52,7 @@
         <div id="invalidBadge" class="badge">Lap invalid</div>
       </div>
       <button id="keepLapBtn" class="keep-lap" title="Watch an ad to keep this lap (K)">Keep lap <span aria-hidden="true">▶</span> <small>ad</small></button>
+      <button id="helpBtn" class="help-tip"></button>
       <div class="sectors">
         <div id="s0" class="sector">S1</div>
         <div id="s1" class="sector">S2</div>
@@ -99,6 +100,8 @@
     <div class="lights-row"><span class="light"></span><span class="light"></span><span class="light"></span></div>
     <div id="lightsText" class="lights-text"></div>
   </div>
+
+  <div id="resumeCount" class="resume-count" aria-live="assertive" hidden></div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -235,18 +238,6 @@
       <button id="restartBtn" class="secondary">Restart</button>
       <button class="secondary" data-open="settings">Settings</button>
       <button id="menuBtn" class="secondary">Change circuit</button>
-    </div>
-  </div>
-
-  <div id="help" class="overlay" hidden>
-    <div class="sheet small" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-describedby="helpText">
-      <h2 class="sheet-title" id="helpTitle">Struggling with the corners?</h2>
-      <p class="sheet-text" id="helpText"></p>
-      <div class="line-legend" id="helpLegend" aria-hidden="true"><span class="swatch go"></span><span class="swatch lift"></span><span class="swatch stop"></span></div>
-      <button id="helpLine" class="primary">Turn on line &amp; restart lap</button>
-      <button id="helpRestart" class="secondary">Just restart lap</button>
-      <button id="helpRescue" class="secondary" hidden>Watch an ad to keep this lap</button>
-      <button id="helpKeep" class="secondary">Keep driving</button>
     </div>
   </div>
 

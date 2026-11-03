@@ -48,13 +48,17 @@ let lastLit = -1;
 let stuckTime = 0;        // seconds stopped off track or against a wall
 let stuckHinted = false;  // the reset hint shows once per run
 
-// Keep going off track and the game offers the racing line and a restart.
+// Keep going off track and the timing panel suggests the racing line (or a
+// restart) while the car drives on.
 const HELP_AFTER = 3;        // trips off track (or hard wall hits)...
 const HELP_WINDOW = 120;     // ...within this many seconds of driving
-const HELP_MAX_DISMISS = 2;  // waved off this often: stop offering
+const HELP_SHOWN = 10;       // seconds of driving the suggestion stays up
+const HELP_MAX_IGNORED = 2;  // left unused this often: stop suggesting
 let incidents = [];          // session clock times of recent trips off
 let helpOffered = false;     // at most once per run
-let helpDismissed = 0;
+let helpUntil = 0;           // session clock time the suggestion goes; 0 when it isn't up
+let helpIgnored = 0;
+let resumeTimer = 0;         // the 3, 2, 1 after Resume; 0 when not counting
 
 // ---------- menu ----------
 
@@ -153,11 +157,12 @@ function openMenu({ keepRoom = false } = {}) {
   session = null;
   audio.silence();
   paused = false;
+  stopResumeCount();
+  hideHelp();
   backdrop = new Session(selected, null);
   renderer.setTrack(selected);
   show('menu', true);
   show('pause', false);
-  show('help', false);
   show('results', false);
   show('hud', false);
   show('lights', false);
@@ -178,6 +183,7 @@ async function requestRun(opts) {
   if (opts instanceof Event || opts === undefined) opts = session ? runOpts : menuRunOpts();
   if (runsStarted > 0) {
     paused = true;
+    stopResumeCount();
     await platform.commercialBreak();
   }
   startRun(opts);
@@ -209,11 +215,12 @@ function startRun(opts = {}) {
   resultsShownAt = 0;
   renderer.setTrack(selected);
   paused = false;
+  stopResumeCount();
+  hideHelp();
   acc = 0;
   show('menu', false);
   show('pause', false);
   show('settings', false);
-  show('help', false);
   show('results', false);
   document.body.classList.toggle('racing', session.mode === 'race');
   show('hud', true);
@@ -224,15 +231,52 @@ function startRun(opts = {}) {
   track('Run start', { track: selected.name, mode: opts.challenge ? 'challenge' : opts.versus ? 'versus' : mode, camera: settings.camera, line: settings.line });
 }
 
+// Pausing is instant; resuming counts 3, 2, 1 first, with the car still
+// frozen, so it doesn't set off the moment the menu goes (unless the start
+// lights are still counting). Pausing again during the count stops it.
 function setPaused(p) {
-  if (!session || adPlaying) return;
-  paused = p;
-  p ? platform.gameplayStop() : platform.gameplayStart();
+  if (!session || adPlaying || (!p && !paused)) return;
+  stopResumeCount();
   show('pause', p);
-  if (!p) show('settings', false);
-  p ? audio.suspend() : audio.resume();
-  if (p) $('resumeBtn').focus({ preventScroll: true });
+  if (p) {
+    paused = true;
+    platform.gameplayStop();
+    audio.suspend();
+    $('resumeBtn').focus({ preventScroll: true });
+    return;
+  }
+  show('settings', false);
+  show('lights', false); // a GO left from the start would sit under the count
+  document.activeElement?.blur?.();
+  let n = session.phase === 'countdown' ? 0 : 3;
+  const tick = () => {
+    const el = $('resumeCount');
+    if (n === 0) {
+      stopResumeCount();
+      paused = false;
+      platform.gameplayStart();
+      audio.resume();
+      return;
+    }
+    el.textContent = n--;
+    el.classList.remove('tick');
+    void el.offsetWidth; // restarts the animation for each number
+    el.classList.add('tick');
+    show('resumeCount', true);
+  };
+  resumeTimer = setInterval(tick, 700);
+  tick();
 }
+
+function stopResumeCount() {
+  clearInterval(resumeTimer);
+  resumeTimer = 0;
+  show('resumeCount', false);
+}
+
+// Escape, P and the pad's pause button: pause while driving or counting
+// down, resume from the pause menu.
+const togglePause = () => setPaused(!paused || !!resumeTimer);
 
 // ---------- settings ----------
 
@@ -548,58 +592,39 @@ function noteIncident() {
   if (incidents.length && now - incidents.at(-1) < 3) return;
   incidents.push(now);
   incidents = incidents.filter((t) => now - t <= HELP_WINDOW);
-  if (incidents.length >= HELP_AFTER && !helpOffered && helpDismissed < HELP_MAX_DISMISS) offerHelp();
+  if (incidents.length >= HELP_AFTER && !helpOffered && helpIgnored < HELP_MAX_IGNORED) offerHelp();
 }
 
+// The racing line if it's off, else a restart (which online races don't have).
 function offerHelp() {
   helpOffered = true;
   const lineOn = settings.line !== 'off';
-  $('helpTitle').textContent = lineOn ? 'Tough lap?' : 'Struggling with the corners?';
-  $('helpText').textContent = lineOn
-    ? `That's ${incidents.length} trips off track. Restart the lap for a clean run?`
-    : `That's ${incidents.length} trips off track. The racing line shows where to brake (red), lift (yellow) and go flat out (green).`;
-  $('helpLine').hidden = lineOn;
-  $('helpLegend').hidden = lineOn;
+  if (lineOn && session.online) return;
   const what = session.mode === 'race' ? 'race' : 'lap';
-  $('helpRestart').textContent = lineOn ? `Restart ${what}` : `Just restart ${what}`;
-  $('helpRestart').className = lineOn ? 'primary' : 'secondary';
-  $('helpRescue').hidden = !(session.canRescue && platform.rewardedAvailable);
-  if (session.online) { $('helpRestart').hidden = true; $('helpLine').hidden = true; $('helpLegend').hidden = true; } else $('helpRestart').hidden = false;
-  paused = true;
-  audio.suspend();
-  platform.gameplayStop();
+  $('helpBtn').innerHTML = lineOn
+    ? `<kbd class="keys-only">R</kbd>Tough ${what}? <b>Restart it</b>`
+    : '<kbd class="keys-only">L</kbd>Off a lot? <b>Show the racing line</b>';
+  $('helpBtn').classList.add('on');
+  helpUntil = session.clock + HELP_SHOWN;
   track('Help offered', { track: selected.name, line: settings.line });
-  show('help', true);
-  (lineOn ? $('helpRestart') : $('helpLine')).focus({ preventScroll: true });
 }
 
-function closeHelp() {
-  show('help', false);
-  paused = false;
-  audio.resume();
-  platform.gameplayStart();
+function hideHelp() {
+  helpUntil = 0;
+  $('helpBtn').classList.remove('on');
 }
 
-$('helpLine').addEventListener('click', async () => {
-  track('Help choice', { choice: 'line' });
-  setSetting('line', 'full');
-  await requestRun();
-  toast('Racing line', 'On', 'Change it any time in Settings or with L', 'info');
-});
-$('helpRestart').addEventListener('click', () => {
-  track('Help choice', { choice: 'restart' });
-  helpDismissed++;
-  requestRun();
-});
-$('helpRescue').addEventListener('click', () => {
-  track('Help choice', { choice: 'rescue' });
-  closeHelp();
-  keepLap();
-});
-$('helpKeep').addEventListener('click', () => {
-  track('Help choice', { choice: 'keep driving' });
-  helpDismissed++;
-  closeHelp();
+$('helpBtn').addEventListener('click', () => {
+  if (!helpUntil || !session) return;
+  hideHelp();
+  if (settings.line === 'off') {
+    track('Help choice', { choice: 'line' });
+    setSetting('line', 'full');
+    toast('Racing line', 'On', 'Brake on red, lift on yellow, flat out on green', 'info');
+  } else {
+    track('Help choice', { choice: 'restart' });
+    requestRun();
+  }
 });
 
 // ---------- lap rescue ----------
@@ -607,7 +632,7 @@ $('helpKeep').addEventListener('click', () => {
 // Watch a rewarded ad to keep a lap that went over the track limits. Once
 // per lap, and the lap then counts as a personal best only.
 async function keepLap() {
-  if (!session?.canRescue || !platform.rewardedAvailable || adPlaying) return;
+  if (!session?.canRescue || !platform.rewardedAvailable || adPlaying || resumeTimer) return;
   track('Rescue', { result: 'asked' });
   const rewarded = await platform.rewardedBreak();
   if (rewarded && session?.rescue()) {
@@ -705,6 +730,11 @@ function updateHud(inp) {
   setClass('delta', 'delta ' + (d === null ? '' : d <= 0 ? 'ahead' : 'behind'));
   setClass('invalidBadge', 'badge' + (running && !s.valid ? ' on' : ''));
   setClass('keepLapBtn', 'keep-lap' + (s.canRescue && platform.rewardedAvailable ? ' on' : ''));
+  if (helpUntil && s.clock > helpUntil) {
+    hideHelp();
+    helpIgnored++;
+    track('Help choice', { choice: 'ignored' });
+  }
 
   // Show the lap just finished for a few seconds, then the current lap.
   const prev = s.laps.at(-1);
@@ -827,14 +857,14 @@ const LINE_NAMES = { full: 'Full', braking: 'Braking only', off: 'Off' };
 function cycleLine() {
   const next = LINE_MODES[(LINE_MODES.indexOf(settings.line) + 1) % LINE_MODES.length];
   setSetting('line', next);
+  hideHelp();
   if (session) toast('Racing line', LINE_NAMES[next], '', 'info');
 }
 
 function onPad(action) {
   if (action === 'pause') {
     if (!$('settings').hidden) closeSettings();
-    else if (!$('help').hidden) $('helpKeep').click();
-    else if (session) setPaused(!paused);
+    else if (session) togglePause();
     else requestRun();
   } else if (action === 'restart' && session) {
     requestRun();
@@ -849,17 +879,15 @@ addEventListener('keydown', (e) => {
   if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.target.closest?.('input, textarea, select')) return; // typing, not driving
   const settingsOpen = !$('settings').hidden;
-  const helpOpen = !$('help').hidden;
   const garageOpen = !$('garage').hidden;
   const dialogOpen = settingsOpen || garageOpen || !$('account').hidden || !$('lobby').hidden;
   if (e.code === 'Escape') {
     if (!$('lobby').hidden && !session) lobby.leave();
     else if (settingsOpen) closeSettings();
     else if (garageOpen) closeGarage();
-    else if (helpOpen) $('helpKeep').click();
-    else if (session) setPaused(!paused);
+    else if (session) togglePause();
   } else if (e.code === 'KeyP') {
-    if (session && !settingsOpen && !helpOpen) setPaused(!paused);
+    if (session && !settingsOpen) togglePause();
   } else if (e.code === 'KeyR') {
     if (session) requestRun();
   } else if (e.code === 'KeyK') {
@@ -888,7 +916,7 @@ addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && session && $('help').hidden) setPaused(true);
+  if (document.hidden && session) setPaused(true);
 });
 
 $('startBtn').addEventListener('click', requestRun);
@@ -898,7 +926,7 @@ $('menuBtn').addEventListener('click', () => openMenu());
 $('pauseBtn').addEventListener('click', () => setPaused(true));
 $('resetBtn').addEventListener('click', resetCar);
 // Clicking a HUD button mustn't leave it focused: Space (brake) would then press it.
-for (const id of ['pauseBtn', 'resetBtn', 'muteBtn', 'keepLapBtn']) {
+for (const id of ['pauseBtn', 'resetBtn', 'muteBtn', 'keepLapBtn', 'helpBtn']) {
   $(id).addEventListener('mousedown', (e) => e.preventDefault());
 }
 

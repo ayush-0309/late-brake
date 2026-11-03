@@ -136,6 +136,28 @@ body.racing #racePos { display: block; }
 .keep-lap.on { display: block; }
 .keep-lap small { font-size: 11px; opacity: 0.75; }
 .keep-lap:hover { background: rgba(245, 197, 66, 0.24); }
+
+/* Off track a lot: suggests the racing line or a restart, while driving on. */
+.help-tip {
+  display: none;
+  width: 100%;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(52, 210, 123, 0.55);
+  border-radius: 6px;
+  background: rgba(52, 210, 123, 0.12);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  animation: tip-in 0.3s ease-out;
+}
+.help-tip.on { display: block; }
+.help-tip b { color: var(--green); }
+.help-tip kbd { float: right; margin-left: 6px; font-size: 11px; }
+.help-tip:hover { background: rgba(52, 210, 123, 0.22); }
+@keyframes tip-in { from { opacity: 0; transform: translateY(-4px); } }
 @keyframes flash { 50% { opacity: 0.2; } }
 
 .sectors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 6px; }
@@ -265,6 +287,22 @@ body.racing #racePos { display: block; }
 .light { width: 38px; height: 38px; border-radius: 50%; background: #2a0d0d; transition: background 0.05s; }
 .light.on { background: #ff2a2a; box-shadow: 0 0 22px #ff2a2a; }
 .lights-text { font-size: 64px; font-weight: 800; font-style: italic; color: var(--green); text-shadow: 0 3px 14px rgba(0, 0, 0, 0.6); }
+
+/* 3, 2, 1 after Resume, so the car doesn't set off the instant the menu goes. */
+.resume-count {
+  position: fixed;
+  top: 32%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 96px;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1;
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+.resume-count.tick { animation: count-in 0.7s ease-out; }
+@keyframes count-in { from { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } 30% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 
 .toast {
   position: fixed;
@@ -719,10 +757,7 @@ body.touch .keys-only { display: none; }
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
 }
 .sheet.small { width: min(320px, 100%); }
-#help .sheet { width: min(380px, 100%); }
 .sheet-text { font-size: 18px; color: #c3c8d0; line-height: 1.3; margin: 0; }
-.line-legend { display: flex; gap: 6px; margin: 2px 0 6px; }
-.line-legend .swatch { width: 100%; height: 6px; margin: 0; }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; }
 .sheet-title { font-size: 28px; font-weight: 800; font-style: italic; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.02em; }
 .sheet .icon-btn { padding: 6px; }
@@ -851,5 +886,5 @@ body.touch .keys-only { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .toast, .track-card, #touch button { transition: none; }
-  .rev-fill.limit, .badge.flash { animation: none; }
+  .rev-fill.limit, .badge.flash, .help-tip, .resume-count.tick { animation: none; }
 }
