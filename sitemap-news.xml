@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/antonelli-keeps-number-12-for-2027.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-03T15:00:00+05:30</news:publication_date>
+      <news:title>New F1 champion Antonelli to keep his 12 instead of number 1</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/sao-paulo-grand-prix-2026-schedule.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-01T18:00:00+05:30</news:publication_date>
       <news:title>Six F1 facts about Interlagos that sound made up</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/hirakawa-replaces-ocon-at-haas.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-01T15:00:00+05:30</news:publication_date>
-      <news:title>Haas replaces Ocon with Hirakawa for Mexico City Grand Prix</news:title>
     </news:news>
   </url>
 </urlset>
