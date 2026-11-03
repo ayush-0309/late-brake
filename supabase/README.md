@@ -132,11 +132,17 @@ a backup.
    select vault.create_secret('TOKEN', 'github_publish_token');
    ```
 3. Run the whole of `publish-blog.sql` from this folder in the SQL Editor.
-4. After the next quarter hour, **Integrations → Cron → Jobs** shows `publish-blog` with a run that succeeded, and
-   GitHub's **Actions → Publish blog** shows a run started by `workflow_dispatch`. If GitHub has no run, this shows
-   GitHub's answer (204 means it accepted):
+4. After the next quarter hour, GitHub's **Actions → Publish blog** shows a run started by `workflow_dispatch`. If
+   it doesn't, this shows whether the timer ran and what GitHub answered (204 means it accepted; 400 "Problems
+   parsing JSON" from a job made before the line-break fix in `publish-blog.sql` means the token was saved with a
+   line break: run the file again):
    ```sql
-   select created, status_code, content from net._http_response order by created desc limit 5;
+   select start_time as at, 'timer ran' as what, status as result, left(return_message, 200) as detail
+   from cron.job_run_details
+   union all
+   select created, 'GitHub answered', status_code::text, left(coalesce(content, error_msg), 200)
+   from net._http_response
+   order by at desc limit 6;
    ```
 
 When the token expires, GitHub answers 401: make a new one the same way and save it with

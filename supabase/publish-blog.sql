@@ -18,7 +18,8 @@ select cron.schedule(
   select net.http_post(
     url := 'https://api.github.com/repos/ayush-0309/late-brake/actions/workflows/publish-blog.yml/dispatches',
     headers := jsonb_build_object(
-      'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'github_publish_token'),
+      -- Spaces and line breaks dropped: a token pasted with a line break splits the header and GitHub answers 400.
+      'Authorization', 'Bearer ' || (select regexp_replace(decrypted_secret, '\s', '', 'g') from vault.decrypted_secrets where name = 'github_publish_token'),
       'Accept', 'application/vnd.github+json',
       'X-GitHub-Api-Version', '2022-11-28',
       'User-Agent', 'late-brake-publish-blog'
