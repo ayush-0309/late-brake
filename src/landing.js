@@ -3,8 +3,10 @@
 import { TRACKS } from './track.js';
 import { CIRCUITS } from './circuits.js';
 import { initAnalytics } from './analytics.js';
+import { initCoffee } from './coffee.js';
 
 initAnalytics();
+initCoffee();
 
 const dpr = Math.min(window.devicePixelRatio || 1, 2);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;

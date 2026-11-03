@@ -22,6 +22,7 @@ import { CURRENCIES } from './currencies.mjs';
 
 const MIN_SHARE = 30; // no country pays less than this % of the list price (Dodo's own PPP floor)
 const MIN_USD = 0.99; // nor less than this in dollars: fees would take most of a smaller payment
+const DODO_MIN_USD = 0.5; // Dodo's smallest payment anywhere, the floor for the coffee (a `tip` colour)
 const STEPS = [1, 1.2, 1.5, 1.8, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9]; // round numbers to price at, times 10ⁿ
 
 const paid = COLOURS.filter((c) => c.usd > 0);
@@ -88,9 +89,14 @@ for (const cur of CURRENCIES) {
   let last = 0;
   for (const c of paid) {
     // The nearest price, but never below the floor, and each colour dearer
-    // than the one before.
+    // than the one before. The coffee only has to be one Dodo can charge.
     const x = (c.usd * share) / 100 * rate;
     let i = steps.reduce((best, s, j) => Math.abs(Math.log(s.n / x)) < Math.abs(Math.log(steps[best].n / x)) ? j : best, 0);
+    if (c.tip) {
+      while (steps[i].price < Math.max(cur.min, DODO_MIN_USD * rate)) i++;
+      prices[c.id] = steps[i].price;
+      continue;
+    }
     while (steps[i].price < floor || steps[i].price <= last) i++;
     last = prices[c.id] = steps[i].price;
   }
@@ -115,7 +121,7 @@ ${rows.join('\n')}
 
 console.log(`Prices at exchange rates of ${day}:\n`);
 for (const [code, { share, rate, prices }] of Object.entries(table)) {
-  const usd = paid.map((c) => prices[c.id] / rate);
+  const usd = paid.filter((c) => !c.tip).map((c) => prices[c.id] / rate);
   console.log(`${code.padEnd(4)}${String(share).padStart(4)}%  ${paid.map((c) => String(prices[c.id]).padStart(8)).join('')}   ($${usd[0].toFixed(2)} to $${usd.at(-1).toFixed(2)})`);
 }
 console.log('\nWrote src/prices.js. Commit it, then run tools/dodo-products.mjs to set the same prices on Dodo.');

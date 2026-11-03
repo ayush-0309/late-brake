@@ -321,11 +321,13 @@ function closeGarage() {
 }
 
 // Car colours to pick from. A locked one says how many medals unlock it
-// and, when the shop is open, its price in the player's currency.
+// and, when the shop is open, its price in the player's currency. Coffee
+// can only be bought, so it's left out while the shop is shut.
 function renderGarage() {
   const count = medalCount(), max = tracks.length * MEDALS.length, shop = onlineUI.shopOpen;
+  const shown = COLOURS.filter((c) => !c.tip || shop || onlineUI.owned.has(c.id));
   $('garageText').textContent = count >= max
-    ? `All ${max} medals. Every colour is yours.`
+    ? `All ${max} medals. Every colour you can win is yours.`
     : `${count} of ${max} medals. Win medals on the circuits to unlock more colours${shop ? ', or buy the ones you want' : ''}. A gold counts as three.`;
   const pick = $('currency');
   if (!pick.options.length) {
@@ -334,18 +336,18 @@ function renderGarage() {
       .map(({ code, name }) => `<option value="${code}">${name} (${code})</option>`).join('');
   }
   pick.value = shopCurrency(settings.currency);
-  show('currencyPick', shop && count < max);
+  show('currencyPick', shop && shown.some((c) => !unlocked(c, onlineUI.owned)));
   const list = $('colourList');
-  list.innerHTML = COLOURS.map((c) => {
+  list.innerHTML = shown.map((c) => {
     const open = unlocked(c, onlineUI.owned);
     return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop ? '' : ' disabled'}>
       <canvas aria-hidden="true"></canvas>
       <span class="colour-name">${c.name}</span>
-      <small>${open ? '' : `${c.needs} medals${shop ? ` or ${price(c)}` : ''}`}</small>
+      <small>${open ? '' : c.tip ? `A coffee for the dev, ${price(c)}` : `${c.needs} medals${shop ? ` or ${price(c)}` : ''}`}</small>
     </button>`;
   }).join('');
   hideOffer();
-  requestAnimationFrame(() => list.querySelectorAll('canvas').forEach((cv, i) => drawCarPreview(cv, COLOURS[i].paint)));
+  requestAnimationFrame(() => list.querySelectorAll('canvas').forEach((cv, i) => drawCarPreview(cv, shown[i].paint)));
 }
 
 // A locked colour tapped: offer it for sale. Buying needs Google, so a
@@ -355,7 +357,9 @@ function offerColour(c) {
   const guest = onlineUI.user?.guest;
   $('buyText').textContent = guest
     ? `${c.name} costs ${price(c)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
-    : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`;
+    : c.tip
+      ? `Buy the developer a coffee for ${price(c)} and your car gets painted to match. No medals win this one. It stays yours on any device you sign in to with Google.`
+      : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`;
   $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${price(c)}`;
   $('buyError').textContent = '';
   show('buyPanel', true);
@@ -365,6 +369,27 @@ function offerColour(c) {
 function hideOffer() {
   offered = null;
   show('buyPanel', false);
+}
+
+// play.html?buy=<colour> (the home page's coffee) opens the Garage offering
+// that colour once the player is signed in and named. It's kept for this tab
+// until then, since signing in with Google leaves the page and comes back
+// without it, and so is a guest's colour on the way to Google.
+const BUY = 'latebrake:buy';
+let toBuy = new URLSearchParams(location.search).get('buy');
+try {
+  if (toBuy) sessionStorage.setItem(BUY, toBuy);
+  else toBuy = sessionStorage.getItem(BUY);
+} catch {}
+
+function offerToBuy() {
+  const c = COLOURS.find((x) => x.id === toBuy);
+  if (!c || !onlineUI.shopOpen || !onlineUI.user?.name || session) return;
+  toBuy = null;
+  try { sessionStorage.removeItem(BUY); } catch {}
+  if (unlocked(c, onlineUI.owned)) return;
+  openGarage();
+  offerColour(c);
 }
 
 $('colourList').addEventListener('click', (e) => {
@@ -381,8 +406,10 @@ $('buyBtn').addEventListener('click', async () => {
   if (!c) return;
   $('buyBtn').disabled = true;
   try {
-    if (onlineUI.user?.guest) await onlineUI.continueWithGoogle();
-    else if (await onlineUI.buy(c, shopCurrency(settings.currency))) {
+    if (onlineUI.user?.guest) {
+      try { sessionStorage.setItem(BUY, c.id); } catch {}
+      await onlineUI.continueWithGoogle();
+    } else if (await onlineUI.buy(c, shopCurrency(settings.currency))) {
       setSetting('colour', c.id);
       renderGarage();
       toast('Car colour', c.name, "It's yours on any device", 'best');
@@ -919,10 +946,16 @@ const onlineUI = createOnlineUI({
   startRun: (opts) => requestRun(opts),
   toast,
   offerVersus,
-  // Signed in, out, or bought a colour: repaint and refresh the garage.
+  // Signed in, out, or bought a colour: repaint and refresh the garage,
+  // still offering the colour on offer if it's still locked.
   ownedChanged() {
     colour = colourFor(settings.colour, onlineUI.owned);
-    if (!$('garage').hidden) renderGarage();
+    if (!$('garage').hidden) {
+      const c = offered;
+      renderGarage();
+      if (c && !unlocked(c, onlineUI.owned)) offerColour(c);
+    }
+    offerToBuy();
   },
 });
 

@@ -56,6 +56,7 @@ Icons (`icon.svg`, `icon-*.png`), `manifest.webmanifest` and the share image `og
 - **Game portals.** On CrazyGames or Poki (detected automatically) the game shows an ad break between runs (never before the first), and a rewarded ad keeps a lap that went over the track limits (once per lap; the lap then counts as a personal best only and is never uploaded). Nothing shows on our own site. Try the flow locally with `?platform=test`. Check each portal's current SDK docs when submitting: the calls are in `src/platform.js`.
 - **Sponsors.** `sponsors.html` describes the ad slots and links to the email in `src/config.js`; the landing page and the menu link to it.
 - **Car colours.** Locked colours in the Garage can be bought with Dodo Payments, in the player's currency: $1.99 to $9.99 in the US, less where prices are lower (₹99 to ₹299 in India), from `src/prices.js`. Off until `shop: true` in `src/config.js`; setup, and how to change prices, is in `supabase/README.md`. Buying needs a Google account so the colour follows the player.
+- **A coffee for the developer.** The home page's "Buy the dev a coffee" button (`src/coffee.js`) sells Coffee, a colour that can only be bought, at about the lowest price Dodo can charge ($0.99 in the US, ₹49 in India): Dodo only takes payments that buy something, so the colour is what makes the tip a sale. It opens the Garage offering it (`play.html?buy=coffee`) and shows while the shop is on.
 - **Supporter pack.** Shown as "coming soon" in the menu; not built yet.
 
 ## Ads
@@ -97,7 +98,7 @@ sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `ve
 
 ## Medals and car colours
 
-Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock car colours in the Garage (`COLOURS` in `src/medals.js`); a gold counts as three, so all 18 medals is every circuit on gold. Players without the medals can buy a colour instead, once the shop is set up. Retune the times if the car's handling or the AI changes.
+Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock car colours in the Garage (`COLOURS` in `src/medals.js`); a gold counts as three, so all 18 medals is every circuit on gold. Players without the medals can buy a colour instead, once the shop is set up. Coffee (`tip`) is the exception: no medals unlock it, it's only bought. Retune the times if the car's handling or the AI changes.
 
 ## Credits
 

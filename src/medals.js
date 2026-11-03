@@ -11,7 +11,9 @@ export const MEDALS = ['Bronze', 'Silver', 'Gold'];
 // A gold counts as three medals (it beats the silver and bronze times too),
 // so 18 is every circuit on gold. `usd` is the list price in US dollars;
 // other currencies pay a share of it (src/prices.js, made from it by
-// tools/make-prices.mjs).
+// tools/make-prices.mjs). Coffee (`tip`) can only be bought: it's how a
+// player buys the developer a coffee from the home page, priced as low as
+// Dodo allows, and the colour is what makes it a sale Dodo can take.
 export const COLOURS = [
   { id: 'red', name: 'Late Brake Red', paint: '#e8112d', needs: 0, usd: 0 },
   { id: 'green', name: 'Racing Green', paint: '#0f7a45', needs: 2, usd: 1.99 },
@@ -20,6 +22,7 @@ export const COLOURS = [
   { id: 'pink', name: 'Hot Pink', paint: '#ff3fa4', needs: 10, usd: 4.99 },
   { id: 'volt', name: 'Volt', paint: '#b5e61d', needs: 14, usd: 6.99 },
   { id: 'gold', name: 'Champion Gold', paint: '#c8961e', needs: 18, usd: 9.99 },
+  { id: 'coffee', name: 'Coffee', paint: '#6f4e37', needs: Infinity, usd: 0.99, tip: true },
 ];
 
 // { [track id]: 1 bronze | 2 silver | 3 gold }
