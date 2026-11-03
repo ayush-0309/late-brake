@@ -109,11 +109,13 @@ make a live API key, run `node tools/dodo-products.mjs --live` with it, add the 
 secrets (`DODO_MODE` to `live`). The game needs no change. Payments and refunds are in the Dodo dashboard; each
 checkout is also a row in `purchases`, with the amount and currency paid.
 
-**Changing prices.** Edit the `usd` list prices in `src/medals.js`, or the settings at the top of
-`tools/make-prices.mjs`, then run `node tools/make-prices.mjs`. It also picks up today's exchange rates and the
-World Bank's latest price levels, so run it every few months even without changes. Check the table it prints, run
-`node tools/dodo-products.mjs` and `node tools/dodo-products.mjs --live`, then commit and deploy straight away, so
-the Garage and the checkout agree.
+**Changing prices.** Prices are fixed: they don't follow exchange rates, and running `node tools/make-prices.mjs`
+again keeps every price already set, pricing only a new colour or currency. To change a colour's price, edit its `usd`
+list price in `src/medals.js` (or the settings at the top of `tools/make-prices.mjs`) and run
+`node tools/make-prices.mjs --reprice=green` with the colours to change, comma-separated; `--reprice` alone
+reprices everything at today's exchange rates. Check the table it prints, commit and deploy, then run
+`node tools/dodo-products.mjs` and `node tools/dodo-products.mjs --live` straight away, so the Garage and the
+checkout agree.
 
 ## Publishing blog posts on time
 
