@@ -365,14 +365,14 @@ function closeGarage() {
 }
 
 // Car colours to pick from. A locked one says how many medals unlock it
-// and, when the shop is open, its price in the player's currency. Coffee
-// can only be bought, so it's left out while the shop is shut.
+// and, when the shop is open, its price in the player's currency. Shop-only
+// colours (Coffee among them) are left out while the shop is shut.
 function renderGarage() {
   const count = medalCount(), max = tracks.length * MEDALS.length, shop = onlineUI.shopOpen;
-  const shown = COLOURS.filter((c) => !c.tip || shop || onlineUI.owned.has(c.id));
+  const shown = COLOURS.filter((c) => isFinite(c.needs) || shop || unlocked(c, onlineUI.owned));
   $('garageText').textContent = count >= max
     ? `All ${max} medals. Every colour you can win is yours.`
-    : `${count} of ${max} medals. Win medals on the circuits to unlock more colours${shop ? ', or buy the ones you want' : ''}. A gold counts as three.`;
+    : `${count} of ${max} medals. Win medals on the circuits to unlock colours${shop ? ', or buy them. Some are only in the shop' : ''}. A gold counts as three.`;
   const pick = $('currency');
   if (!pick.options.length) {
     pick.innerHTML = CURRENCIES.map((code) => ({ code, name: currencyName(code) }))
@@ -387,7 +387,7 @@ function renderGarage() {
     return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop ? '' : ' disabled'}>
       <canvas aria-hidden="true"></canvas>
       <span class="colour-name">${c.name}</span>
-      <small>${open ? '' : c.tip ? `A coffee for the dev, ${price(c)}` : `${c.needs} medals${shop ? ` or ${price(c)}` : ''}`}</small>
+      <small>${open ? '' : c.tip ? `A coffee for the dev, ${price(c)}` : isFinite(c.needs) ? `${c.needs} medals${shop ? ` or ${price(c)}` : ''}` : `Shop only, ${price(c)}`}</small>
     </button>`;
   }).join('');
   hideOffer();
@@ -403,7 +403,9 @@ function offerColour(c) {
     ? `${c.name} costs ${price(c)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
     : c.tip
       ? `Buy the developer a coffee for ${price(c)} and your car gets painted to match. No medals win this one. It stays yours on any device you sign in to with Google.`
-      : `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`;
+      : isFinite(c.needs)
+        ? `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`
+        : `${c.name} is only in the shop, ${price(c)}. Rivals see it in online races, and it stays yours on any device you sign in to with Google.`;
   $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${price(c)}`;
   $('buyError').textContent = '';
   show('buyPanel', true);
@@ -570,7 +572,7 @@ function renderResults() {
     const time = r.pos === 1 && r.done ? formatTime(r.time)
       : !r.done && r.lapsDown > 0 ? `+${r.lapsDown} lap${r.lapsDown > 1 ? 's' : ''}`
       : `+${r.gap.toFixed(3)}${r.done ? '' : '*'}`;
-    return `<tr class="${r.me ? 'me' : ''}"><td>${r.pos}</td><td><span class="swatch-dot" style="background:${esc(r.color)}"></span>${esc(r.name)}</td><td>${time}</td><td>${formatTime(r.bestLap)}</td></tr>`;
+    return `<tr class="${r.me ? 'me' : ''}"><td>${r.pos}</td><td><span class="swatch-dot" style="background:${esc(r.me ? colour.paint : r.color)}"></span>${esc(r.name)}</td><td>${time}</td><td>${formatTime(r.bestLap)}</td></tr>`;
   }).join('');
 }
 
@@ -777,7 +779,7 @@ function updateRaceHud(s) {
   if (hudCache.racePos !== html) { hudCache.racePos = html; $('racePos').innerHTML = html; }
   const list = rows.map((r, i) => {
     const gap = i === 0 ? 'Leader' : r.lapsDown > 0 ? `+${r.lapsDown}L` : `+${r.gap.toFixed(1)}`;
-    return `<li class="${r.me ? 'me' : ''}"><span class="p">${i + 1}</span><span class="c" style="background:${esc(r.color)}"></span><span class="n">${esc(r.name)}</span><span class="g">${gap}</span></li>`;
+    return `<li class="${r.me ? 'me' : ''}"><span class="p">${i + 1}</span><span class="c" style="background:${esc(r.me ? colour.paint : r.color)}"></span><span class="n">${esc(r.name)}</span><span class="g">${gap}</span></li>`;
   }).join('');
   if (hudCache.standings !== list) { hudCache.standings = list; $('standings').innerHTML = list; }
   if (!$('results').hidden && now - resultsShownAt > 400) renderResults();
@@ -998,6 +1000,7 @@ function startOnline(msg, room, me, host) {
 const lobby = createLobby({
   onlineUI,
   settings,
+  colour: () => colour,
   selected: () => selected,
   trackById: (id) => tracks.find((x) => x.id === id),
   startOnline,

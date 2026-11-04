@@ -4,12 +4,14 @@
 
 import { createRoom, newRoomCode, MAX_PLAYERS } from './net.js';
 import { RIVALS } from './race.js';
+import { rivalPaint } from './medals.js';
 import { track } from './analytics.js';
 
-// Car colours by grid slot; you always see your own car in red.
+// Car colours by grid slot, for AI cars and drivers in the free red. You see
+// your own car in your colour, and other drivers in theirs.
 const COLORS = ['#ff8000', '#00a19b', '#2b4bd4', '#f5c542'];
 
-// game: { onlineUI, selected(), select(trackById), settings, startOnline(start, room, me, host), toast, openAccount() }
+// game: { onlineUI, colour(), selected(), select(trackById), settings, startOnline(start, room, me, host), toast, openAccount() }
 export function createLobby(game) {
   const $ = (id) => document.getElementById(id);
   let room = null, me = null, code = null, peers = [], racing = false, session = null;
@@ -33,7 +35,7 @@ export function createLobby(game) {
     $('lobbyPlayers').innerHTML = '';
     $('lobby').hidden = false;
     try {
-      await room.join({ id: me.id, name: me.name, joinedAt: Date.now(), track: game.selected().id });
+      await room.join({ id: me.id, name: me.name, joinedAt: Date.now(), track: game.selected().id, colour: game.colour().id });
       track('Online lobby', { step: roomCode ? 'joined' : 'created' });
     } catch (err) {
       $('lobbyStatus').textContent = err.message;
@@ -61,7 +63,7 @@ export function createLobby(game) {
     const t = game.selected();
     $('lobbyTrack').textContent = host ? t.name : (game.trackById(peers[0]?.track)?.name || t.name);
     $('lobbyPlayers').innerHTML = peers.slice(0, MAX_PLAYERS).map((p, i) =>
-      `<li><span class="c" style="background:${p.id === me.id ? '#e8112d' : COLORS[i]}"></span><span class="n">${escapeHtml(p.name)}${p.id === me.id ? ' (you)' : ''}</span>${i === 0 ? '<span class="tag">Host</span>' : ''}</li>`).join('');
+      `<li><span class="c" style="background:${p.id === me.id ? game.colour().paint : rivalPaint(p.colour, game.colour(), COLORS[i])}"></span><span class="n">${escapeHtml(p.name)}${p.id === me.id ? ' (you)' : ''}</span>${i === 0 ? '<span class="tag">Host</span>' : ''}</li>`).join('');
     const ai = $('lobbyAi').checked ? MAX_PLAYERS - Math.min(peers.length, MAX_PLAYERS) : 0;
     $('lobbyAiNote').textContent = ai ? `+ ${ai} AI driver${ai > 1 ? 's' : ''}` : '';
     $('lobbyHostOnly').hidden = !host;
@@ -76,7 +78,7 @@ export function createLobby(game) {
   // Host: everyone gets the same grid and settings.
   function start() {
     if (!isHost()) return;
-    const humans = peers.slice(0, MAX_PLAYERS).map((p, i) => ({ id: p.id, name: p.name, color: COLORS[i] }));
+    const humans = peers.slice(0, MAX_PLAYERS).map((p, i) => ({ id: p.id, name: p.name, color: COLORS[i], colour: p.colour }));
     const ai = $('lobbyAi').checked
       ? RIVALS.slice(0, MAX_PLAYERS - humans.length).map((r, k) => ({ id: `ai-${k}`, name: r.name, color: COLORS[humans.length + k], ai: true }))
       : [];
@@ -96,7 +98,9 @@ export function createLobby(game) {
     racing = true;
     $('lobby').hidden = true;
     track('Online race', { step: 'start', players: String(msg.grid.filter((g) => !g.ai).length) });
-    session = game.startOnline(msg, room, me, mine || isHost());
+    // Everyone paints the other drivers here, against their own colour.
+    const grid = msg.grid.map((g) => (g.ai ? g : { ...g, color: rivalPaint(g.colour, game.colour(), g.color) }));
+    session = game.startOnline({ ...msg, grid }, room, me, mine || isHost());
   }
 
   function leave() {

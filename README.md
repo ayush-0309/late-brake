@@ -98,7 +98,7 @@ sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `ve
 
 ## Medals and car colours
 
-Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock car colours in the Garage (`COLOURS` in `src/medals.js`); a gold counts as three, so all 18 medals is every circuit on gold. Players without the medals can buy a colour instead, once the shop is set up. Coffee (`tip`) is the exception: no medals unlock it, it's only bought. Retune the times if the car's handling or the AI changes.
+Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best laps of a lone easy, medium and hard AI driver, rounded up to the half second. A clean lap (not rescued) that beats one wins that medal. Medals unlock some car colours in the Garage (`COLOURS` in `src/medals.js`): Racing Green at 6, Purple Sector at 12 and Champion Gold at 18. A gold counts as three, so 18 is every circuit on gold. Players without the medals can buy those instead, once the shop is set up. Pearl, Hot Pink, Volt and Coffee (`needs: Infinity`) are shop only. Until November 2026 every colour could be won, at lower counts; a browser that had won one by then keeps it (`latebrake:kept-colours`). In online races the other drivers see your colour, unless it's the free red or the same as theirs (then your grid slot's). Retune the times if the car's handling or the AI changes.
 
 ## Credits
 
