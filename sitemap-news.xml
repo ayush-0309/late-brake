@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/massa-hamilton-2008-interlagos-title-decider.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-04T18:00:00+05:30</news:publication_date>
+      <news:title>How Hamilton won the 2008 F1 title in the last corners at Interlagos</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/mclaren-brazil-upgrades-2027-front-wing.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-03T09:00:00+05:30</news:publication_date>
       <news:title>Penalties drop Piastri and both Alpines out of F1 Mexico points</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/vettel-2012-interlagos-title-comeback.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-02T18:00:00+05:30</news:publication_date>
-      <news:title>How Vettel spun at Interlagos and still won the 2012 F1 title</news:title>
     </news:news>
   </url>
 </urlset>
