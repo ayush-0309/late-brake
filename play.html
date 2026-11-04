@@ -133,6 +133,10 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="M8.5 9.6 6 3h4l2 4 2-4h4l-2.5 6.6"/></svg>
           <span>Garage</span><b id="medalCount">0</b>
         </button>
+        <button class="icon-btn" data-open="controls" aria-label="Controls" title="Controls">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12a4 4 0 0 1 4 4v1a4 4 0 0 1-7 2.6l-1-.6h-4l-1 .6A4 4 0 0 1 2 13v-1a4 4 0 0 1 4-4z"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r="0.6" fill="currentColor"/><circle cx="18" cy="13.5" r="0.6" fill="currentColor"/></svg>
+          <span>Controls</span>
+        </button>
         <button class="icon-btn" data-open="settings" aria-label="Settings">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
           <span>Settings</span>
@@ -219,6 +223,7 @@
         <span><kbd>Esc</kbd> pause</span>
         <span><kbd>K</kbd> keep lap</span>
         <span class="pad-hint">Gamepad works too</span>
+        <button class="link-btn" data-open="controls">All controls</button>
       </div>
 
       <div class="menu-foot">
@@ -237,6 +242,7 @@
       <button id="resumeBtn" class="primary">Resume</button>
       <button id="restartBtn" class="secondary">Restart</button>
       <button class="secondary" data-open="settings">Settings</button>
+      <button class="secondary" data-open="controls">Controls</button>
       <button id="menuBtn" class="secondary">Change circuit</button>
     </div>
   </div>
@@ -409,6 +415,14 @@
 
       <div class="setting">
         <div class="setting-text">
+          <div class="setting-name">Controls</div>
+          <div class="setting-help">Every key, touch button and gamepad button.</div>
+        </div>
+        <button class="secondary" data-open="controls">Show</button>
+      </div>
+
+      <div class="setting">
+        <div class="setting-text">
           <div class="setting-name">Lap records</div>
           <div class="setting-help">Best laps, ghosts and medals are saved in this browser.</div>
         </div>
@@ -416,6 +430,72 @@
       </div>
 
       <button id="settingsDone" class="primary">Done</button>
+    </div>
+  </div>
+
+  <div id="controls" class="overlay" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="controlsTitle">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="controlsTitle">Controls</h2>
+        <button class="icon-btn" id="controlsClose" aria-label="Close controls">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="segmented controls-tabs" id="controlsTabs" role="radiogroup" aria-label="Controls for">
+        <button data-tab="keys" role="radio">Keyboard</button>
+        <button data-tab="touch" role="radio">Touch</button>
+        <button data-tab="pad" role="radio">Gamepad</button>
+      </div>
+
+      <table class="controls-table" data-tab="keys">
+        <tr class="group"><th colspan="2">Driving</th></tr>
+        <tr><td>Gas</td><td><kbd>↑</kbd> or <kbd>W</kbd></td></tr>
+        <tr><td>Brake</td><td><kbd>↓</kbd>, <kbd>S</kbd> or <kbd>Space</kbd></td></tr>
+        <tr><td>Steer</td><td><kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd></td></tr>
+        <tr class="group"><th colspan="2">On track</th></tr>
+        <tr><td>Pause</td><td><kbd>Esc</kbd> or <kbd>P</kbd></td></tr>
+        <tr><td>Restart</td><td><kbd>R</kbd></td></tr>
+        <tr><td>Reset to track</td><td><kbd>T</kbd></td></tr>
+        <tr><td>Keep a lap that went off track <small>Watch an ad</small></td><td><kbd>K</kbd></td></tr>
+        <tr><td>Racing line <small>Full, braking, off</small></td><td><kbd>L</kbd></td></tr>
+        <tr><td>Ghost car on or off</td><td><kbd>G</kbd></td></tr>
+        <tr><td>Camera <small>Chase, cockpit, top-down</small></td><td><kbd>C</kbd></td></tr>
+        <tr><td>Sound on or off</td><td><kbd>M</kbd></td></tr>
+        <tr class="group"><th colspan="2">Menu</th></tr>
+        <tr><td>Pick a circuit</td><td><kbd>↑</kbd> <kbd>↓</kbd></td></tr>
+        <tr><td>Start</td><td><kbd>Enter</kbd></td></tr>
+        <tr><td>Close a window</td><td><kbd>Esc</kbd></td></tr>
+      </table>
+
+      <table class="controls-table" data-tab="touch" hidden>
+        <tr class="group"><th colspan="2">Driving</th></tr>
+        <tr><td>Gas</td><td>Green pedal, bottom right</td></tr>
+        <tr><td>Brake</td><td>Red pedal, next to it</td></tr>
+        <tr><td>Steer</td><td>‹ and › buttons, bottom left</td></tr>
+        <tr class="group"><th colspan="2">On track</th></tr>
+        <tr><td>Pause</td><td>❚❚ at the top</td></tr>
+        <tr><td>Reset to track</td><td>↺ at the top</td></tr>
+        <tr><td>Sound on or off</td><td>Speaker at the top</td></tr>
+        <tr><td>Keep a lap that went off track <small>Watch an ad</small></td><td>Keep lap, under the lap time</td></tr>
+        <tr><td>Restart</td><td>Pause, then Restart</td></tr>
+        <tr><td>Racing line, ghost, camera</td><td>Pause, then Settings</td></tr>
+      </table>
+      <p class="controls-note" data-tab="touch" hidden>Use both thumbs: you can hold gas and steer at the same time.</p>
+
+      <table class="controls-table" data-tab="pad" hidden>
+        <tr class="group"><th></th><th>Xbox</th><th>PlayStation</th></tr>
+        <tr><td>Gas</td><td>RT, A or RB</td><td>R2, ✕ or R1</td></tr>
+        <tr><td>Brake</td><td>LT, B or LB</td><td>L2, ○ or L1</td></tr>
+        <tr><td>Steer</td><td>Left stick or D-pad</td><td>Left stick or D-pad</td></tr>
+        <tr><td>Pause</td><td>Menu</td><td>Options</td></tr>
+        <tr><td>Restart</td><td>View</td><td>Create</td></tr>
+        <tr><td>Reset to track</td><td>Y</td><td>△</td></tr>
+        <tr><td>Keep a lap that went off track <small>Watch an ad</small></td><td>X</td><td>□</td></tr>
+        <tr><td>Racing line, ghost, camera</td><td colspan="2">Pause, then Settings</td></tr>
+      </table>
+      <p class="controls-note" data-tab="pad" hidden>Plug in or pair a controller and press any button. The keyboard keeps working too.</p>
+
+      <button id="controlsDone" class="primary">Done</button>
     </div>
   </div>
 

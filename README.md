@@ -114,6 +114,8 @@ Gamepad (standard mapping): left stick or d-pad steers, RT or A throttle, LT or 
 
 On touch screens, steering buttons appear on the left and pedals on the right; the ↺ button at the top resets to track.
 
+All of this is in the game too: the Controls window (`#controls` in `play.html`), with a tab each for keyboard, touch and gamepad. It opens from the menu's top bar (just Settings on a phone), the pause menu, Settings and the key strip under the menu. Keep it in step when a control changes.
+
 The racing line is painted green (throttle), yellow (lift) and red (brake). It's off by default; turn it on in Settings or with L, full or braking zones only. Go off track (or hit a wall hard) three times within two minutes and the timing panel suggests the line (or, with it on, a restart) for ten seconds while you keep driving; once per run, and it stops after being ignored twice. Resuming from pause counts 3, 2, 1 before the car moves. Braking boards at 150, 100 and 50 m count down to every stop that loses more than about 70 km/h. Reset to track puts the car back on the track at the nearest point, stopped; the lap carries on, and the usual off-track rule decides if it counts.
 
 The default chase camera turns with the car, so left is always screen-left. C cycles chase, cockpit (first person, WebGL; falls back to chase where WebGL isn't available) and top-down. Settings also has the cameras, steering sensitivity (low / normal / high), racing line, ghost and sound, and a reset for saved lap records.

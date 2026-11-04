@@ -221,6 +221,7 @@ function startRun(opts = {}) {
   show('menu', false);
   show('pause', false);
   show('settings', false);
+  show('controls', false);
   show('results', false);
   document.body.classList.toggle('racing', session.mode === 'race');
   show('hud', true);
@@ -246,6 +247,7 @@ function setPaused(p) {
     return;
   }
   show('settings', false);
+  show('controls', false);
   show('lights', false); // a GO left from the start would sit under the count
   document.activeElement?.blur?.();
   let n = session.phase === 'countdown' ? 0 : 3;
@@ -277,6 +279,39 @@ function stopResumeCount() {
 // Escape, P and the pad's pause button: pause while driving or counting
 // down, resume from the pause menu.
 const togglePause = () => setPaused(!paused || !!resumeTimer);
+
+// ---------- controls ----------
+
+// Every key, touch button and gamepad button. It opens on the way this
+// player drives: gamepad once one is plugged in, touch on a phone.
+let controlsOpener = null; // focused again on closing (Settings can open it)
+function openControls() {
+  controlsOpener = document.activeElement;
+  const pad = [...(navigator.getGamepads?.() || [])].some((p) => p?.connected);
+  showControls(pad ? 'pad' : document.body.classList.contains('touch') ? 'touch' : 'keys');
+  show('controls', true);
+  $('controlsDone').focus({ preventScroll: true });
+}
+
+function showControls(tab) {
+  for (const b of $('controlsTabs').querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset.tab === tab));
+  for (const el of $('controls').querySelectorAll('.controls-table, .controls-note')) el.hidden = el.dataset.tab !== tab;
+}
+
+function closeControls() {
+  show('controls', false);
+  const back = controlsOpener?.getClientRects().length ? controlsOpener : session ? $('resumeBtn') : $('startBtn');
+  back.focus({ preventScroll: true });
+}
+
+document.querySelectorAll('[data-open="controls"]').forEach((b) => b.addEventListener('click', openControls));
+$('controlsTabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (b) showControls(b.dataset.tab);
+});
+$('controlsClose').addEventListener('click', closeControls);
+$('controlsDone').addEventListener('click', closeControls);
+$('controls').addEventListener('click', (e) => { if (e.target === $('controls')) closeControls(); });
 
 // ---------- settings ----------
 
@@ -865,7 +900,8 @@ function cycleLine() {
 
 function onPad(action) {
   if (action === 'pause') {
-    if (!$('settings').hidden) closeSettings();
+    if (!$('controls').hidden) closeControls();
+    else if (!$('settings').hidden) closeSettings();
     else if (session) togglePause();
     else requestRun();
   } else if (action === 'restart' && session) {
@@ -882,14 +918,16 @@ addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea, select')) return; // typing, not driving
   const settingsOpen = !$('settings').hidden;
   const garageOpen = !$('garage').hidden;
-  const dialogOpen = settingsOpen || garageOpen || !$('account').hidden || !$('lobby').hidden;
+  const controlsOpen = !$('controls').hidden;
+  const dialogOpen = settingsOpen || garageOpen || controlsOpen || !$('account').hidden || !$('lobby').hidden;
   if (e.code === 'Escape') {
     if (!$('lobby').hidden && !session) lobby.leave();
+    else if (controlsOpen) closeControls();
     else if (settingsOpen) closeSettings();
     else if (garageOpen) closeGarage();
     else if (session) togglePause();
   } else if (e.code === 'KeyP') {
-    if (session && !settingsOpen) togglePause();
+    if (session && !settingsOpen && !controlsOpen) togglePause();
   } else if (e.code === 'KeyR') {
     if (session) requestRun();
   } else if (e.code === 'KeyK') {

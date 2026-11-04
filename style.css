@@ -426,7 +426,7 @@ body.touch .rev-fill { background-size: 170px 100%; }
   touch-action: pan-y;
   z-index: 10;
 }
-#settings { z-index: 20; background: rgba(6, 8, 10, 0.7); }
+#settings, #controls { z-index: 20; background: rgba(6, 8, 10, 0.7); }
 
 .menu-overlay {
   background:
@@ -451,6 +451,7 @@ body.touch .rev-fill { background-size: 170px 100%; }
 .menu-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .menu-top-buttons { display: flex; gap: 8px; }
 .account-btn.signed-in { border-color: rgba(245, 197, 66, 0.4); color: var(--yellow); }
+#accountLabel { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Daily challenge card. */
 .challenge-card {
@@ -798,6 +799,18 @@ body.touch .keys-only { display: none; }
 .segmented button[aria-checked="true"] { background: var(--text); color: #0b0d10; }
 .sheet .primary { margin-top: 6px; }
 
+/* Controls: keys, touch buttons and gamepad buttons, one tab each. */
+.controls-tabs { align-self: flex-start; }
+.controls-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.controls-table td, .controls-table th { padding: 7px 0; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.controls-table td + td, .controls-table th + th { padding-left: 12px; }
+.controls-table td:first-child { color: #c3c8d0; }
+.controls-table td + td { font-weight: 700; white-space: nowrap; }
+.controls-table small { display: block; font-size: 13px; color: var(--muted); }
+.controls-table .group th { padding-top: 14px; border-top: 0; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.controls-note { font-size: 15px; color: var(--muted); margin: 0; }
+.controls-help .link-btn { margin: 0; }
+
 /* Garage: car colour cards, two to a row. */
 .sheet.garage-sheet { width: min(420px, 100%); }
 .colour-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
@@ -848,6 +861,15 @@ body.touch .keys-only { display: none; }
   .icon-btn span { display: none; }
   .setting { flex-direction: column; align-items: stretch; gap: 8px; }
   .segmented { align-self: flex-start; }
+}
+
+/* Less room up top: Controls goes to just its icon, then (on a phone) is
+   only in Settings. */
+@media (max-width: 1000px) {
+  .menu-top [data-open="controls"] span { display: none; }
+}
+@media (max-width: 460px) {
+  .menu-top [data-open="controls"] { display: none; }
 }
 
 @media (max-height: 780px) and (min-width: 761px) {
