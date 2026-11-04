@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-4-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-04T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: F1&#39;s 500th race and Räikkönen&#39;s Abu Dhabi win</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/haas-drops-ocon-camara-debut-brazil.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-02T15:00:00+05:30</news:publication_date>
       <news:title>Stewards explain lighter Leclerc penalty that angered Hamilton</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-2-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-02T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Hamilton&#39;s first title and his Austin win streak</news:title>
     </news:news>
   </url>
 </urlset>
