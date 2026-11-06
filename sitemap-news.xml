@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/williams-first-win-silverstone-1979.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-06T18:00:00+05:30</news:publication_date>
+      <news:title>How Williams won its first F1 race at Silverstone in 1979</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/mercedes-can-clinch-constructors-title-brazil.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-05T09:00:00+05:30</news:publication_date>
       <news:title>Herta to run Perez&#39;s Cadillac in F1 practice at Interlagos</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/massa-hamilton-2008-interlagos-title-decider.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-04T18:00:00+05:30</news:publication_date>
-      <news:title>How Hamilton won the 2008 F1 title in the last corners at Interlagos</news:title>
     </news:news>
   </url>
 </urlset>
