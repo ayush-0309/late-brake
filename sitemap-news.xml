@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/alan-jones-1980-f1-champion-dies.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-06T09:00:00+05:30</news:publication_date>
+      <news:title>Alan Jones, 1980 F1 champion and Williams&#39; first, dies aged 80</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/f1-debut-facts-that-sound-made-up.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-04T12:00:00+05:30</news:publication_date>
       <news:title>On this day: F1&#39;s 500th race and Räikkönen&#39;s Abu Dhabi win</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/haas-drops-ocon-camara-debut-brazil.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-04T09:00:00+05:30</news:publication_date>
-      <news:title>Haas drops Ocon for rest of 2026 as Camara gets F1 debut in Brazil</news:title>
     </news:news>
   </url>
 </urlset>
