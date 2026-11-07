@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-7-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-07T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Senna&#39;s last win and Red Bull&#39;s first F1 title</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/antonelli-tops-brazil-friday-practice.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-05T15:00:00+05:30</news:publication_date>
       <news:title>NTT to join McLaren F1 team as official partner from 2027</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-5-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-05T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Boutsen&#39;s Adelaide rain win and Verstappen&#39;s 52nd</news:title>
     </news:news>
   </url>
 </urlset>
