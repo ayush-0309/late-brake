@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/verstappen-2024-interlagos-win-from-17th.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-08T18:00:00+05:30</news:publication_date>
+      <news:title>How Verstappen won from 17th in the 2024 Interlagos rain</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/brazilian-grand-prix-deal-to-2035.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-07T09:00:00+05:30</news:publication_date>
       <news:title>Antonelli tops F1 São Paulo practice after Norris leads FP1</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/williams-first-win-silverstone-1979.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-06T18:00:00+05:30</news:publication_date>
-      <news:title>How Williams won its first F1 race at Silverstone in 1979</news:title>
     </news:news>
   </url>
 </urlset>
