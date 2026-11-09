@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-9-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-09T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Rosberg&#39;s Interlagos win and Norris&#39;s 2025 victory</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/norris-wins-sao-paulo-mercedes-title.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-07T15:00:00+05:30</news:publication_date>
       <news:title>Russell to take five-place grid penalty at F1 São Paulo GP</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-7-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-07T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Senna&#39;s last win and Red Bull&#39;s first F1 title</news:title>
     </news:news>
   </url>
 </urlset>
