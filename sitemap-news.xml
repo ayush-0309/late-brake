@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/piastri-ends-webber-management-deal.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-10T09:00:00+05:30</news:publication_date>
+      <news:title>Piastri ends management deal with Mark Webber after seven years</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/las-vegas-grand-prix-facts.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-08T12:00:00+05:30</news:publication_date>
       <news:title>On this day: Berger wins in Adelaide as Senna and Mansell collide</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/norris-wet-pole-sao-paulo-2026.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-08T09:00:00+05:30</news:publication_date>
-      <news:title>Norris takes wet F1 São Paulo pole as Russell rues aborted lap</news:title>
     </news:news>
   </url>
 </urlset>
