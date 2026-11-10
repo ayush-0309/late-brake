@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/five-way-fight-for-second-f1-2026.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-10T15:00:00+05:30</news:publication_date>
+      <news:title>Verstappen leads five-way fight for second in F1 standings</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-10-november.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-08T18:00:00+05:30</news:publication_date>
       <news:title>How Verstappen won from 17th in the 2024 Interlagos rain</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/brazilian-grand-prix-deal-to-2035.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-08T15:00:00+05:30</news:publication_date>
-      <news:title>F1 extends Brazilian Grand Prix deal at Interlagos to 2035</news:title>
     </news:news>
   </url>
 </urlset>
