@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/jordan-first-win-spa-1998.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-10T18:00:00+05:30</news:publication_date>
+      <news:title>How Jordan won its first F1 race in the 1998 Spa chaos</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/five-way-fight-for-second-f1-2026.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-09T09:00:00+05:30</news:publication_date>
       <news:title>Norris wins wet F1 São Paulo GP as Mercedes clinch the title</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/verstappen-2024-interlagos-win-from-17th.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-08T18:00:00+05:30</news:publication_date>
-      <news:title>How Verstappen won from 17th in the 2024 Interlagos rain</news:title>
     </news:news>
   </url>
 </urlset>
