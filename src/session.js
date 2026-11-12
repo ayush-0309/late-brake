@@ -7,8 +7,11 @@ import { project } from './track.js';
 export const COUNTDOWN = 2.4;      // seconds of start lights before GO
 const GHOST_EVERY = 2;             // record a ghost sample every N ticks
 const SPLIT_EVERY = 10;            // meters between live-delta checkpoints
-const OFF_LIMIT = 1.2;             // car center this far past the edge = off track
-const OFF_ALLOWED = 0.5;           // seconds fully off before the lap is invalid
+// Track limits as in Grand Prix racing: the white lines are part of the
+// track, and a car with all four wheels past them has left it, which deletes
+// the lap.
+export const OFF_LIMIT = 1.2;      // car centre this far past the edge: all four wheels off
+const BIG_MOMENT = 0.5;            // seconds of one trip off that make it a big moment (the help tip)
 const GRID_BACK = 8;               // start this many meters behind the line
 const GRID_LAT = -3;               // and this far left of center
 
@@ -44,7 +47,6 @@ export class Session {
     this.sectorStart = 0;
     this.sectorTimes = [];
     this.sectorClasses = [];
-    this.offTime = 0;
     this.excursion = 0;                // seconds of the current trip off track
     this.valid = true;
     this.rescued = false;              // this lap was kept with a rescue
@@ -68,7 +70,6 @@ export class Session {
     if (!this.canRescue) return false;
     this.valid = true;
     this.rescued = true;
-    this.offTime = 0;
     this.forgiving = true;
     this.events.push({ type: 'rescued' });
     return true;
@@ -124,14 +125,14 @@ export class Session {
     const off = Math.abs(pj.lat) > t.halfW + OFF_LIMIT;
     if (!off) this.forgiving = false;
     if (off && !this.forgiving) {
-      this.offTime += DT;
-      if (this.valid && this.offTime > OFF_ALLOWED) {
+      if (this.excursion === 0) this.leftTrack();
+      if (this.valid) {
         this.valid = false;
         this.events.push({ type: 'invalid' });
       }
       // Each trip off that lasts long enough is reported once.
       this.excursion += DT;
-      if (this.excursion > OFF_ALLOWED && this.excursion - DT <= OFF_ALLOWED) this.events.push({ type: 'off' });
+      if (this.excursion > BIG_MOMENT && this.excursion - DT <= BIG_MOMENT) this.events.push({ type: 'off' });
     } else {
       this.excursion = 0;
     }
@@ -141,9 +142,13 @@ export class Session {
     this.record();
   }
 
+  // A trip off the track begins. Nothing more in a time trial (the lap is
+  // already gone); a race counts it as a strike (race.js).
+  leftTrack() {}
+
   // Puts the car back on the track, stopped and facing down it, at the
-  // nearest point to where it is. The lap carries on: time spent off track
-  // before the reset already counts against it under the usual rule.
+  // nearest point to where it is. The lap carries on: a trip off before the
+  // reset has already deleted it.
   resetToTrack() {
     if (this.phase !== 'running') return false;
     const t = this.track, car = this.car;
@@ -219,7 +224,6 @@ export class Session {
     this.sector = 0;
     this.sectorTimes = [];
     this.sectorClasses = [];
-    this.offTime = 0;
     this.valid = true;
     this.rescued = false;
     this.forgiving = false;

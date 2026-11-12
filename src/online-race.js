@@ -37,6 +37,8 @@ export class OnlineRaceSession extends RaceSession {
     this.remotes = new Map();   // everyone else, by id
     this.playerFinishedAt = null;
     this.playerBestLap = null;
+    this.strikes = 0;
+    this.penalty = 0;            // s added for track limits; each screen counts its own car's
 
     start.grid.forEach((g, slot) => {
       const car = gridCar(t, slot);
@@ -48,6 +50,7 @@ export class OnlineRaceSession extends RaceSession {
       const entry = {
         id: g.id, name: g.name, color: g.color, car, ai: !!g.ai, left: false,
         progress: car.s - t.length, laps: 0, lapStart: 0, finishedAt: null, bestLap: null, last: null, lastAt: 0,
+        valid: true, wasOff: false, strikes: 0, penalty: 0,
       };
       if (g.ai && host) {
         entry.driver = createDriver(t, line, skill);
@@ -94,6 +97,7 @@ export class OnlineRaceSession extends RaceSession {
     r.laps = s.laps;
     r.finishedAt = s.finishedAt;
     r.bestLap = s.bestLap;
+    r.penalty = s.penalty || 0;
   }
 
   // Carry a remote car on from its last update and ease it there.
@@ -123,6 +127,7 @@ export class OnlineRaceSession extends RaceSession {
       const hit = carContact(A, r.car);
       if (!hit) continue;
       const { over, nx, ny } = hit;
+      A.contactAt = this.clock;
       A.x -= nx * over;
       A.y -= ny * over;
       const vrel = (r.car.vx - A.vx) * nx + (r.car.vy - A.vy) * ny;
@@ -141,10 +146,10 @@ export class OnlineRaceSession extends RaceSession {
     });
     const msg = pack(this.me.id, this.car, {
       progress: r2(this.progress), laps: Math.min(this.laps.length, this.totalLaps),
-      finishedAt: this.playerFinishedAt, bestLap: this.playerBestLap,
+      finishedAt: this.playerFinishedAt, bestLap: this.playerBestLap, penalty: this.penalty,
     });
     if (this.host) {
-      msg.ai = this.rivals.map((r) => pack(r.id, r.car, { progress: r2(r.progress), laps: r.laps, finishedAt: r.finishedAt, bestLap: r.bestLap }));
+      msg.ai = this.rivals.map((r) => pack(r.id, r.car, { progress: r2(r.progress), laps: r.laps, finishedAt: r.finishedAt, bestLap: r.bestLap, penalty: r.penalty }));
     }
     this.room.send('state', msg);
   }

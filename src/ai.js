@@ -10,6 +10,9 @@ const SIDE = 2.6;         // m of lateral overlap that counts as "in the way"
 const PASS_GAP = 3.2;     // m of lateral room to leave when passing
 const OFFSET_RATE = 2.2;  // m/s the car moves across the track
 const STUCK_TIME = 2.5;   // s nearly stopped before resetting to the track
+const SLIDE = 0.6;        // car.slip above this: sliding, ease off the throttle
+const EDGE = 1;           // m inside the edge line where a sliding car starts braking
+const EDGE_BRAKE = 0.4;   // how hard
 
 export const DIFFICULTY = { easy: 0.86, medium: 0.93, hard: 0.985 };
 
@@ -18,6 +21,7 @@ export function createDriver(track, line, skill) {
   let j = -1;              // nearest racing-line point
   let offset = 0;          // current lateral shift from the line, m (+ = right)
   let stuck = 0;
+  let lastLat = 0;         // across the track last tick, to tell which way the car is heading
 
   function nearest(car) {
     const { n, xs, ys } = line;
@@ -72,14 +76,21 @@ export function createDriver(track, line, skill) {
     let err = Math.atan2(ty - car.y, tx - car.x) - car.a;
     err = Math.atan2(Math.sin(err), Math.cos(err));
 
+    const lat = car.lat ?? 0;
+    const edge = car.slip > SLIDE && Math.abs(lat) > track.halfW - EDGE && (lat - lastLat) * lat > 0;
+    lastLat = lat;
+
     stuck = v < 2 ? stuck + dt : 0;
     const reset = stuck > STUCK_TIME;
     if (reset) stuck = 0;
 
     return {
       steer: clamp(err * 3.5, -1, 1),
-      throttle: v < target - 0.5 ? 1 : v < target ? 0.4 : 0,
-      brake: v > target + 1.5 ? clamp((v - target) / 6, 0.3, 1) : 0,
+      // Traction control: ease off while the car slides, so a hairpin exit
+      // doesn't slide it off the track. Sliding toward the edge: lift and
+      // brake to tighten the line and stay inside the track limits.
+      throttle: edge ? 0 : (v < target - 0.5 ? 1 : v < target ? 0.4 : 0) * (car.slip > SLIDE ? 0.6 : 1),
+      brake: edge ? EDGE_BRAKE : v > target + 1.5 ? clamp((v - target) / 6, 0.3, 1) : 0,
       sens: 1,
       reset,
     };

@@ -2,7 +2,7 @@
 // timing, sectors and track limits work the same) and adds a grid, rivals,
 // car-to-car contact, positions and a finish. No DOM, so it can run headless.
 
-import { Session } from './session.js';
+import { Session, OFF_LIMIT } from './session.js';
 import { DT, CAR, createCar, stepCar, collideBarrier } from './car.js';
 import { project } from './track.js';
 import { buildLine } from './line.js';
@@ -16,9 +16,18 @@ export const RIVALS = [
   { name: 'R. Tanaka', color: '#9ca3af' },
 ];
 const SKILL_SPREAD = [0.012, -0.004, 0.006, -0.012, 0]; // drivers differ a little
+const MAX_SKILL = DIFFICULTY.hard;                       // but none past hard: quicker, the AI can't keep inside the track limits
 const CAR_RADIUS = 1.0;                                  // three circles along each car
 const CIRCLES = [-1.75, 0, 1.75];
 const RESTITUTION = 0.3;
+// Track limits in a race, as in Grand Prix racing: every trip off deletes
+// that lap and is a strike (unless another car pushed you off). The third
+// brings the black-and-white flag; the fourth and each one after add five
+// seconds to the race time.
+const WARN_AT = 3;
+const PENALTY_FROM = 4;
+const PENALTY = 5;      // s
+const PUSHED = 2;       // s after car-to-car contact in which a trip off isn't a strike
 
 export class RaceSession extends Session {
   // opts: { opponents: 1–3, laps, difficulty: 'easy' | 'medium' | 'hard', name }
@@ -44,8 +53,9 @@ export class RaceSession extends Session {
     this.rivals = RIVALS.slice(0, o.opponents).map((r, g) => {
       const car = gridCar(t, g);
       return {
-        ...r, car, driver: createDriver(t, line, skill + SKILL_SPREAD[g]),
+        ...r, car, driver: createDriver(t, line, Math.min(MAX_SKILL, skill + SKILL_SPREAD[g])),
         progress: car.s - t.length, laps: 0, lapStart: 0, finishedAt: null, bestLap: null,
+        valid: true, wasOff: false, strikes: 0, penalty: 0,
       };
     });
     const me = gridCar(t, o.opponents);
@@ -53,6 +63,15 @@ export class RaceSession extends Session {
     this.progress = me.s - t.length;
     this.playerFinishedAt = null;
     this.playerBestLap = null;
+    this.strikes = 0;
+    this.penalty = 0;
+  }
+
+  // The player's trip off the track: a strike, unless pushed off or already
+  // past the flag (the AI drives the car home then).
+  leftTrack() {
+    if (this.finished || !strike(this, this.car)) return;
+    this.events.push({ type: 'strike', strikes: this.strikes, warn: this.strikes === WARN_AT, penalty: this.strikes >= PENALTY_FROM });
   }
 
   // No ghost in a race: the rivals are on track instead.
@@ -75,10 +94,10 @@ export class RaceSession extends Session {
     for (const r of this.rivals) this.stepRival(r);
     this.collideCars();
 
-    // Player's laps: best lap in the race, and the finish.
+    // Player's laps: best lap in the race (deleted laps don't count), and the finish.
     if (this.laps.length > lapsBefore) {
       const l = this.laps.at(-1);
-      if (this.playerBestLap === null || l.time < this.playerBestLap) this.playerBestLap = l.time;
+      if (l.valid && (this.playerBestLap === null || l.time < this.playerBestLap)) this.playerBestLap = l.time;
       if (!this.finished && this.laps.length >= this.totalLaps) {
         this.finished = true;
         this.playerFinishedAt = this.lapStart; // the moment the last lap ended
@@ -110,12 +129,21 @@ export class RaceSession extends Session {
     const prev = r.progress;
     r.progress += ds;
 
+    // Track limits, the same as the player's.
+    const off = Math.abs(pj.lat) > t.halfW + OFF_LIMIT;
+    if (off && r.finishedAt === null) {
+      r.valid = false;
+      if (!r.wasOff) strike(this, car, r);
+    }
+    r.wasOff = off;
+
     // Crossing the line: count the lap, interpolating the exact moment.
     const line = (r.laps + 1) * t.length;
     if (r.progress >= line && prev < line) {
       const at = this.clock - DT + ((line - prev) / (r.progress - prev)) * DT;
       const lapTime = at - r.lapStart;
-      if (r.laps > 0 || lapTime > 0) r.bestLap = r.bestLap === null ? lapTime : Math.min(r.bestLap, lapTime);
+      if (r.valid && (r.laps > 0 || lapTime > 0)) r.bestLap = r.bestLap === null ? lapTime : Math.min(r.bestLap, lapTime);
+      r.valid = true;
       r.laps++;
       r.lapStart = at;
       if (r.laps >= this.totalLaps && r.finishedAt === null) r.finishedAt = at;
@@ -132,6 +160,7 @@ export class RaceSession extends Session {
         const hit = carContact(A, B);
         if (!hit) continue;
         const { over, nx, ny } = hit;
+        A.contactAt = B.contactAt = this.clock;
         A.x -= nx * over / 2; A.y -= ny * over / 2;
         B.x += nx * over / 2; B.y += ny * over / 2;
         const vrel = (B.vx - A.vx) * nx + (B.vy - A.vy) * ny;
@@ -154,18 +183,19 @@ export class RaceSession extends Session {
     return inp;
   }
 
-  // Everyone, in race order: finished cars by finishing time, then the rest
-  // by distance covered.
+  // Everyone, in race order: finished cars by race time (finishing time plus
+  // penalties), then the rest by distance covered.
   get standings() {
     const L = this.track.length;
     const rows = [
-      { name: this.opts.name || 'You', color: '#e8112d', me: true, progress: this.progress, finishedAt: this.playerFinishedAt, laps: Math.min(this.laps.length, this.totalLaps), bestLap: this.playerBestLap, car: this.car },
-      ...this.opponents.map((r) => ({ name: r.name, color: r.color, me: false, progress: r.progress, finishedAt: r.finishedAt, laps: Math.min(r.laps, this.totalLaps), bestLap: r.bestLap, car: r.car })),
+      { name: this.opts.name || 'You', color: '#e8112d', me: true, progress: this.progress, finishedAt: this.playerFinishedAt, penalty: this.penalty, laps: Math.min(this.laps.length, this.totalLaps), bestLap: this.playerBestLap, car: this.car },
+      ...this.opponents.map((r) => ({ name: r.name, color: r.color, me: false, progress: r.progress, finishedAt: r.finishedAt, penalty: r.penalty || 0, laps: Math.min(r.laps, this.totalLaps), bestLap: r.bestLap, car: r.car })),
     ];
+    for (const r of rows) r.time = r.finishedAt === null ? null : r.finishedAt + r.penalty;
     rows.sort((a, b) => {
-      if (a.finishedAt !== null && b.finishedAt !== null) return a.finishedAt - b.finishedAt;
-      if (a.finishedAt !== null) return -1;
-      if (b.finishedAt !== null) return 1;
+      if (a.time !== null && b.time !== null) return a.time - b.time;
+      if (a.time !== null) return -1;
+      if (b.time !== null) return 1;
       return b.progress - a.progress;
     });
     const lead = rows[0];
@@ -174,7 +204,7 @@ export class RaceSession extends Session {
       // Gap to the leader in seconds: exact once both have finished, else
       // estimated from the distance between them at the current speed.
       if (r === lead) r.gap = 0;
-      else if (r.finishedAt !== null && lead.finishedAt !== null) r.gap = r.finishedAt - lead.finishedAt;
+      else if (r.time !== null && lead.time !== null) r.gap = r.time - lead.time;
       else r.gap = (lead.progress - r.progress) / Math.max(20, r.car.speed);
     }
     return rows;
@@ -188,7 +218,7 @@ export class RaceSession extends Session {
     return this.standings.map((r, i) => ({
       pos: i + 1, name: r.name, color: r.color, me: r.me, done: r.finishedAt !== null,
       gap: r.gap, lapsDown: r.lapsDown, bestLap: r.bestLap,
-      time: r.finishedAt,
+      time: r.time, penalty: r.penalty,
     }));
   }
 }
@@ -208,6 +238,15 @@ export function carContact(A, B) {
     }
   }
   return best;
+}
+
+// A trip off the track by `car` (the player's, or rival `r`'s): a strike,
+// with five seconds added from the fourth, unless another car touched it
+// just before. Says whether it was one.
+function strike(race, car, r = race) {
+  if (race.clock - (car.contactAt ?? -Infinity) < PUSHED) return false;
+  if (++r.strikes >= PENALTY_FROM) r.penalty += PENALTY;
+  return true;
 }
 
 // A car parked in grid slot g (0 = pole), as the scenery paints the slots:

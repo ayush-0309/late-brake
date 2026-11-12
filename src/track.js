@@ -5,21 +5,22 @@ import { CIRCUITS } from './circuits.js';
 
 // Game settings per circuit. Geometry comes from circuits.js.
 // `slug`: the circuit's page, circuits/<slug>.html.
-// `medals`: bronze, silver and gold lap times (s), the best laps of a lone
-// easy, medium and hard AI driver rounded up to the half second. Retune them
-// if the car's handling or the AI changes.
+// `medals`: bronze, silver and gold lap times (s), the best clean laps
+// (inside the track limits) of a lone easy, medium and hard AI driver,
+// rounded up to the half second. Retune them if the car's handling or the AI
+// changes, keeping an old time that's quicker and was set by a clean lap.
 const SETTINGS = [
   { id: 'at-1969', slug: 'spielberg', name: 'Spielberg', country: 'Austria', width: 14, runoff: 14,
-    medals: [79, 74.5, 71.5],
+    medals: [79, 74, 71],
     blurb: 'Short and fast. Three heavy stops uphill, then flat-out through the valley.' },
   { id: 'it-1922', slug: 'monza', name: 'Monza', country: 'Italy', width: 14, runoff: 12,
-    medals: [96.5, 90, 86.5],
+    medals: [96.5, 89.5, 85.5],
     blurb: 'The temple of speed. Huge straights, tight chicanes, brake as late as you dare.' },
   { id: 'gb-1948', slug: 'silverstone', name: 'Silverstone', country: 'Great Britain', width: 15, runoff: 14,
     medals: [114, 106, 100.5],
     blurb: 'High-speed flow. Maggotts, Becketts and Chapel reward commitment.' },
   { id: 'be-1925', slug: 'spa-francorchamps', name: 'Spa-Francorchamps', country: 'Belgium', width: 14, runoff: 12,
-    medals: [127.5, 118, 115],
+    medals: [127.5, 118, 113],
     blurb: 'Seven kilometres through the Ardennes. Eau Rouge, Pouhon, the Bus Stop.' },
   { id: 'mc-1929', slug: 'monaco', name: 'Monaco', country: 'Monaco', width: 12, runoff: 1.5, setting: 'city',
     medals: [85.5, 81, 78],

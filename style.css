@@ -649,6 +649,7 @@ body.touch .rev-fill { background-size: 170px 100%; }
 .results-table th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 6px 8px; }
 .results-table td { padding: 8px; border-top: 1px solid var(--line); }
 .results-table tr.me td { color: var(--yellow); font-weight: 700; }
+.results-table .pen { display: block; font-size: 12px; font-weight: 700; color: var(--red); }
 .results-table .swatch-dot { display: inline-block; width: 6px; height: 14px; border-radius: 2px; margin-right: 8px; vertical-align: -2px; }
 .results-overlay { background: rgba(6, 8, 10, 0.45); }
 .mode {

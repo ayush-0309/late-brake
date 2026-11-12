@@ -569,6 +569,7 @@ function handleEvents() {
       audio.beep(220, 0.3, 0.14);
       track('Lap invalid', { track: selected.name });
     }
+    if (e.type === 'strike') onStrike(e);
     if (e.type === 'hit') audio.hit(e.impact);
     if (e.type === 'off' || (e.type === 'hit' && e.impact > 6)) noteIncident();
     if (e.type === 'go') audio.beep(1046, 0.5, 0.2);
@@ -598,6 +599,16 @@ function onFinish(e) {
   }, 1600);
 }
 
+// Track limits in a race, as in Grand Prix racing: each trip off is a
+// strike, the third brings the black-and-white flag, and from the fourth
+// each costs 5 seconds.
+function onStrike(e) {
+  track('Track limits', { strikes: String(Math.min(e.strikes, 5)) });
+  if (e.penalty) toast('Track limits', '+5 s penalty', `Strike ${e.strikes}: added to your race time`, 'bad');
+  else if (e.warn) toast('Black and white flag', `Strike ${e.strikes}`, 'One more and it\'s a 5-second penalty', 'bad');
+  else toast('Track limits', `Strike ${e.strikes}`, 'Lap time deleted. Three and you get a warning flag', 'slower');
+}
+
 function renderResults() {
   const rows = session.classify();
   const me = rows.find((r) => r.me);
@@ -607,7 +618,8 @@ function renderResults() {
     const time = r.pos === 1 && r.done ? formatTime(r.time)
       : !r.done && r.lapsDown > 0 ? `+${r.lapsDown} lap${r.lapsDown > 1 ? 's' : ''}`
       : `+${r.gap.toFixed(3)}${r.done ? '' : '*'}`;
-    return `<tr class="${r.me ? 'me' : ''}"><td>${r.pos}</td><td><span class="swatch-dot" style="background:${esc(r.me ? colour.paint : r.color)}"></span>${esc(r.name)}</td><td>${time}</td><td>${formatTime(r.bestLap)}</td></tr>`;
+    const pen = r.penalty ? ` <small class="pen">incl. ${r.penalty} s penalty</small>` : '';
+    return `<tr class="${r.me ? 'me' : ''}"><td>${r.pos}</td><td><span class="swatch-dot" style="background:${esc(r.me ? colour.paint : r.color)}"></span>${esc(r.name)}</td><td>${time}${pen}</td><td>${formatTime(r.bestLap)}</td></tr>`;
   }).join('');
 }
 
