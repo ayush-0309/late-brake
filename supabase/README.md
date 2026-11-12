@@ -12,20 +12,25 @@ exactly as before with those features hidden.
 
 ## 2. Sign-in
 
-Players either **play as a guest** (pick a name, no account details at all) or **continue with Google**. A guest
-can add Google later and keeps their laps; until then the guest account lives in that browser only. There are no
-passwords or emails.
+Time trials need no account at all: laps stay in the browser. Everything else (racing AI drivers or other players,
+the daily challenge, the leaderboards and buying car colours) needs **Google**, and a Google player picks the name
+other drivers see. Laps set before signing in go up to the leaderboards once they have. There are no passwords or
+emails.
+
+Until November 2026 anyone could also **play as a guest** (an anonymous account kept in one browser). Those
+accounts still work for time trials and can add Google, keeping their laps, but they can't set a name or upload
+laps any more (`is_guest` and `name_fits` in `schema.sql`), and a Google account can't take a name starting with
+"Guest". `rename-guests.sql` (optional, once, after `schema.sql`) gives the old guests made-up names like
+`Guest 48213` and frees the names they took; it shows how to list them first.
 
 1. **Authentication → URL Configuration**:
    - **Site URL**: `https://www.latebrake.in/play.html`
    - **Redirect URLs**: add `https://www.latebrake.in/play.html`, `https://late-brake.vercel.app/play.html` and, for testing, `http://localhost:5173/play.html`
-2. **Authentication → Sign In / Providers → User Signups**: turn on **Allow anonymous sign-ins** (guests) and
-   **Allow manual linking** (it lets a guest add Google), then **Save changes**.
+2. **Authentication → Sign In / Providers → User Signups**: turn **Allow anonymous sign-ins** off (the game no
+   longer makes guest accounts) and **Allow manual linking** on (it lets an old guest add Google), then
+   **Save changes**.
 3. Under **Auth Providers**, turn **Email** off. The game doesn't use it, and leaving it on lets anyone use your
    project to send sign-in emails.
-
-Guests count as monthly active users like everyone else. Supabase allows 30 new guests an hour from one IP address;
-if fake guests start filling the leaderboards, turn on a CAPTCHA under **Attack Protection**.
 
 ### Google
 

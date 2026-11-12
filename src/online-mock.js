@@ -36,12 +36,6 @@ export function createMockOnline() {
     mock: true,
     get user() { return user; },
     onUser(fn) { listeners.add(fn); return () => listeners.delete(fn); },
-    async playAsGuest() {
-      user = { id: 'guest-' + Date.now().toString(36), email: null, name: null, guest: true };
-      data.user = user;
-      save(data);
-      setTimeout(emit, 300);
-    },
     // A guest keeps their id (and laps) and gains the Google account.
     async signInWithGoogle() {
       const email = 'driver@gmail.com';
@@ -52,7 +46,7 @@ export function createMockOnline() {
       setTimeout(emit, 300);
     },
     async providers() {
-      return { google: true, anonymous_users: true };
+      return { google: true };
     },
     // Buying: no Dodo checkout here; the session says so and counts as paid.
     async ownedColours() {
@@ -77,6 +71,7 @@ export function createMockOnline() {
     },
     async setName(name) {
       if (!/^[A-Za-z0-9 ._-]{2,20}$/.test(name)) throw new Error('Names are 2–20 letters, numbers, spaces, dots, dashes or underscores.');
+      if (user.guest || /^guest/i.test(name)) throw new Error('new row violates row-level security policy for table "profiles"'); // as the server says it
       const taken = Object.entries(data.names).some(([id, n]) => n.toLowerCase() === name.toLowerCase() && id !== user.id);
       if (taken || FAKES.includes(name)) throw new Error('That name is taken.');
       data.names[user.id] = name;
@@ -104,6 +99,7 @@ export function createMockOnline() {
       return mine && { userId: user.id, name: user.name, time: mine.time, rank: rows.filter((r) => r.time < mine.time).length + 1 };
     },
     async submitLap(track, lap, { challenge = false } = {}) {
+      if (user?.guest) throw new Error('Sign in with Google first');
       if (!user?.name) throw new Error('Pick a name first');
       const list = challenge ? (data.daily[today()] ||= []) : (data.best[track] ||= []);
       const mine = list.find((r) => r.userId === user.id);

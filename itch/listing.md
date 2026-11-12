@@ -55,7 +55,8 @@ Brake as late as you dare, hit the apex and chase the perfect lap.
 ### How to play
 
 Press **Play** and the game opens on [latebrake.in](https://www.latebrake.in/) in a new tab. It's free, with no
-download and no install. Play as a guest, or sign in with Google to keep your laps and medals on any device.
+download and no install. Time trials need no account. Sign in with Google to race computer drivers and other
+players, play the daily challenge and put your laps on the leaderboards.
 
 - **↑ / W** throttle, **↓ / S** brake
 - **← → / A D** steer

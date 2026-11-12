@@ -1,10 +1,11 @@
 // Menu and dialogs for the online features: sign-in, display name, daily
 // challenge card, leaderboards (click a time to race that ghost) and sharing
 // your ghost. Everything stays hidden when online features are off.
-// With them on, playing needs a guest or Google account with a name.
+// Time trials need no account. Racing (AI drivers or other players), the daily
+// challenge, the leaderboards and the shop need a Google account with a name.
 
-import { getOnline, onlineEnabled } from './online.js';
-import { formatTime } from './storage.js';
+import { getOnline, onlineEnabled, GUEST_NAME } from './online.js';
+import { formatTime, loadTrack } from './storage.js';
 import { track } from './analytics.js';
 import { CONFIG } from './config.js';
 import { buyColour, resumeCheckout, PAYMENT_FAILED } from './shop.js';
@@ -17,14 +18,15 @@ export function createOnlineUI(game) {
   let challenge = null;      // { day, track } today
   let boardTab = 'all';      // 'all' | 'today'
   let boardFor = null;
-  // Sign-in methods switched on in Supabase; both assumed until it says, so
-  // the sign-in dialog is never left empty.
-  let providers = { anonymous_users: true, google: true };
+  // Sign-in methods switched on in Supabase; Google is assumed until it says,
+  // so the sign-in dialog is never left empty.
+  let providers = { google: true };
   let leaveArmed = 0;        // a guest's first tap on "Leave guest account"
   let owned = new Set();     // car colours this player has bought
+  let why = null;            // what the sign-in is for: 'race' | 'online' | 'challenge', or null
 
   if (!onlineEnabled()) {
-    return { ready: Promise.resolve(null), canPlay: async () => true, lapDone() {}, refresh() {}, owned, shopOpen: false, get user() { return null; } };
+    return { ready: Promise.resolve(null), canPlay: async () => true, needsName: () => false, signedIn: () => false, lapDone() {}, refresh() {}, owned, shopOpen: false, get user() { return null; } };
   }
 
   const ready = (async () => {
@@ -48,12 +50,18 @@ export function createOnlineUI(game) {
 
   // ---------- account ----------
 
+  // A Google account picks its own name first, including an old guest's that
+  // just added Google with a made-up "Guest 48213" one. Guests (accounts from
+  // before November 2026) count as not signed in: they can add Google.
+  const needsName = (user) => !!user && !user.guest && (!user.name || GUEST_NAME.test(user.name));
+  const signedIn = (user) => !!user && !user.guest && !!user.name && !needsName(user);
+
   function onUser(user) {
-    $('accountLabel').textContent = user ? user.name || 'Pick a name' : 'Sign in';
+    $('accountLabel').textContent = !user ? 'Sign in' : needsName(user) ? 'Pick a name' : user.name || 'Guest';
     $('accountBtn').classList.toggle('signed-in', !!user);
     if (!$('account').hidden) renderAccount();
-    // Signing in and picking a name come before anything else.
-    if (!user?.name) openAccount();
+    if (needsName(user)) openAccount();
+    if (signedIn(user)) sendLocalBests();
     refresh();
     loadOwned();
   }
@@ -92,57 +100,68 @@ export function createOnlineUI(game) {
     return true;
   }
 
-  function openAccount() {
+  function openAccount(reason = null) {
+    why = reason;
     renderAccount();
     $('account').hidden = false;
     // The first thing to press or fill in; just the close button over your own details.
-    const first = !online.user?.name && [...$('account').querySelectorAll('.primary, .google-btn, input')].find((el) => el.offsetParent);
+    const first = (!online.user || needsName(online.user)) && [...$('account').querySelectorAll('.primary, .google-btn, input')].find((el) => el.offsetParent);
     (first || $('accountClose')).focus({ preventScroll: true });
   }
 
   function closeAccount() {
-    if (!online.user?.name) return; // still choosing how to play
+    if (needsName(online.user)) return; // a Google account still picking its name
     $('account').hidden = true;
   }
 
-  // Whether a run can start: yes once signed in with a name, or when online
-  // features aren't working (the game still plays then). Otherwise it brings
-  // up the sign-in dialog.
-  async function canPlay() {
+  // Whether a run can start. Time trials are open to everyone; `need` (racing
+  // AI drivers or online, or the daily challenge) needs a Google account with
+  // its name, so it brings up the sign-in instead. A Google account still
+  // without its name picks one first either way. With online features not
+  // working the game plays on.
+  async function canPlay(need = null) {
     await ready;
-    if (!online || online.user?.name) return true;
-    openAccount();
-    return false;
+    if (!online) return true;
+    if (needsName(online.user) || (need && !signedIn(online.user))) {
+      track('Sign in', { step: 'asked', for: need || 'name' });
+      openAccount(need);
+      return false;
+    }
+    return true;
   }
 
   function renderAccount() {
     const user = online.user;
-    const view = !user ? 'signin' : !user.name ? 'name' : 'me';
+    const view = !user ? 'signin' : needsName(user) ? 'name' : 'me';
     // A guest gets the Google button too, to keep their laps.
     const shown = view === 'me' && user.guest && providers.google ? ['me', 'signin'] : [view];
     for (const v of ['signin', 'name', 'me']) $(`account-${v}`).hidden = !shown.includes(v);
     clearTimeout(leaveArmed);
     leaveArmed = 0;
     $('signOutBtn').hidden = view !== 'me';
-    $('accountClose').hidden = view !== 'me';
+    $('accountClose').hidden = view === 'name';
     $('signOutBtn').textContent = user?.guest ? 'Leave guest account' : 'Sign out';
     $('accountError').textContent = '';
     renderMethods();
     if (view === 'me') {
       $('accountName').textContent = user.name;
-      $('accountEmail').textContent = user.guest ? 'Guest' : user.email || '';
+      $('accountEmail').textContent = user.guest ? 'Guest account, in this browser only' : user.email || '';
     }
-    if (view === 'name') $('nameInput').value = user?.name || '';
+    if (view === 'name') $('nameInput').value = user.name && !GUEST_NAME.test(user.name) ? user.name : '';
   }
 
-  // Guest play and Google show once they're switched on in Supabase.
+  // Google shows once it's switched on in Supabase. The text says what
+  // signing in is for, when a run asked for it.
+  const WHY = {
+    race: 'Racing AI drivers needs a Google account.',
+    online: 'Online races need a Google account, so the other drivers see your name.',
+    challenge: 'The daily challenge has its own leaderboard, so it needs a Google account.',
+  };
   function renderMethods() {
-    const user = online.user;
-    $('guestSignin').hidden = !providers.anonymous_users || !!user;
     $('googleSignin').hidden = !providers.google;
-    $('signinText').textContent = user?.guest
-      ? 'Guest accounts live in this browser only. Sign in with Google to keep your laps on any device.'
-      : 'Play as a guest to start straight away, or sign in with Google to keep your laps on any device.';
+    $('signinText').textContent = online.user?.guest
+      ? 'Continue with Google to keep your laps and name on any device. Races, the daily challenge and the leaderboards need a Google account.'
+      : `${WHY[why] || 'Sign in with Google to race AI drivers and other players, play the daily challenge and put your laps on the leaderboards.'} Time trials are free to play without an account.`;
   }
 
   $('accountBtn').addEventListener('click', openAccount);
@@ -163,13 +182,13 @@ export function createOnlineUI(game) {
       busy('account-signin', false);
     }
   };
-  $('guestBtn').addEventListener('click', signInVia('guest', () => online.playAsGuest()));
   $('googleBtn').addEventListener('click', signInVia('google', () => online.signInWithGoogle()));
 
   $('nameForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = $('nameInput').value.trim();
     if (!/^[A-Za-z0-9 ._-]{2,20}$/.test(name)) return error('2–20 letters, numbers, spaces, dots, dashes or underscores.');
+    if (/^guest/i.test(name)) return error('Names starting with "Guest" are kept for guest accounts.');
     busy('nameForm', true);
     try {
       await online.setName(name);
@@ -193,7 +212,8 @@ export function createOnlineUI(game) {
     }
     clearTimeout(leaveArmed);
     leaveArmed = 0;
-    await online.signOut(); // back to the sign-in dialog
+    await online.signOut();
+    openAccount(); // the way back in, or to another account
   });
 
   function error(msg) { $('accountError').textContent = msg; }
@@ -249,7 +269,10 @@ export function createOnlineUI(game) {
     if (mine && !rows.some((r) => r.userId === me)) html += `<li class="board-gap" aria-hidden="true">⋯</li>${row(mine, mine.rank)}`;
     $('boardList').innerHTML = html || `<li class="board-empty">${boardTab === 'today' ? 'No times today yet. Be the first.' : 'No times yet. Set the first.'}</li>`;
     $('shareBtn').hidden = !(mine && boardTab === 'all');
+    $('boardSignin').hidden = signedIn(online.user);
   }
+
+  $('boardSignin').addEventListener('click', () => openAccount());
 
   $('boardTabs').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-tab]');
@@ -295,15 +318,17 @@ export function createOnlineUI(game) {
     game.offerVersus(g);
   }
 
-  // A finished lap: upload it if it's a personal best (or today's challenge).
+  // A finished lap: upload it if it's a personal best (or today's challenge),
+  // once signed in with Google.
   async function lapDone(t, e, session) {
-    if (!online?.user?.name || !e.valid || e.rescued) return;
+    if (!signedIn(online?.user) || !e.valid || e.rescued) return;
     const challengeRun = session.challenge && challenge?.track === t.id;
     if (!e.isBest && !challengeRun) return;
     const ghost = e.ghost;
     if (!ghost) return;
     try {
       const res = await online.submitLap(t.id, { time: e.time, sectors: e.sectors, ghost }, { challenge: !!challengeRun });
+      if (e.isBest) markSent(t.id, e.time);
       if (res.improved) {
         game.toast(challengeRun ? "Today's challenge" : 'Leaderboard', `#${res.rank}`, challengeRun ? 'Your best today' : `on ${t.name}`, 'info');
       }
@@ -313,8 +338,49 @@ export function createOnlineUI(game) {
     }
   }
 
+  // Time trials need no account, so laps set before signing in go up once a
+  // Google account has its name: each circuit's best, unless this browser has
+  // already sent that account one as quick. A lap the server turns down isn't
+  // tried again; one lost to the network is, next time.
+  const SENT = 'latebrake:sent'; // { [user id]: { [track id]: time sent } }
+  let sending = false;
+  function sentTimes() {
+    try {
+      return JSON.parse(localStorage.getItem(SENT)) || {};
+    } catch {
+      return {};
+    }
+  }
+  function markSent(trackId, time) {
+    const sent = sentTimes(), id = online.user.id;
+    sent[id] = { ...sent[id], [trackId]: time };
+    try { localStorage.setItem(SENT, JSON.stringify(sent)); } catch {}
+  }
+  async function sendLocalBests() {
+    if (sending) return;
+    sending = true;
+    const id = online.user.id;
+    let any = false;
+    for (const t of game.tracks) {
+      const best = loadTrack(t.id)?.best;
+      const sent = sentTimes()[id]?.[t.id];
+      if (!best?.ghost || best.rescued || (sent !== undefined && sent <= best.time)) continue;
+      try {
+        await online.submitLap(t.id, { time: best.time, sectors: best.sectors, ghost: best.ghost });
+        any = true;
+      } catch (err) {
+        console.warn('Lap upload failed', t.id, err);
+        if (/fetch|network/i.test(err.message)) continue;
+      }
+      if (online.user?.id !== id) break; // signed out meanwhile
+      markSent(t.id, best.time);
+    }
+    sending = false;
+    if (any) refresh();
+  }
+
   return {
-    ready, canPlay, lapDone, refresh, buy,
+    ready, canPlay, lapDone, refresh, buy, needsName, signedIn,
     continueWithGoogle: () => online.signInWithGoogle(),
     get owned() { return owned; },
     get shopOpen() { return shopOpen(); },

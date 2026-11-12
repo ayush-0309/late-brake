@@ -1,6 +1,6 @@
 // Lobby for online races: a room code to share, who's in, and (for the
 // host, the first to arrive) whether to fill the grid with AI and when to
-// start. Signed-in players only.
+// start. Players signed in with Google only.
 
 import { createRoom, newRoomCode, MAX_PLAYERS } from './net.js';
 import { RIVALS } from './race.js';
@@ -11,19 +11,14 @@ import { track } from './analytics.js';
 // your own car in your colour, and other drivers in theirs.
 const COLORS = ['#ff8000', '#00a19b', '#2b4bd4', '#f5c542'];
 
-// game: { onlineUI, colour(), selected(), select(trackById), settings, startOnline(start, room, me, host), toast, openAccount() }
+// game: { onlineUI, colour(), selected(), select(trackById), settings, startOnline(start, room, me, host), toast }
 export function createLobby(game) {
   const $ = (id) => document.getElementById(id);
   let room = null, me = null, code = null, peers = [], racing = false, session = null;
 
   async function open(roomCode) {
     const online = await game.onlineUI.ready;
-    if (!online) return;
-    if (!online.user?.name) {
-      game.toast('Online race', 'Sign in first', 'Racing online needs a driver name', 'info');
-      game.openAccount();
-      return;
-    }
+    if (!online || !(await game.onlineUI.canPlay('online'))) return;
     leave();
     me = { id: online.user.id, name: online.user.name };
     code = (roomCode || newRoomCode()).toUpperCase();
@@ -131,13 +126,29 @@ export function createLobby(game) {
     if (/^[A-Z]{5}$/.test(c)) open(c);
   });
 
-  // play.html?room=CODE joins that room once signed in.
+  // play.html?room=CODE joins that room once signed in with Google. Signing
+  // in leaves the page and comes back without the code, so it waits in this
+  // tab until then.
+  const ROOM = 'latebrake:room';
   (async () => {
-    const c = new URLSearchParams(location.search).get('room');
+    let c = new URLSearchParams(location.search).get('room');
+    try {
+      if (c) sessionStorage.setItem(ROOM, c);
+      else c = sessionStorage.getItem(ROOM);
+    } catch {}
     if (!c) return;
     const online = await game.onlineUI.ready;
-    if (online?.user?.name) open(c);
-    else online?.onUser((u) => { if (u?.name && !room) open(c); });
+    if (!online) return;
+    let waiting = true;
+    const join = (u) => {
+      if (!waiting || !game.onlineUI.signedIn(u)) return;
+      waiting = false;
+      try { sessionStorage.removeItem(ROOM); } catch {}
+      open(c);
+    };
+    if (game.onlineUI.signedIn(online.user)) return join(online.user);
+    online.onUser(join);
+    game.onlineUI.canPlay('online'); // the sign-in, saying what it's for
   })();
 
   return {

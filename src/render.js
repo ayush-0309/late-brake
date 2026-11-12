@@ -1,10 +1,13 @@
 // Canvas drawing: scenery, track, cars, ghost, skid marks and the minimap.
 
 import { buildScenery, drawGround, drawMarkings, drawTrackside, drawStructures, makePatterns } from './scenery.js';
-import { buildLine } from './line.js';
+import { buildLine, LINE_PALETTES } from './line.js';
 
-// Racing line colours by zone: throttle, lift, brake.
-const LINE_COLORS = ['rgba(52,210,123,0.5)', 'rgba(245,197,66,0.6)', 'rgba(255,45,72,0.65)'];
+// Racing line colours by zone (throttle, lift, brake) in each palette, a
+// little see-through so the track shows under them.
+const LINE_ALPHA = [0.5, 0.6, 0.65];
+const LINE_COLORS = Object.fromEntries(Object.entries(LINE_PALETTES).map(([name, cols]) =>
+  [name, cols.map((c, z) => `rgba(${parseInt(c.slice(1, 3), 16)},${parseInt(c.slice(3, 5), 16)},${parseInt(c.slice(5, 7), 16)},${LINE_ALPHA[z]})`)]));
 
 const C = {
   grass: '#4b8a40',
@@ -184,7 +187,7 @@ export function createRenderer(canvas, minimap) {
       ctx.lineCap = 'butt';
       ctx.lineWidth = 1.4;
       for (let z = opts.line === 'braking' ? 1 : 0; z < 3; z++) {
-        ctx.strokeStyle = LINE_COLORS[z];
+        ctx.strokeStyle = (LINE_COLORS[opts.lineColours] || LINE_COLORS.standard)[z];
         ctx.stroke(linePaths[z]);
       }
     }

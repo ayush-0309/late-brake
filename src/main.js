@@ -177,7 +177,12 @@ function openMenu({ keepRoom = false } = {}) {
 // restart keeps racing the same ghost or challenge.
 async function requestRun(opts) {
   if (adPlaying) return;
-  if (!session && !(await onlineUI.canPlay())) return; // guest or Google first
+  // Time trials need no account; racing and the daily challenge need Google.
+  if (!session) {
+    const o = opts && !(opts instanceof Event) ? opts : {};
+    const mode = o.mode || settings.mode;
+    if (!(await onlineUI.canPlay(o.challenge ? 'challenge' : mode === 'trial' ? null : mode))) return;
+  }
   if (session?.online) return toast('Online race', "Can't restart", 'Finish the race or leave it from the pause menu', 'info');
   if (!session && settings.mode === 'online' && !(opts && !(opts instanceof Event) && opts.mode)) return lobby.open();
   if (opts instanceof Event || opts === undefined) opts = session ? runOpts : menuRunOpts();
@@ -342,6 +347,7 @@ function setSetting(name, value) {
 }
 
 function syncSettings() {
+  document.body.classList.toggle('cb-line', settings.lineColours === 'colourblind'); // the swatches in Settings
   const values = { ...settings, sound: !audio.muted };
   for (const group of document.querySelectorAll('[data-setting]')) {
     const v = String(values[group.dataset.setting]);
@@ -429,19 +435,21 @@ function renderGarage() {
   requestAnimationFrame(() => list.querySelectorAll('canvas').forEach((cv, i) => drawCarPreview(cv, shown[i].paint)));
 }
 
-// A locked colour tapped: offer it for sale. Buying needs Google, so a
-// guest is asked to continue with Google first (they keep their laps).
+// A locked colour tapped: offer it for sale. Buying needs Google, so anyone
+// not signed in with it is asked to continue with Google first (an old guest
+// account keeps its laps).
+const hasGoogle = () => !!onlineUI.user && !onlineUI.user.guest;
 function offerColour(c) {
   offered = c;
-  const guest = onlineUI.user?.guest;
-  $('buyText').textContent = guest
-    ? `${c.name} costs ${price(c)}. Buying needs a Google account so the colour stays yours on any device. Your laps and name come with you.`
+  const google = hasGoogle();
+  $('buyText').textContent = !google
+    ? `${c.tip ? `A coffee for the developer is ${price(c)}` : `${c.name} costs ${price(c)}`}. Buying needs a Google account, so the colour stays yours on any device.`
     : c.tip
       ? `Buy the developer a coffee for ${price(c)} and your car gets painted to match. No medals win this one. It stays yours on any device you sign in to with Google.`
       : isFinite(c.needs)
         ? `Win ${c.needs} medals to unlock ${c.name} free, or buy it now for ${price(c)}. It stays yours on any device you sign in to with Google.`
         : `${c.name} is only in the shop, ${price(c)}. Rivals see it in online races, and it stays yours on any device you sign in to with Google.`;
-  $('buyBtn').textContent = guest ? 'Continue with Google' : `Buy for ${price(c)}`;
+  $('buyBtn').textContent = google ? `Buy for ${price(c)}` : 'Continue with Google';
   $('buyError').textContent = '';
   show('buyPanel', true);
   $('buyBtn').focus({ preventScroll: true });
@@ -453,9 +461,9 @@ function hideOffer() {
 }
 
 // play.html?buy=<colour> (the home page's coffee) opens the Garage offering
-// that colour once the player is signed in and named. It's kept for this tab
-// until then, since signing in with Google leaves the page and comes back
-// without it, and so is a guest's colour on the way to Google.
+// that colour, asking for Google first if need be. It's kept for this tab
+// until it's offered, and so is any colour on the way to Google, since signing
+// in leaves the page and comes back without it.
 const BUY = 'latebrake:buy';
 let toBuy = new URLSearchParams(location.search).get('buy');
 try {
@@ -465,7 +473,7 @@ try {
 
 function offerToBuy() {
   const c = COLOURS.find((x) => x.id === toBuy);
-  if (!c || !onlineUI.shopOpen || !onlineUI.user?.name || session) return;
+  if (!c || !onlineUI.shopOpen || onlineUI.needsName(onlineUI.user) || session) return;
   toBuy = null;
   try { sessionStorage.removeItem(BUY); } catch {}
   if (unlocked(c, onlineUI.owned)) return;
@@ -487,7 +495,7 @@ $('buyBtn').addEventListener('click', async () => {
   if (!c) return;
   $('buyBtn').disabled = true;
   try {
-    if (onlineUI.user?.guest) {
+    if (!hasGoogle()) {
       try { sessionStorage.setItem(BUY, c.id); } catch {}
       await onlineUI.continueWithGoogle();
     } else if (await onlineUI.buy(c, shopCurrency(settings.currency))) {
@@ -509,6 +517,7 @@ $('currency').addEventListener('change', (e) => {
   if (c) offerColour(c);
 });
 $('garageBtn').addEventListener('click', openGarage);
+$('footGarage').addEventListener('click', openGarage);
 $('garageClose').addEventListener('click', closeGarage);
 $('garageDone').addEventListener('click', closeGarage);
 $('garage').addEventListener('click', (e) => { if (e.target === $('garage')) closeGarage(); });
@@ -547,7 +556,7 @@ function frame(now) {
       const alpha = session && !paused ? acc / DT : 1;
       const cockpit = settings.camera === 'cockpit' && get3D();
       showCockpit(!!cockpit);
-      const opts = { ghost: settings.ghost, camera: cockpit ? 'none' : settings.camera, line: settings.line, paint: colour.paint };
+      const opts = { ghost: settings.ghost, camera: cockpit ? 'none' : settings.camera, line: settings.line, lineColours: settings.lineColours, paint: colour.paint };
       renderer.draw(view, alpha, opts, dt);
       if (cockpit) cockpit.draw(view, alpha, opts);
     }
@@ -669,7 +678,7 @@ $('helpBtn').addEventListener('click', () => {
   if (settings.line === 'off') {
     track('Help choice', { choice: 'line' });
     setSetting('line', 'full');
-    toast('Racing line', 'On', 'Brake on red, lift on yellow, flat out on green', 'info');
+    toast('Racing line', 'On', settings.lineColours === 'colourblind' ? 'Brake on orange, lift on yellow, flat out on blue' : 'Brake on red, lift on yellow, flat out on green', 'info');
   } else {
     track('Help choice', { choice: 'restart' });
     requestRun();
@@ -1055,7 +1064,6 @@ const lobby = createLobby({
   trackById: (id) => tracks.find((x) => x.id === id),
   startOnline,
   toast,
-  openAccount: () => $('accountBtn').click(),
 });
 
 // Online racing shows in the menu once online features are working.

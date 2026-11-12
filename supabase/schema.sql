@@ -10,10 +10,25 @@ create table if not exists public.profiles (
 alter table public.profiles enable row level security;
 drop policy if exists "profiles are public" on public.profiles;
 create policy "profiles are public" on public.profiles for select using (true);
+-- Names are for Google accounts. Guest accounts (anyone could play as one
+-- until November 2026; time trials now need no account at all) can't take or
+-- change one, so they can't hold on to names Google players want. A Google
+-- account can't take a name starting with "Guest" either, which keeps the
+-- made-up names that rename-guests.sql gives old guests apart.
+create or replace function public.is_guest()
+returns boolean
+language sql stable set search_path = public as $$
+  select coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false);
+$$;
+create or replace function public.name_fits(n text)
+returns boolean
+language sql stable set search_path = public as $$
+  select not public.is_guest() and n !~* '^guest';
+$$;
 drop policy if exists "own profile insert" on public.profiles;
-create policy "own profile insert" on public.profiles for insert with check (auth.uid() = id);
+create policy "own profile insert" on public.profiles for insert with check (auth.uid() = id and public.name_fits(name));
 drop policy if exists "own profile update" on public.profiles;
-create policy "own profile update" on public.profiles for update using (auth.uid() = id);
+create policy "own profile update" on public.profiles for update using (auth.uid() = id) with check (public.name_fits(name));
 
 -- Circuits, with the fastest lap time the server will believe (about 10%
 -- under the game's own ideal lap). Raise or lower these if the handling changes.
@@ -91,6 +106,7 @@ declare
   rank int;
 begin
   if uid is null then raise exception 'Sign in first'; end if;
+  if public.is_guest() then raise exception 'Sign in with Google first'; end if;
   if not exists (select 1 from profiles where id = uid) then raise exception 'Pick a name first'; end if;
 
   select min_time into floor_time from tracks where id = p_track;

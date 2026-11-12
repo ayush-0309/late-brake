@@ -7,7 +7,8 @@ export const DEFAULTS = {
   camera: 'chase',        // 'chase' turns with the car, 'cockpit' is first person, 'fixed' keeps north up
   sensitivity: 'normal',  // steering: 'low' | 'normal' | 'high'
   ghost: true,
-  line: 'off',            // racing line: 'full' | 'braking' | 'off'
+  line: 'full',           // racing line: 'full' | 'braking' | 'off'; on for new players, who need it most
+  lineColours: 'standard', // its palette: 'standard' | 'colourblind' (LINE_PALETTES in line.js)
   mode: 'trial',          // 'trial' (time trial) | 'race' (against AI)
   opponents: 3,           // AI rivals in a race, 1–3
   raceLaps: 3,
@@ -32,6 +33,7 @@ export function loadSettings() {
   if (saved.sensitivity in SENSITIVITY) s.sensitivity = saved.sensitivity;
   if (typeof saved.ghost === 'boolean') s.ghost = saved.ghost;
   if (LINE_MODES.includes(saved.line)) s.line = saved.line;
+  if (['standard', 'colourblind'].includes(saved.lineColours)) s.lineColours = saved.lineColours;
   if (['trial', 'race', 'online'].includes(saved.mode)) s.mode = saved.mode;
   if ([1, 2, 3].includes(saved.opponents)) s.opponents = saved.opponents;
   if ([3, 5, 10].includes(saved.raceLaps)) s.raceLaps = saved.raceLaps;

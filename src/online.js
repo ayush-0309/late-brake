@@ -12,6 +12,11 @@ let api = null;
 
 export const onlineEnabled = () => !!CONFIG.supabase || new URLSearchParams(location.search).get('online') === 'mock';
 
+// Names like "Guest 48213" belong to the guest accounts of before November
+// 2026 (supabase/rename-guests.sql); a Google account can't take one, nor
+// any name starting with "Guest" (the server holds it to that: schema.sql).
+export const GUEST_NAME = /^Guest \d{5}$/;
+
 // Resolves to the API, or null when online features are off or unreachable.
 export async function getOnline() {
   if (api !== null) return api || null;
@@ -74,20 +79,16 @@ async function createSupabaseOnline({ url, anonKey }) {
     get user() { return user; },
     onUser(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
-    // Guest play: an account with no email, kept in this browser.
-    async playAsGuest() {
-      check(await db.auth.signInAnonymously());
-    },
     // Google sign-in: leaves for Google and comes back to this page signed in.
-    // A guest gets Google added to their account instead, keeping their laps.
+    // A guest (an account from before November 2026, when anyone could play
+    // as one) gets Google added to their account instead, keeping their laps.
     // Google always asks which account: otherwise, after signing out, it
     // quietly signs back in to the last one.
     async signInWithGoogle() {
       const options = { redirectTo: back(), queryParams: { prompt: 'select_account' } };
       check(await (user?.guest ? db.auth.linkIdentity({ provider: 'google', options }) : db.auth.signInWithOAuth({ provider: 'google', options })));
     },
-    // Sign-in methods switched on in the Supabase dashboard, e.g.
-    // { google: true, anonymous_users: true } (guests).
+    // Sign-in methods switched on in the Supabase dashboard, e.g. { google: true }.
     async providers() {
       const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: anonKey } });
       return res.ok ? (await res.json()).external || {} : {};

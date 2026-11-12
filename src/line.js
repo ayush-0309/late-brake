@@ -15,6 +15,14 @@ const BOARDS = [150, 100, 50];
 
 export const ZONE = { throttle: 0, lift: 1, brake: 2 };
 
+// The line's colours by zone (throttle, lift, brake). Colour-blind uses blue,
+// yellow and orange (Okabe and Ito's palette), which stay apart for
+// red-green colour blindness.
+export const LINE_PALETTES = {
+  standard: ['#34d27b', '#f5c542', '#ff2d48'],
+  colourblind: ['#56b4e9', '#f0e442', '#d55e00'],
+};
+
 export function buildLine(t) {
   // The line lives on a coarser grid than the centerline.
   const n = Math.floor(t.length / STEP);

@@ -11,7 +11,7 @@
 
 import { buildScenery } from './scenery.js';
 import { poses } from './render.js';
-import { buildLine } from './line.js';
+import { buildLine, LINE_PALETTES } from './line.js';
 import { adsFor, drawAd } from './ads.js';
 import { STRIDE, builder, boxAt, hex, mulc, norm, sub, cross, dot } from './mesh3d.js';
 import { carMesh, frontWheelMesh, driverMesh, steeringWheelMesh, FRONT_AXLE, FRONT_TRACK, TYRE_R } from './car3d.js';
@@ -26,7 +26,6 @@ const SUN = norm([0.38, 0.86, 0.34]);
 const HAZE = hex('#bccfe0');          // fog and the sky at the horizon
 const SKY_TOP = hex('#5d8fd0');
 const ATLAS = 1024;
-const LINE_COLORS = ['#34d27b', '#f5c542', '#ff2d48'];
 
 const VERT = `
 attribute vec3 aPos;
@@ -222,7 +221,8 @@ export function createView3D(canvas) {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     drawMesh(world.logos, atlas.tex, { fog, alpha: 0.85 });
     if (opts.line === 'full' || opts.line === 'braking') {
-      for (let z = opts.line === 'braking' ? 1 : 0; z < 3; z++) drawMesh(world.line[z], atlas.tex, { fog, alpha: 0.6 });
+      const lines = world.line[opts.lineColours] || world.line.standard;
+      for (let z = opts.line === 'braking' ? 1 : 0; z < 3; z++) drawMesh(lines[z], atlas.tex, { fog, alpha: 0.6 });
     }
     const g = opts.ghost ? session.ghostPose() : null;
     const G = g ? carMatrix(g.x, g.y, g.a) : null;
@@ -420,17 +420,17 @@ function buildWorld(gl, t, sc, line, atlas) {
   }
   out.logos = mesh(gl, lg);
 
-  // ---- racing line, one mesh per zone
-  out.line = [0, 1, 2].map((zone) => {
+  // ---- racing line, one mesh per zone, in each palette
+  out.line = Object.fromEntries(Object.entries(LINE_PALETTES).map(([name, cols]) => [name, [0, 1, 2].map((zone) => {
     const b = builder();
-    const col = hex(LINE_COLORS[zone]);
+    const col = hex(cols[zone]);
     for (let j = 0; j < line.n; j++) {
       if (line.zone[j] !== zone) continue;
       const k = (j + 1) % line.n;
       stroke(b, [[line.xs[j], line.ys[j]], [line.xs[k], line.ys[k]]], 1.4, col);
     }
     return mesh(gl, b);
-  });
+  })]));
 
   // ---- everything standing up goes in one mesh
   const so = builder();
