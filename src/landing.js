@@ -23,7 +23,9 @@ function bounds(pts) {
 // Scale and offset that fit the points into a w×h box (device pixels).
 function fit(pts, w, h, pad) {
   const b = bounds(pts);
-  const sc = Math.min((w - pad * 2) / (b.maxX - b.minX), (h - pad * 2) / (b.maxY - b.minY));
+  // Kept above zero: a box smaller than the padding (a page opened with no
+  // width yet) would flip the drawing and stop the animation for good.
+  const sc = Math.max(1e-3, Math.min((w - pad * 2) / (b.maxX - b.minX), (h - pad * 2) / (b.maxY - b.minY)));
   return {
     sc,
     ox: (w - (b.maxX - b.minX) * sc) / 2 - b.minX * sc,
