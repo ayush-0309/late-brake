@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/russell-gr63-karting-academy-silverstone.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-13T15:00:00+05:30</news:publication_date>
+      <news:title>Russell launches fully funded karting academy at Silverstone</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-13-november.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-11T18:00:00+05:30</news:publication_date>
       <news:title>Six F1 Monza facts that sound made up, but are true</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/fia-aduo-final-2026-engine-review.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-11T15:00:00+05:30</news:publication_date>
-      <news:title>FIA keeps F1 engine catch-up order unchanged in final 2026 review</news:title>
     </news:news>
   </url>
 </urlset>
