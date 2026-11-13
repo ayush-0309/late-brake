@@ -84,6 +84,9 @@
 
     section { padding-top: 48px; padding-bottom: 48px; }
     h2 { font-size: 13px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
+    /* Badges from sites that list the game, above the circuits. */
+    .featured { margin: 0 0 36px; }
+    .featured img { display: block; width: 200px; height: auto; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
     .circuit { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: center; padding: 12px; border-radius: 14px;
       background: var(--surface); border: 1px solid var(--line); text-decoration: none; transition: border-color .15s, transform .15s; }
@@ -160,6 +163,11 @@
 
   <main>
     <section class="wrap" aria-labelledby="circuitsTitle">
+      <p class="featured">
+        <a href="https://launchbuff.com/products/late-brake-4bkeqi" target="_blank" rel="noopener noreferrer" title="Featured on LaunchBuff">
+          <img src="https://launchbuff.com/badge-featured-dark.svg" alt="Featured on LaunchBuff" width="256" height="80" />
+        </a>
+      </p>
       <h2 id="circuitsTitle">The circuits</h2>
       <div class="grid" id="circuits"></div>
     </section>
