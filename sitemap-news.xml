@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/schumacher-spa-1991-jordan-debut.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-14T18:00:00+05:30</news:publication_date>
+      <news:title>How Michael Schumacher&#39;s F1 career began at Spa in 1991</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/karthikeyan-india-first-f1-driver.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-13T09:00:00+05:30</news:publication_date>
       <news:title>Racing Bulls keeps Lawson and Lindblad for 2027 F1 season</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/silverstone-1950-first-f1-championship-race.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-12T18:00:00+05:30</news:publication_date>
-      <news:title>How Silverstone hosted the first F1 World Championship race</news:title>
     </news:news>
   </url>
 </urlset>
