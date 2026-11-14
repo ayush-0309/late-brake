@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-14-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-14T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Vettel&#39;s first title and Hamilton&#39;s Interlagos charge</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/audi-tsunoda-monza-appeal-hearing-date.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-12T15:00:00+05:30</news:publication_date>
       <news:title>Honda hunts cause of battery failures behind Stroll&#39;s F1 retirement</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-12-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-12T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Hill wins Adelaide by two laps, Vettel takes Interlagos</news:title>
     </news:news>
   </url>
 </urlset>
