@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/karthikeyan-india-first-f1-driver.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-14T15:00:00+05:30</news:publication_date>
+      <news:title>How Narain Karthikeyan became India&#39;s first F1 driver</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-14-november.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-12T18:00:00+05:30</news:publication_date>
       <news:title>How Silverstone hosted the first F1 World Championship race</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/honda-battery-problem-stroll-brazil.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-12T15:00:00+05:30</news:publication_date>
-      <news:title>Honda hunts cause of battery failures behind Stroll&#39;s F1 retirement</news:title>
     </news:news>
   </url>
 </urlset>
