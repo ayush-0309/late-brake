@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-15-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-15T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Berger&#39;s Adelaide win and Hamilton&#39;s seventh title</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/mclaren-las-vegas-upgrade-2027-foundation.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-13T15:00:00+05:30</news:publication_date>
       <news:title>Russell launches fully funded karting academy at Silverstone</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-13-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-13T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Schumacher&#39;s Adelaide title, Hamilton&#39;s rain win</news:title>
     </news:news>
   </url>
 </urlset>
