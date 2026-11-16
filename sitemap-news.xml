@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/mansell-silverstone-1987-piquet.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-16T18:00:00+05:30</news:publication_date>
+      <news:title>How Mansell hunted down Piquet to win at Silverstone in 1987</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/istanbul-park-revamp-turkish-gp-2027.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-15T09:00:00+05:30</news:publication_date>
       <news:title>McLaren to bring upgrades for 2027 to F1 Las Vegas Grand Prix</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/schumacher-spa-1991-jordan-debut.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-14T18:00:00+05:30</news:publication_date>
-      <news:title>How Michael Schumacher&#39;s F1 career began at Spa in 1991</news:title>
     </news:news>
   </url>
 </urlset>
