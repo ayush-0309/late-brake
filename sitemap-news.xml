@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/british-grand-prix-silverstone-facts.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-17T18:00:00+05:30</news:publication_date>
+      <news:title>Six F1 British Grand Prix facts that sound made up</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/williams-chrome-livery-las-vegas-2026.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-16T09:00:00+05:30</news:publication_date>
       <news:title>Williams stops developing its 2026 F1 car to focus on 2027</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/belgian-grand-prix-spa-facts.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-15T18:00:00+05:30</news:publication_date>
-      <news:title>Six F1 Belgian Grand Prix facts that sound made up</news:title>
     </news:news>
   </url>
 </urlset>
