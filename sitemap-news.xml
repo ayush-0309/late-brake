@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/rosberg-1982-title-with-one-win.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-18T18:00:00+05:30</news:publication_date>
+      <news:title>How Keke Rosberg won the 1982 F1 title with a single victory</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/mercedes-aduo-turbo-antonelli-las-vegas.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-17T09:00:00+05:30</news:publication_date>
       <news:title>Haas keeps Camara for F1 Las Vegas GP as Hirakawa returns for FP1</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/mansell-silverstone-1987-piquet.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-16T18:00:00+05:30</news:publication_date>
-      <news:title>How Mansell hunted down Piquet to win at Silverstone in 1987</news:title>
     </news:news>
   </url>
 </urlset>
