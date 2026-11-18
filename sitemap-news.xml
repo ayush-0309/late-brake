@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/alonso-dakar-rally-aston-martin-2027.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-18T09:00:00+05:30</news:publication_date>
+      <news:title>Alonso to race the 2027 Dakar Rally for Aston Martin</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/british-grand-prix-silverstone-facts.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-16T12:00:00+05:30</news:publication_date>
       <news:title>F1 Las Vegas Grand Prix 2026: race time in India and full schedule</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/williams-shifts-focus-to-2027-car.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-16T09:00:00+05:30</news:publication_date>
-      <news:title>Williams stops developing its 2026 F1 car to focus on 2027</news:title>
     </news:news>
   </url>
 </urlset>
