@@ -27,7 +27,7 @@ Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no 
 | `src/online.js`, `src/online-ui.js`, `src/online-mock.js` | Accounts, leaderboards, daily challenge and shared ghosts (Supabase), their menu and dialogs, and a pretend backend for local testing |
 | `src/net.js`, `src/online-race.js`, `src/lobby-ui.js` | Online races for up to 4: rooms (Supabase Realtime, or tabs of one browser for testing), syncing cars, the lobby |
 | `src/platform.js` | Web game portals (CrazyGames, Poki): ad breaks between runs and rewarded ads |
-| `src/analytics.js` | Privacy-friendly analytics and error reports (Plausible or GoatCounter), off until configured |
+| `src/analytics.js` | Game events and error reports, sent to Microsoft Clarity (or Plausible or GoatCounter) |
 | `src/config.js` | Switches for production: sponsor email, analytics, ad portal, Supabase |
 | `sponsors.html`, `media/` | Page for advertisers, with screenshots of the ad slots |
 | `itch/` | The itch.io listing: its text (`listing.md`), cover, screenshots and the launcher that opens the game here (not deployed) |

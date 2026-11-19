@@ -329,6 +329,7 @@ export function createOnlineUI(game) {
     try {
       const res = await online.submitLap(t.id, { time: e.time, sectors: e.sectors, ghost }, { challenge: !!challengeRun });
       if (e.isBest) markSent(t.id, e.time);
+      track('Leaderboard lap', { track: t.name, board: challengeRun ? 'challenge' : 'circuit' });
       if (res.improved) {
         game.toast(challengeRun ? "Today's challenge" : 'Leaderboard', `#${res.rank}`, challengeRun ? 'Your best today' : `on ${t.name}`, 'info');
       }

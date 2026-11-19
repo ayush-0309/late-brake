@@ -5,10 +5,11 @@ export const CONFIG = {
   // Where advertisers write to from the sponsor page.
   sponsorEmail: 'officialayushgarg@gmail.com',
 
-  // Privacy-friendly analytics, off when null. One of:
+  // Game events (runs, laps, sign-in steps, purchases), off when null. One of:
+  //   { provider: 'clarity' }   // uses the Clarity tag already on every page
   //   { provider: 'plausible', domain: 'www.latebrake.in' }
   //   { provider: 'goatcounter', code: 'latebrake' }   // latebrake.goatcounter.com
-  analytics: null,
+  analytics: { provider: 'clarity' },
 
   // Ad portal. CrazyGames and Poki are detected from where the game is
   // hosted; set one here to force it. 'test' shows pretend ads so the flow
