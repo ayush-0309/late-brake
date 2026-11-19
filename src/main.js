@@ -1078,6 +1078,7 @@ onlineUI.ready.then((online) => {
 });
 
 openMenu();
+$('menu').classList.remove('booting'); // built: show it (see .booting in style.css)
 requestAnimationFrame(frame);
 platform.loadingFinished();
 window.lateBrakeReady = true;

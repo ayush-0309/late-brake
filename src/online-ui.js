@@ -29,10 +29,19 @@ export function createOnlineUI(game) {
     return { ready: Promise.resolve(null), canPlay: async () => true, needsName: () => false, signedIn: () => false, lapDone() {}, refresh() {}, owned, shopOpen: false, get user() { return null; } };
   }
 
+  // What fills in once Supabase answers (the sign-in button, the challenge
+  // card, the leaderboard) has its room from the start, so the menu doesn't
+  // jump when it arrives.
+  const late = ['accountBtn', 'challengeCard', 'board'];
+  for (const id of late) $(id).hidden = false;
+  $('boardList').innerHTML = '<li class="board-empty">Loading…</li>';
+
   const ready = (async () => {
     online = await getOnline();
-    if (!online) return null;
-    $('accountBtn').hidden = false;
+    if (!online) {
+      for (const id of late) $(id).hidden = true;
+      return null;
+    }
     online.onUser(onUser);
     onUser(online.user);
     online.providers().then((p) => { providers = { ...providers, ...p }; renderMethods(); }, () => {});
@@ -164,7 +173,8 @@ export function createOnlineUI(game) {
       : `${WHY[why] || 'Sign in with Google to race AI drivers and other players, play the daily challenge and put your laps on the leaderboards.'} Time trials are free to play without an account.`;
   }
 
-  $('accountBtn').addEventListener('click', openAccount);
+  // The button shows before Supabase has loaded; a tap that early waits for it.
+  $('accountBtn').addEventListener('click', () => ready.then((o) => o && openAccount()));
   $('accountClose').addEventListener('click', closeAccount);
   $('account').addEventListener('click', (e) => { if (e.target === $('account')) closeAccount(); });
   addEventListener('keydown', (e) => {

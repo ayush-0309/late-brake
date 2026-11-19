@@ -20,9 +20,21 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+  <!-- Barlow Condensed is served from here (fonts/, with its licence) and
+       fetched first, so text is in its own font from the start: a font that
+       arrives late makes the page jump. -->
+  <link rel="preload" href="fonts/barlow-condensed-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/barlow-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/barlow-condensed-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/barlow-condensed-800-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url(fonts/barlow-condensed-500.woff2) format('woff2'); }
+    @font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url(fonts/barlow-condensed-600.woff2) format('woff2'); }
+    @font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap; src: url(fonts/barlow-condensed-700.woff2) format('woff2'); }
+    @font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 800; font-display: swap; src: url(fonts/barlow-condensed-800.woff2) format('woff2'); }
+    @font-face { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 800; font-display: swap; src: url(fonts/barlow-condensed-800-italic.woff2) format('woff2'); }
+  </style>
   <link rel="stylesheet" href="style.css">
   <!-- Microsoft Clarity: heatmaps and session recordings -->
   <script type="text/javascript">
@@ -120,7 +132,8 @@
     </div>
   </div>
 
-  <div id="menu" class="overlay menu-overlay">
+  <div id="menu" class="overlay menu-overlay booting">
+    <div class="boot" aria-hidden="true"><span class="logo">LATE<span>BRAKE</span></span></div>
     <div class="menu">
       <header class="menu-top">
         <a class="logo" href="./">LATE<span>BRAKE</span></a>
@@ -149,8 +162,8 @@
           <div id="challengeCard" class="challenge-card" hidden>
             <div>
               <div class="label">Daily challenge</div>
-              <div class="challenge-track" id="challengeTrack"></div>
-              <div class="challenge-ends" id="challengeEnds"></div>
+              <div class="challenge-track" id="challengeTrack">&nbsp;</div>
+              <div class="challenge-ends" id="challengeEnds">&nbsp;</div>
             </div>
             <button id="challengeBtn" class="secondary">Play</button>
           </div>
@@ -204,8 +217,10 @@
               </div>
             </div>
             <ol id="boardList" class="board-list"></ol>
-            <button id="shareBtn" class="link-btn" hidden>Share your ghost</button>
-            <button id="boardSignin" class="link-btn" hidden>Sign in with Google to put your laps here</button>
+            <div class="board-foot">
+              <button id="shareBtn" class="link-btn" hidden>Share your ghost</button>
+              <button id="boardSignin" class="link-btn" hidden>Sign in with Google to put your laps here</button>
+            </div>
           </div>
           <button id="startBtn" class="primary">Start <kbd class="keys-only">Enter</kbd></button>
         </section>
