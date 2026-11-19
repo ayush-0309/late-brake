@@ -18,14 +18,18 @@ const GRID_LAT = -3;               // and this far left of center
 export class Session {
   // opts.versus: { name, time, ghost } to race someone else's lap instead of
   // your own best. opts.challenge: this run counts for the daily challenge,
-  // whose twist can change the car (opts.tune, see car.js) and the track
-  // limits (opts.offLimit, metres past the edge, default OFF_LIMIT).
+  // whose twist can change the car (opts.tune, see car.js), the track
+  // limits (opts.offLimit, metres past the edge, default OFF_LIMIT) or wear
+  // the tyres (opts.wear: the share of grip gone by the end of each lap; new
+  // tyres at the line, so every lap is alike).
   constructor(track, saved, opts = {}) {
     this.track = track;
     this.versus = opts.versus || null;
     this.challenge = !!opts.challenge;
     this.tune = opts.tune || null;
     this.offLimit = opts.offLimit ?? OFF_LIMIT;
+    this.wear = opts.wear || 0;
+    this.tyres = 1;                    // share of grip left
     this.best = saved?.best || null;               // { time, sectors, ghost, splits }
     this.bestSectors = saved?.bestSectors || [null, null, null];
     this.reset();
@@ -38,6 +42,7 @@ export class Session {
     // Pole position: the front-left grid slot.
     this.car = createCar(t.xs[i] + t.nx[i] * GRID_LAT, t.ys[i] + t.ny[i] * GRID_LAT, a);
     if (this.tune) this.car.tune = this.tune;
+    if (this.wear) this.car.tune = { ...(this.tune || CAR) }; // its grip follows the tyres, wearTyres()
     const pj = project(t, this.car.x, this.car.y);
     this.car.hint = pj.i;
     this.car.s = pj.s;
@@ -103,6 +108,7 @@ export class Session {
     }
     this.tick++;
 
+    if (this.wear) this.wearTyres();
     const before = project(t, car.x, car.y, car.hint);
     stepCar(car, input, Math.abs(before.lat) <= t.halfW + 0.5);
 
@@ -145,6 +151,14 @@ export class Session {
     this.recordSplits();
     this.checkSectors(prev);
     this.record();
+  }
+
+  // Grip falls evenly over the lap, from new at the line to 1 - wear.
+  wearTyres() {
+    const base = this.tune || CAR;
+    this.tyres = 1 - this.wear * Math.min(1, Math.max(0, this.lapProgress / this.track.length));
+    this.car.tune.grip = base.grip * this.tyres;
+    this.car.tune.downforce = base.downforce * this.tyres;
   }
 
   // A trip off the track begins. Nothing more in a time trial (the lap is

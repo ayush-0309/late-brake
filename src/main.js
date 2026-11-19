@@ -223,7 +223,7 @@ function startRun(opts = {}) {
   session = opts.online ? new OnlineRaceSession(selected, saved, opts.online)
     : mode === 'race'
     ? new RaceSession(selected, saved, { opponents: settings.opponents, laps: settings.raceLaps, difficulty: settings.difficulty, name: onlineUI.user?.name })
-    : new Session(runTrack, saved, { versus: opts.versus, challenge: !!ch, tune: ch && tuneFor(ch.twist), offLimit: ch?.twist.offLimit });
+    : new Session(runTrack, saved, { versus: opts.versus, challenge: !!ch, tune: ch && tuneFor(ch.twist), offLimit: ch?.twist.offLimit, wear: ch?.twist.wear });
   resultsShownAt = 0;
   renderer.setTrack(runTrack);
   paused = false;
@@ -240,6 +240,7 @@ function startRun(opts = {}) {
   hideToast();
   $('trackLabel').textContent = opts.versus ? `vs ${opts.versus.name}` : ch ? `Challenge: ${ch.twist.name}` : selected.name;
   renderMedalNext();
+  show('tyreGrip', !!session.wear);
   document.activeElement?.blur?.();
   platform.gameplayStart();
   track('Run start', { track: selected.name, mode: opts.challenge ? 'challenge' : opts.versus ? 'versus' : mode, camera: settings.camera, line: settings.line });
@@ -830,6 +831,7 @@ function updateHud(inp) {
   setText('gearVal', running ? (s.car.vf < -0.5 ? 'R' : String(audio.gear)) : 'N');
   setText('bestTime', formatTime(s.best?.time));
   setText('lastTime', formatTime(s.laps.at(-1)?.time));
+  if (s.wear) setText('tyreVal', `${Math.round(s.tyres * 100)}%`);
 
   const rev = Math.max(0, Math.min(1, (audio.rpm - 4000) / (audio.rpmMax - 4000)));
   setScale('revFill', 'X', rev);

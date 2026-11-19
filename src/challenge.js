@@ -10,10 +10,11 @@ import { CAR } from './car.js';
 import { buildLine } from './line.js';
 import { TRACKS } from './track.js';
 
-// `tune` multiplies CAR's handling (car.js); `offLimit` replaces the track
-// limit (session.js: metres the car centre may go past the edge). The line
-// and the AI drivers are worked out for the changed car, so the painted
-// braking zones are right for it.
+// `tune` multiplies CAR's handling (car.js); `wear` is the share of grip the
+// tyres lose over a lap; `offLimit` replaces the track limit (session.js:
+// metres the car centre may go past the edge). The line and the AI drivers
+// are worked out for the changed car, so the painted braking zones are right
+// for it.
 export const TWISTS = [
   { id: 'wet', name: 'Wet track', blurb: 'Less grip everywhere: brake early, go gently on the power',
     tune: { grip: 0.7, downforce: 0.7, traction: 0.7 } },
@@ -27,11 +28,10 @@ export const TWISTS = [
   // it stop later (and corner slower).
   { id: 'heavy', name: 'Heavy car', blurb: 'Slow to pick up speed, longer to stop, slower through corners',
     tune: { traction: 0.8, power: 0.85, grip: 0.85, downforce: 0.85 } },
-  // Quicker, further steering, and the car may turn past its grip (yawCap)
-  // and is slower to straighten (align): a tap of the keys makes it dart
-  // and the rear step out. Steered smoothly, it's no slower.
-  { id: 'twitchy', name: 'Twitchy steering', blurb: 'The car darts at every input and the rear steps out: steer gently',
-    tune: { steerMax: 1.4, steerIn: 2.5, steerOut: 2.5, align: 0.35, yawCap: 1.5 } },
+  // Fresh tyres at the line, worn to 70% grip by the end of the lap
+  // (session.js), so the same corner needs more care late in the lap.
+  { id: 'worn', name: 'Worn tyres', blurb: 'Grip fades through the lap: brake earlier for the last corners',
+    wear: 0.3 },
   // Half the usual allowance: the car centre 0.6 m past the edge has both
   // outside wheels over it (OFF_LIMIT is all four).
   { id: 'strict', name: 'Strict limits', blurb: 'Two wheels over the white line deletes the lap',
@@ -42,12 +42,12 @@ export const TWISTS = [
 // a lone AI driver at easy, medium and hard skill with the twist on, rounded
 // up to the half second. Made by `node tools/medal-times.mjs --challenge`.
 export const CHALLENGE_MEDALS = {
-  'at-1969': { wet: [94, 87.5, 84.5], lowdf: [79.5, 74.5, 71.5], rocket: [76.5, 71.5, 68.5], heavy: [87, 80.5, 77.5], twitchy: [79.5, 74, 70.5], strict: [79, 74, 71] }, // Spielberg
-  'it-1922': { wet: [111.5, 104, 99.5], lowdf: [95.5, 89, 85.5], rocket: [92, 85.5, 81.5], heavy: [105, 97.5, 92.5], twitchy: [96.5, 89.5, 85], strict: [96.5, 89.5, 85.5] }, // Monza
-  'gb-1948': { wet: [137.5, 128.5, 122.5], lowdf: [116, 108, 103], rocket: [111.5, 104, 99], heavy: [125.5, 117, 111.5], twitchy: [114, 106.5, 101.5], strict: [114, 106.5, 101.5] }, // Silverstone
-  'be-1925': { wet: [152, 141.5, 134.5], lowdf: [128.5, 119.5, 114], rocket: [123.5, 114.5, 109], heavy: [139.5, 130, 123.5], twitchy: [127.5, 118.5, 113.5], strict: [127.5, 118.5, 113] }, // Spa-Francorchamps
-  'mc-1929': { wet: [103.5, 99, 97], lowdf: [87, 84, 81.5], rocket: [85.5, 82, 79.5], heavy: [94.5, 90.5, 88], twitchy: [85, 81, 80], strict: [86, 82.5, 80.5] }, // Monaco
-  'br-1940': { wet: [105.5, 98.5, 94], lowdf: [89, 83.5, 79.5], rocket: [85.5, 79.5, 76], heavy: [96, 89.5, 85.5], twitchy: [87, 81.5, 78], strict: [87, 81, 78] }, // Interlagos
+  'at-1969': { wet: [94, 87.5, 84.5], lowdf: [79.5, 74.5, 71.5], rocket: [76.5, 71.5, 68.5], heavy: [87, 80.5, 77.5], worn: [83.5, 78, 75], strict: [79, 74, 71] }, // Spielberg
+  'it-1922': { wet: [111.5, 104, 99.5], lowdf: [95.5, 89, 85.5], rocket: [92, 85.5, 81.5], heavy: [105, 97.5, 92.5], worn: [100.5, 93, 89.5], strict: [96.5, 89.5, 85.5] }, // Monza
+  'gb-1948': { wet: [137.5, 128.5, 122.5], lowdf: [116, 108, 103], rocket: [111.5, 104, 99], heavy: [125.5, 117, 111.5], worn: [122, 114, 108.5], strict: [114, 106.5, 101.5] }, // Silverstone
+  'be-1925': { wet: [152, 141.5, 134.5], lowdf: [128.5, 119.5, 114], rocket: [123.5, 114.5, 109], heavy: [139.5, 130, 123.5], worn: [135, 125.5, 120], strict: [127.5, 118.5, 113] }, // Spa-Francorchamps
+  'mc-1929': { wet: [103.5, 99, 97], lowdf: [87, 84, 81.5], rocket: [85.5, 82, 79.5], heavy: [94.5, 90.5, 88], worn: [91.5, 88.5, 85.5], strict: [86, 82.5, 80.5] }, // Monaco
+  'br-1940': { wet: [105.5, 98.5, 94], lowdf: [89, 83.5, 79.5], rocket: [85.5, 79.5, 76], heavy: [96, 89.5, 85.5], worn: [93, 87, 83.5], strict: [87, 81, 78] }, // Interlagos
 };
 
 // The twist on a challenge day ('YYYY-MM-DD', UTC). The server picks the
@@ -96,8 +96,8 @@ export function challengeTrack(base, twist) {
   if (!derived.has(key)) {
     const t = Object.create(base);
     const tune = tuneFor(twist);
-    if (tune) {
-      t.line = buildLine(base, tune);
+    if (tune || twist.wear) {
+      t.line = buildLine(base, tune || CAR, twist.wear);
       t.linePaths = null; // the 2D renderer's paths for the line, made from it
     } else {
       t.line = base.line ||= buildLine(base);

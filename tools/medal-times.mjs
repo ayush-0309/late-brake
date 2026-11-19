@@ -53,7 +53,7 @@ if (process.argv.includes('--challenge')) {
 // The AI drives a time trial on `t` with the twist on; its best clean lap.
 // A twist the AI can't lap cleanly is a bug in the twist: it stops here.
 function trialLap(t, twist, skill) {
-  const s = new Session(t, null, { challenge: true, tune: tuneFor(twist), offLimit: twist.offLimit });
+  const s = new Session(t, null, { challenge: true, tune: tuneFor(twist), offLimit: twist.offLimit, wear: twist.wear });
   const driver = createDriver(t, t.line, skill);
   for (let k = 0; k < 20 * 60 / DT && s.laps.length < LAPS; k++) {
     if (s.phase !== 'running') { s.step(PARKED); continue; }

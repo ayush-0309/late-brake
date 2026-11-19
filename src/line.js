@@ -1,5 +1,6 @@
 // Racing line and speed profile, worked out once per circuit from its shape
-// and the car's handling (`tune`, CAR unless a challenge twist changes it).
+// and the car's handling (`tune`, CAR unless a challenge twist changes it;
+// `wear`, the share of grip worn away by the end of the lap, see session.js).
 // Feeds the painted line, the braking boards and the AI drivers.
 // No DOM here, so it can run headless too.
 
@@ -24,7 +25,7 @@ export const LINE_PALETTES = {
   colourblind: ['#56b4e9', '#f0e442', '#d55e00'],
 };
 
-export function buildLine(t, tune = CAR) {
+export function buildLine(t, tune = CAR, wear = 0) {
   // The line lives on a coarser grid than the centerline.
   const n = Math.floor(t.length / STEP);
   const ds = t.length / n;
@@ -67,15 +68,18 @@ export function buildLine(t, tune = CAR) {
 
   // Speed profile: corner limits, then braking backwards and accelerating
   // forwards from them. Two laps each way so it wraps cleanly at the line.
+  // Line points start at the start line, so with worn tyres the grip left at
+  // point j is 1 - wear * j / n.
+  const left = (j) => 1 - (wear * j) / n;
   const vc = new Float64Array(n);
   for (let j = 0; j < n; j++) {
-    const kk = Math.abs(curv[j]) / GRIP_USE;
-    vc[j] = kk > tune.downforce ? Math.min(120, Math.sqrt(tune.grip / (kk - tune.downforce))) : 120;
+    const kk = Math.abs(curv[j]) / GRIP_USE, g = left(j);
+    vc[j] = kk > tune.downforce * g ? Math.min(120, Math.sqrt((tune.grip * g) / (kk - tune.downforce * g))) : 120;
   }
   const vb = Float64Array.from(vc), vf = Float64Array.from(vc);
   for (let pass = 0; pass < 2 * n; pass++) {
     const j = (2 * n - 1 - pass) % n, next = (j + 1) % n;
-    vb[j] = Math.min(vb[j], Math.sqrt(vb[next] ** 2 + 2 * decel(vb[next], tune) * ds));
+    vb[j] = Math.min(vb[j], Math.sqrt(vb[next] ** 2 + 2 * decel(vb[next], tune, left(next)) * ds));
   }
   for (let pass = 0; pass < 2 * n; pass++) {
     const j = pass % n, next = (j + 1) % n;
@@ -146,9 +150,10 @@ function curvature(xs, ys, n) {
   return out;
 }
 
-// Deceleration available at speed v (m/s²): brakes, limited by grip, plus drag.
-function decel(v, C) {
-  const G = C.grip + C.downforce * v * v;
+// Deceleration available at speed v (m/s²): brakes, limited by grip (times
+// `g`, what the tyres have left), plus drag.
+function decel(v, C, g = 1) {
+  const G = (C.grip + C.downforce * v * v) * g;
   return BRAKE_USE * Math.min(C.brake, G * 1.1) + C.roll + C.aeroDrag * v * v;
 }
 
