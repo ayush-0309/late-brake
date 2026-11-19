@@ -13,7 +13,8 @@ import { createView3D } from './view3d.js';
 import { createPlatform } from './platform.js';
 import { initAnalytics, track, reportError } from './analytics.js';
 import { createOnlineUI } from './online-ui.js';
-import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, earnMedal, unlocked, colourFor } from './medals.js';
+import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, medalFor, earnMedal, unlocked, colourFor } from './medals.js';
+import { challengeTrack, tuneFor, loadChallengeRun, saveChallengeRun, earnChallengeMedal, streak, STREAK_GOAL } from './challenge.js';
 import { CURRENCIES, shopCurrency, currencyName, priceText } from './shop.js';
 
 const $ = (id) => document.getElementById(id);
@@ -33,6 +34,7 @@ const platform = createPlatform({
 });
 let runsStarted = 0;
 let runOpts = {};          // what the current run is: { versus, challenge, mode }
+let runChallenge = null;   // today's challenge ({ day, track, twist }) when the run is it
 let pendingVersus = null;  // a shared ghost waiting for the next Start
 
 // play.html?track=<id> opens straight onto that circuit.
@@ -211,14 +213,19 @@ function startRun(opts = {}) {
   stuckHinted = false;
   incidents = [];
   helpOffered = false;
-  const saved = loadTrack(selected.id);
+  // The daily challenge runs today's circuit with its twist: the car, line
+  // and limits it changes, its own medal times, and a record of its own.
+  const ch = opts.challenge && onlineUI.challenge?.track === selected.id ? onlineUI.challenge : null;
+  runChallenge = ch;
+  const runTrack = ch ? challengeTrack(selected, ch.twist) : selected;
+  const saved = ch ? loadChallengeRun(ch.day) : loadTrack(selected.id);
   const mode = opts.mode || settings.mode;
   session = opts.online ? new OnlineRaceSession(selected, saved, opts.online)
     : mode === 'race'
     ? new RaceSession(selected, saved, { opponents: settings.opponents, laps: settings.raceLaps, difficulty: settings.difficulty, name: onlineUI.user?.name })
-    : new Session(selected, saved, { versus: opts.versus, challenge: opts.challenge });
+    : new Session(runTrack, saved, { versus: opts.versus, challenge: !!ch, tune: ch && tuneFor(ch.twist), offLimit: ch?.twist.offLimit });
   resultsShownAt = 0;
-  renderer.setTrack(selected);
+  renderer.setTrack(runTrack);
   paused = false;
   stopResumeCount();
   hideHelp();
@@ -231,7 +238,7 @@ function startRun(opts = {}) {
   document.body.classList.toggle('racing', session.mode === 'race');
   show('hud', true);
   hideToast();
-  $('trackLabel').textContent = opts.versus ? `vs ${opts.versus.name}` : opts.challenge ? 'Daily challenge' : selected.name;
+  $('trackLabel').textContent = opts.versus ? `vs ${opts.versus.name}` : ch ? `Challenge: ${ch.twist.name}` : selected.name;
   document.activeElement?.blur?.();
   platform.gameplayStart();
   track('Run start', { track: selected.name, mode: opts.challenge ? 'challenge' : opts.versus ? 'versus' : mode, camera: settings.camera, line: settings.line });
@@ -410,7 +417,7 @@ function closeGarage() {
 // colours (Coffee among them) are left out while the shop is shut.
 function renderGarage() {
   const count = medalCount(), max = tracks.length * MEDALS.length, shop = onlineUI.shopOpen;
-  const shown = COLOURS.filter((c) => isFinite(c.needs) || shop || unlocked(c, onlineUI.owned));
+  const shown = COLOURS.filter((c) => isFinite(c.needs) || c.streak || shop || unlocked(c, onlineUI.owned));
   $('garageText').textContent = count >= max
     ? `All ${max} medals. Every colour you can win is yours.`
     : `${count} of ${max} medals. Win medals on the circuits to unlock colours${shop ? ', or buy them. Some are only in the shop' : ''}. A gold counts as three.`;
@@ -425,10 +432,10 @@ function renderGarage() {
   const list = $('colourList');
   list.innerHTML = shown.map((c) => {
     const open = unlocked(c, onlineUI.owned);
-    return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop ? '' : ' disabled'}>
+    return `<button data-colour="${c.id}" role="radio" aria-checked="${c === colour}"${open ? '' : ' class="locked"'}${open || shop || c.streak ? '' : ' disabled'}>
       <canvas aria-hidden="true"></canvas>
       <span class="colour-name">${c.name}</span>
-      <small>${open ? '' : c.tip ? `A coffee for the dev, ${price(c)}` : isFinite(c.needs) ? `${c.needs} medals${shop ? ` or ${price(c)}` : ''}` : `Shop only, ${price(c)}`}</small>
+      <small>${open ? '' : c.streak ? `${c.streak}-day challenge streak` : c.tip ? `A coffee for the dev, ${price(c)}` : isFinite(c.needs) ? `${c.needs} medals${shop ? ` or ${price(c)}` : ''}` : `Shop only, ${price(c)}`}</small>
     </button>`;
   }).join('');
   hideOffer();
@@ -455,6 +462,13 @@ function offerColour(c) {
   $('buyBtn').focus({ preventScroll: true });
 }
 
+// Hot Streak isn't for sale: tapping it says how to win it.
+function streakHint(c) {
+  hideOffer();
+  const n = onlineUI.challenge ? streak(onlineUI.challenge.day) : 0;
+  toast(c.name, `${n} of ${STREAK_GOAL}`, `Win a medal in the daily challenge ${STREAK_GOAL} days in a row`, 'info');
+}
+
 function hideOffer() {
   offered = null;
   show('buyPanel', false);
@@ -473,7 +487,7 @@ try {
 
 function offerToBuy() {
   const c = COLOURS.find((x) => x.id === toBuy);
-  if (!c || !onlineUI.shopOpen || onlineUI.needsName(onlineUI.user) || session) return;
+  if (!c || c.streak || !onlineUI.shopOpen || onlineUI.needsName(onlineUI.user) || session) return;
   toBuy = null;
   try { sessionStorage.removeItem(BUY); } catch {}
   if (unlocked(c, onlineUI.owned)) return;
@@ -485,7 +499,7 @@ $('colourList').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-colour]');
   if (!b) return;
   const c = COLOURS.find((x) => x.id === b.dataset.colour);
-  if (!unlocked(c, onlineUI.owned)) return offerColour(c);
+  if (!unlocked(c, onlineUI.owned)) return c.streak ? streakHint(c) : offerColour(c);
   setSetting('colour', c.id);
   renderGarage();
 });
@@ -720,8 +734,21 @@ function resetCar() {
   if (session && !paused && session.resetToTrack()) stuckTime = 0;
 }
 
+// Today's challenge medal for a clean lap, shaped like earnMedal()'s answer:
+// the medal, the colour it unlocks (Hot Streak, when the streak gets there)
+// and the streak.
+function challengeMedal(time) {
+  const m = medalFor(session.track, time);
+  const got = m ? earnChallengeMedal(runChallenge.day, m) : null;
+  if (!got) return null;
+  return { medal: m, unlocked: got.reachedGoal ? COLOURS.filter((c) => c.streak) : [], streak: got.streak };
+}
+
 function onLap(e) {
-  if (e.valid) saveTrack(selected.id, session.saveData());
+  if (e.valid) {
+    if (runChallenge) saveChallengeRun(runChallenge.day, session.saveData());
+    else saveTrack(selected.id, session.saveData());
+  }
   let sub, cls;
   if (!e.valid) { sub = 'Invalid · track limits'; cls = 'bad'; }
   else if (e.isBest && e.prevBest === null) { sub = 'First lap on the board'; cls = 'best'; }
@@ -730,13 +757,15 @@ function onLap(e) {
   if (e.rescued) sub += ' · rescued';
   if (e.isBest && !e.rescued) platform.happyTime();
   track('Lap', { track: selected.name, result: e.rescued ? 'rescued' : e.valid ? 'valid' : 'invalid', best: e.isBest ? 'yes' : 'no' });
-  // A clean lap can win a medal, and medals unlock car colours.
-  const won = e.valid && !e.rescued ? earnMedal(selected, e.time) : null;
+  // A clean lap can win a medal, and medals unlock car colours. In the
+  // challenge it's today's medal, which keeps the streak going.
+  const won = !e.valid || e.rescued ? null : runChallenge ? challengeMedal(e.time) : earnMedal(selected, e.time);
   if (won) {
     const newColour = won.unlocked.filter((c) => !onlineUI.owned.has(c.id)).at(-1);
     if (newColour) sub = `New car colour unlocked: ${newColour.name}`;
+    else if (won.streak) sub = `Challenge streak: ${won.streak} ${won.streak === 1 ? 'day' : 'days'}`;
     cls = 'best';
-    track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1] });
+    track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1], board: runChallenge ? 'challenge' : 'circuit' });
   }
   toast(won ? `${MEDALS[won.medal - 1]} medal` : `Lap ${e.lap}`, formatTime(e.time), sub, cls);
   onlineUI.lapDone(selected, e, session);

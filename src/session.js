@@ -17,11 +17,15 @@ const GRID_LAT = -3;               // and this far left of center
 
 export class Session {
   // opts.versus: { name, time, ghost } to race someone else's lap instead of
-  // your own best. opts.challenge: this run counts for the daily challenge.
+  // your own best. opts.challenge: this run counts for the daily challenge,
+  // whose twist can change the car (opts.tune, see car.js) and the track
+  // limits (opts.offLimit, metres past the edge, default OFF_LIMIT).
   constructor(track, saved, opts = {}) {
     this.track = track;
     this.versus = opts.versus || null;
     this.challenge = !!opts.challenge;
+    this.tune = opts.tune || null;
+    this.offLimit = opts.offLimit ?? OFF_LIMIT;
     this.best = saved?.best || null;               // { time, sectors, ghost, splits }
     this.bestSectors = saved?.bestSectors || [null, null, null];
     this.reset();
@@ -33,6 +37,7 @@ export class Session {
     const a = Math.atan2(t.ty[i], t.tx[i]);
     // Pole position: the front-left grid slot.
     this.car = createCar(t.xs[i] + t.nx[i] * GRID_LAT, t.ys[i] + t.ny[i] * GRID_LAT, a);
+    if (this.tune) this.car.tune = this.tune;
     const pj = project(t, this.car.x, this.car.y);
     this.car.hint = pj.i;
     this.car.s = pj.s;
@@ -122,7 +127,7 @@ export class Session {
     const prev = this.progress;
     this.progress += ds;
 
-    const off = Math.abs(pj.lat) > t.halfW + OFF_LIMIT;
+    const off = Math.abs(pj.lat) > t.halfW + this.offLimit;
     if (!off) this.forgiving = false;
     if (off && !this.forgiving) {
       if (this.excursion === 0) this.leftTrack();

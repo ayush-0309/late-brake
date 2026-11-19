@@ -37,7 +37,10 @@ export function createCar(x, y, a) {
   };
 }
 
+// `car.tune`, when set, replaces CAR's handling for this car (the daily
+// challenge's twists, src/challenge.js).
 export function stepCar(car, input, onTrack, dt = DT) {
+  const C = car.tune || CAR;
   car.px = car.x; car.py = car.y; car.pa = car.a;
   car.onTrack = onTrack;
 
@@ -46,21 +49,21 @@ export function stepCar(car, input, onTrack, dt = DT) {
   const sens = input.sens || 1;
   const target = input.steer;
   const rate = sens * (Math.abs(target) > Math.abs(car.steer) && Math.sign(target) === Math.sign(car.steer || target)
-    ? CAR.steerIn : CAR.steerOut);
+    ? C.steerIn : C.steerOut);
   car.steer += clamp(target - car.steer, -rate * dt, rate * dt);
 
   let fx = Math.cos(car.a), fy = Math.sin(car.a);
   let vf = car.vx * fx + car.vy * fy;
   let vr = -car.vx * fy + car.vy * fx;
   const sp = Math.abs(vf);
-  const G = (CAR.grip + CAR.downforce * sp * sp) * (onTrack ? 1 : CAR.grassGrip);
+  const G = (C.grip + C.downforce * sp * sp) * (onTrack ? 1 : C.grassGrip);
 
   // Yaw: bicycle model, capped by grip, plus self-alignment when sliding.
-  const maxAngle = (sens * CAR.steerMax) / (1 + sp / CAR.steerFalloff);
-  let yaw = (vf / CAR.wheelbase) * Math.tan(car.steer * maxAngle);
-  const cap = (G * CAR.yawCap) / Math.max(sp, 4);
+  const maxAngle = (sens * C.steerMax) / (1 + sp / C.steerFalloff);
+  let yaw = (vf / C.wheelbase) * Math.tan(car.steer * maxAngle);
+  const cap = (G * C.yawCap) / Math.max(sp, 4);
   yaw = clamp(yaw, -cap, cap);
-  if (sp > 1) yaw += CAR.align * Math.atan2(vr, sp) * Math.sign(vf);
+  if (sp > 1) yaw += C.align * Math.atan2(vr, sp) * Math.sign(vf);
   car.a += yaw * dt;
 
   // Re-express velocity in the rotated frame.
@@ -71,16 +74,16 @@ export function stepCar(car, input, onTrack, dt = DT) {
   // Longitudinal.
   let long = 0;
   if (input.throttle > 0) {
-    long += input.throttle * Math.min(CAR.traction, CAR.power / Math.max(vf, 1));
+    long += input.throttle * Math.min(C.traction, C.power / Math.max(vf, 1));
   }
   let braking = 0;
   if (input.brake > 0) {
-    if (vf > 0.5) braking = input.brake * CAR.brake;
-    else if (!(input.throttle > 0)) long -= input.brake * CAR.reverse * Math.max(0, 1 + vf / CAR.reverseMax);
+    if (vf > 0.5) braking = input.brake * C.brake;
+    else if (!(input.throttle > 0)) long -= input.brake * C.reverse * Math.max(0, 1 + vf / C.reverseMax);
   }
   braking = Math.min(braking, G * 1.1);
   long = clamp(long, -G, G);
-  const drag = CAR.roll + CAR.aeroDrag * vf * vf + (onTrack ? 0 : CAR.grassDrag * Math.abs(vf));
+  const drag = C.roll + C.aeroDrag * vf * vf + (onTrack ? 0 : C.grassDrag * Math.abs(vf));
   const decel = braking + drag;
   vf += long * dt;
   // Brakes and drag slow the car toward zero, never past it.

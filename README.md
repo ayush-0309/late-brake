@@ -44,6 +44,7 @@ Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no 
 | `src/input.js` | Keyboard, gamepad and on-screen pedals |
 | `src/storage.js` | Best laps and ghosts in localStorage |
 | `src/medals.js` | Bronze, silver and gold medals per circuit and the car colours they unlock (or that can be bought), in localStorage |
+| `src/challenge.js` | The daily challenge's twists (wet track, low downforce, rocket engine, heavy car, twitchy steering, strict limits), their medal times, today's record and the medal streak |
 | `terms.html`, `privacy.html`, `refunds.html`, `contact.html`, `pages.css` | Terms of use, privacy policy, refund policy and contact page (payment providers check for these); keep them in step with what the game collects and sells |
 | `src/shop.js`, `src/prices.js` | Buying car colours: prices in the player's currency (`src/prices.js`, made by `tools/make-prices.mjs`), Dodo Payments checkout over the game, with payments checked by `supabase/functions/shop` |
 | `src/main.js` | Game loop, menus, HUD |
@@ -100,7 +101,13 @@ sources (`posts/`, `content/`, `tools/`, `supabase/`) off the live site, and `ve
 
 ## Medals and car colours
 
-Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best clean laps (inside the track limits) of a lone easy, medium and hard AI driver, rounded up to the half second (`node tools/medal-times.mjs`); where an older AI set a quicker clean lap, its time stays. A clean lap (not rescued) that beats one wins that medal. Medals unlock some car colours in the Garage (`COLOURS` in `src/medals.js`): Racing Green at 6, Purple Sector at 12 and Champion Gold at 18. A gold counts as three, so 18 is every circuit on gold. Players without the medals can buy those instead, once the shop is set up. Pearl, Hot Pink, Volt and Coffee (`needs: Infinity`) are shop only. Until November 2026 every colour could be won, at lower counts; a browser that had won one by then keeps it (`latebrake:kept-colours`). In online races the other drivers see your colour, unless it's the free red or the same as theirs (then your grid slot's). Retune the times if the car's handling or the AI changes.
+Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src/track.js`): the best clean laps (inside the track limits) of a lone easy, medium and hard AI driver, rounded up to the half second (`node tools/medal-times.mjs`); where an older AI set a quicker clean lap, its time stays. A clean lap (not rescued) that beats one wins that medal. Medals unlock some car colours in the Garage (`COLOURS` in `src/medals.js`): Racing Green at 6, Purple Sector at 12 and Champion Gold at 18. A gold counts as three, so 18 is every circuit on gold. Players without the medals can buy those instead, once the shop is set up. Pearl, Hot Pink, Volt and Coffee (`needs: Infinity`) are shop only; Hot Streak is won only in the daily challenge. Until November 2026 every colour could be won, at lower counts; a browser that had won one by then keeps it (`latebrake:kept-colours`). In online races the other drivers see your colour, unless it's the free red or the same as theirs (then your grid slot's). Retune the times if the car's handling or the AI changes.
+
+## Daily challenge
+
+Each day (UTC) has one circuit, picked by the server (`challenge_today()` in `supabase/schema.sql`), and one twist from `TWISTS` in `src/challenge.js`, worked out from the date the same way so every player gets the same one: it changes daily, and each circuit-and-twist pairing comes round once in 36 days. A twist multiplies the car's handling (`tune`, applied to `CAR` in `src/car.js`) or tightens the track limits (`offLimit`: two wheels over instead of four). The racing line and the AI are worked out for the twisted car, so the painted braking zones fit it.
+
+Challenge laps are kept apart from the circuit's own: their own best lap and ghost for the day, their own leaderboard (`challenge_laps`), and medal times per circuit and twist (`CHALLENGE_MEDALS`, from `node tools/medal-times.mjs --challenge`, which fails if the AI can't lap a twist cleanly). A medal in the challenge counts towards a streak of days in a row; seven wins Hot Streak, a car colour that can't be bought (`streak` in `COLOURS`). The streak lives in this browser (`latebrake:challenge`), like the medals. The server's lap floors (`min_time`) sit below every twist's gold, so twists need no server change. Try one locally with `play.html?online=mock&twist=wet`.
 
 ## Credits
 

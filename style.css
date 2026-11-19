@@ -461,8 +461,16 @@ body.touch .rev-fill { background-size: 170px 100%; }
   background: linear-gradient(90deg, rgba(179, 107, 255, 0.18), rgba(179, 107, 255, 0.04));
 }
 .challenge-card .label { color: var(--purple); }
+.challenge-info { min-width: 0; }
+.challenge-ends { margin-left: 6px; color: var(--muted); }
 .challenge-track { font-size: 22px; font-weight: 800; line-height: 1.1; }
-.challenge-ends { font-size: 14px; color: var(--muted); }
+.challenge-twist { font-size: 15px; line-height: 1.25; color: #c3c8d0; margin-top: 2px; }
+.challenge-twist b { color: var(--text); margin-right: 4px; }
+.challenge-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; }
+.challenge-medals { display: flex; gap: 4px; }
+.challenge-medals .medal-target { padding: 2px 7px 2px 5px; }
+.challenge-medals .medal-target b { margin-left: 4px; font-size: 14px; }
+.challenge-streak { font-size: 14px; font-weight: 700; color: #ff8a3d; white-space: nowrap; }
 .challenge-card .secondary { padding: 8px 18px; font-size: 16px; }
 
 /* Leaderboard in the circuit details. */

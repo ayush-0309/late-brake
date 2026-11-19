@@ -1,5 +1,6 @@
 // Racing line and speed profile, worked out once per circuit from its shape
-// and the car's handling. Feeds the painted line and the braking boards.
+// and the car's handling (`tune`, CAR unless a challenge twist changes it).
+// Feeds the painted line, the braking boards and the AI drivers.
 // No DOM here, so it can run headless too.
 
 import { CAR } from './car.js';
@@ -23,7 +24,7 @@ export const LINE_PALETTES = {
   colourblind: ['#56b4e9', '#f0e442', '#d55e00'],
 };
 
-export function buildLine(t) {
+export function buildLine(t, tune = CAR) {
   // The line lives on a coarser grid than the centerline.
   const n = Math.floor(t.length / STEP);
   const ds = t.length / n;
@@ -69,16 +70,16 @@ export function buildLine(t) {
   const vc = new Float64Array(n);
   for (let j = 0; j < n; j++) {
     const kk = Math.abs(curv[j]) / GRIP_USE;
-    vc[j] = kk > CAR.downforce ? Math.min(120, Math.sqrt(CAR.grip / (kk - CAR.downforce))) : 120;
+    vc[j] = kk > tune.downforce ? Math.min(120, Math.sqrt(tune.grip / (kk - tune.downforce))) : 120;
   }
   const vb = Float64Array.from(vc), vf = Float64Array.from(vc);
   for (let pass = 0; pass < 2 * n; pass++) {
     const j = (2 * n - 1 - pass) % n, next = (j + 1) % n;
-    vb[j] = Math.min(vb[j], Math.sqrt(vb[next] ** 2 + 2 * decel(vb[next]) * ds));
+    vb[j] = Math.min(vb[j], Math.sqrt(vb[next] ** 2 + 2 * decel(vb[next], tune) * ds));
   }
   for (let pass = 0; pass < 2 * n; pass++) {
     const j = pass % n, next = (j + 1) % n;
-    vf[next] = Math.min(vf[next], Math.sqrt(Math.max(0, vf[j] ** 2 + 2 * accel(vf[j]) * ds)));
+    vf[next] = Math.min(vf[next], Math.sqrt(Math.max(0, vf[j] ** 2 + 2 * accel(vf[j], tune) * ds)));
   }
   const v = new Float64Array(n);
   for (let j = 0; j < n; j++) v[j] = Math.min(vb[j], vf[j]);
@@ -146,14 +147,14 @@ function curvature(xs, ys, n) {
 }
 
 // Deceleration available at speed v (m/s²): brakes, limited by grip, plus drag.
-function decel(v) {
-  const G = CAR.grip + CAR.downforce * v * v;
-  return BRAKE_USE * Math.min(CAR.brake, G * 1.1) + CAR.roll + CAR.aeroDrag * v * v;
+function decel(v, C) {
+  const G = C.grip + C.downforce * v * v;
+  return BRAKE_USE * Math.min(C.brake, G * 1.1) + C.roll + C.aeroDrag * v * v;
 }
 
 // Acceleration available at speed v (m/s²): engine, limited by traction, minus drag.
-function accel(v) {
-  return Math.min(CAR.traction, CAR.power / Math.max(v, 1)) - CAR.roll - CAR.aeroDrag * v * v;
+function accel(v, C) {
+  return Math.min(C.traction, C.power / Math.max(v, 1)) - C.roll - C.aeroDrag * v * v;
 }
 
 // Runs of braking, with the speed lost over each. `end` is the first point

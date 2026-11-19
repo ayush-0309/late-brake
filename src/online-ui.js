@@ -9,13 +9,14 @@ import { formatTime, loadTrack } from './storage.js';
 import { track } from './analytics.js';
 import { CONFIG } from './config.js';
 import { buyColour, resumeCheckout, PAYMENT_FAILED } from './shop.js';
-import { COLOURS } from './medals.js';
+import { COLOURS, MEDALS } from './medals.js';
+import { TWISTS, twistFor, challengeOn, todayUTC, challengeMedals, streak, bestStreak, todaysMedal, STREAK_GOAL } from './challenge.js';
 
 // `game`: { tracks, selected(), select(track), startRun(opts), toast(...), ownedChanged() }
 export function createOnlineUI(game) {
   const $ = (id) => document.getElementById(id);
   let online = null;
-  let challenge = null;      // { day, track } today
+  let challenge = null;      // { day, track, twist } today
   let boardTab = 'all';      // 'all' | 'today'
   let boardFor = null;
   // Sign-in methods switched on in Supabase; Google is assumed until it says,
@@ -35,6 +36,9 @@ export function createOnlineUI(game) {
   const late = ['accountBtn', 'challengeCard', 'board'];
   for (const id of late) $(id).hidden = false;
   $('boardList').innerHTML = '<li class="board-empty">Loading…</li>';
+  // Today's challenge as the server will have it; it confirms below.
+  challenge = challengeOn(todayUTC());
+  renderChallenge();
 
   const ready = (async () => {
     online = await getOnline();
@@ -46,9 +50,11 @@ export function createOnlineUI(game) {
     onUser(online.user);
     online.providers().then((p) => { providers = { ...providers, ...p }; renderMethods(); }, () => {});
     try {
-      challenge = await online.challenge();
+      const c = await online.challenge();
+      challenge = c && { day: c.day, track: c.track, twist: TWISTS.find((x) => x.id === c.twist) || twistFor(c.day) };
     } catch (err) {
       console.warn('No daily challenge', err);
+      challenge = null;
     }
     renderChallenge();
     refresh();
@@ -231,12 +237,24 @@ export function createOnlineUI(game) {
 
   // ---------- daily challenge ----------
 
+  // The circuit and its twist, today's medal times (ticked off once won) and
+  // the streak of days with a medal, counting towards the Hot Streak colour.
   function renderChallenge() {
     const t = challenge && game.tracks.find((x) => x.id === challenge.track);
     $('challengeCard').hidden = !t;
     if (!t) return;
+    const { day, twist } = challenge;
     $('challengeTrack').textContent = t.name;
-    const end = new Date(challenge.day + 'T00:00:00Z').getTime() + 864e5;
+    $('challengeTwist').innerHTML = `<b>${twist.name}</b> ${twist.blurb}`;
+    const got = todaysMedal(day);
+    $('challengeMedals').innerHTML = challengeMedals(t, twist).map((time, k) =>
+      `<span class="medal-target${got > k ? ' got' : ''}" title="${MEDALS[k]}"><i class="medal m${k + 1}"></i><b>${formatTime(time).replace(/\.?0+$/, '')}</b></span>`).join('');
+    const n = streak(day), won = bestStreak() >= STREAK_GOAL;
+    $('challengeStreak').textContent = won ? `Streak ${n}` : `Streak ${n} of ${STREAK_GOAL}`;
+    $('challengeStreak').title = won
+      ? 'Days in a row with a challenge medal'
+      : `A medal here ${STREAK_GOAL} days in a row wins the Hot Streak car colour`;
+    const end = new Date(day + 'T00:00:00Z').getTime() + 864e5;
     const hours = Math.max(0, Math.ceil((end - Date.now()) / 36e5));
     $('challengeEnds').textContent = `Ends in ${hours} h`;
   }
@@ -252,6 +270,7 @@ export function createOnlineUI(game) {
   // ---------- leaderboards ----------
 
   async function refresh() {
+    renderChallenge();
     if (!online) return;
     const t = game.selected();
     const isChallenge = challenge?.track === t.id;
@@ -299,7 +318,8 @@ export function createOnlineUI(game) {
     const g = await online.ghost(t.id, row.dataset.user).catch(() => null);
     if (!g) return game.toast('Ghost', 'Not available', 'Only uploaded laps can be raced', 'info');
     track('Race ghost', { track: t.name, from: 'leaderboard' });
-    game.startRun({ versus: g, mode: 'trial' });
+    // A lap from today's board was driven with today's twist, so is raced with it.
+    game.startRun({ versus: g, mode: 'trial', challenge: boardTab === 'today' });
   });
 
   $('shareBtn').addEventListener('click', async () => {
@@ -338,7 +358,7 @@ export function createOnlineUI(game) {
     if (!ghost) return;
     try {
       const res = await online.submitLap(t.id, { time: e.time, sectors: e.sectors, ghost }, { challenge: !!challengeRun });
-      if (e.isBest) markSent(t.id, e.time);
+      if (e.isBest && !challengeRun) markSent(t.id, e.time);
       track('Leaderboard lap', { track: t.name, board: challengeRun ? 'challenge' : 'circuit' });
       if (res.improved) {
         game.toast(challengeRun ? "Today's challenge" : 'Leaderboard', `#${res.rank}`, challengeRun ? 'Your best today' : `on ${t.name}`, 'info');
@@ -392,6 +412,7 @@ export function createOnlineUI(game) {
 
   return {
     ready, canPlay, lapDone, refresh, buy, needsName, signedIn,
+    get challenge() { return challenge; }, // { day, track, twist } or null
     continueWithGoogle: () => online.signInWithGoogle(),
     get owned() { return owned; },
     get shopOpen() { return shopOpen(); },

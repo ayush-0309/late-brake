@@ -3,8 +3,8 @@
 // browser's localStorage, sign-in is instant, and a few made-up drivers
 // fill the leaderboards. Same interface as the real one in online.js.
 
-import { TRACKS } from './track.js';
 import { thinGhost } from './online.js';
+import { challengeOn } from './challenge.js';
 
 const KEY = 'latebrake:mock-online';
 // Roughly how fast the made-up drivers are on each circuit (seconds).
@@ -80,12 +80,11 @@ export function createMockOnline() {
       save(data);
       emit();
     },
-    // Same rule as the server: circuits sorted by id, picked by day of the year.
+    // Same rule as the server (challengeOn). ?twist=<id> picks the twist, to
+    // try each one.
     async challenge() {
-      const ids = TRACKS.map((t) => t.id).sort();
-      const d = new Date();
-      const doy = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5);
-      return { day: today(), track: ids[doy % ids.length] };
+      const { day, track } = challengeOn(today());
+      return { day, track, twist: new URLSearchParams(location.search).get('twist') || undefined };
     },
     async leaderboard(track, { challenge = false, limit = 10 } = {}) {
       const rows = challenge ? data.daily[today()] || [] : data.best[track] || [];

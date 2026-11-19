@@ -3,6 +3,8 @@
 // time earns that medal; the times are in track.js. Kept in this browser like
 // the lap records, so storage can be blocked and every call is guarded.
 
+import { bestStreak, STREAK_GOAL } from './challenge.js';
+
 const KEY = 'latebrake:medals';
 
 export const MEDALS = ['Bronze', 'Silver', 'Gold'];
@@ -14,7 +16,9 @@ export const MEDALS = ['Bronze', 'Silver', 'Gold'];
 // other currencies pay a share of it (src/prices.js, made from it by
 // tools/make-prices.mjs). Coffee (`tip`) can only be bought: it's how a
 // player buys the developer a coffee from the home page, priced as low as
-// Dodo allows, and the colour is what makes it a sale Dodo can take.
+// Dodo allows, and the colour is what makes it a sale Dodo can take. Hot
+// Streak (`streak`) is won only with a run of daily-challenge medals and is
+// never for sale.
 export const COLOURS = [
   { id: 'red', name: 'Late Brake Red', paint: '#e8112d', needs: 0, usd: 0 },
   { id: 'green', name: 'Racing Green', paint: '#0f7a45', needs: 6, usd: 1.99 },
@@ -24,6 +28,7 @@ export const COLOURS = [
   { id: 'volt', name: 'Volt', paint: '#b5e61d', needs: Infinity, usd: 6.99 },
   { id: 'gold', name: 'Champion Gold', paint: '#c8961e', needs: 18, usd: 9.99 },
   { id: 'coffee', name: 'Coffee', paint: '#6f4e37', needs: Infinity, usd: 0.99, tip: true },
+  { id: 'streak', name: 'Hot Streak', paint: '#ff6a13', needs: Infinity, usd: 0, streak: STREAK_GOAL },
 ];
 
 // Until November 2026 every colour was won with medals, at these counts. A
@@ -86,9 +91,11 @@ export function earnMedal(track, time) {
   return { medal: m, unlocked: COLOURS.filter((c) => c.needs > before && c.needs <= after && !kept.has(c.id)) };
 }
 
-// Whether a colour can be used: enough medals, kept, or bought (`owned`: ids).
+// Whether a colour can be used: enough medals, kept, bought (`owned`: ids),
+// or for Hot Streak, a long enough challenge streak.
 export function unlocked(colour, owned) {
-  return colour.needs <= medalCount() || kept.has(colour.id) || owned.has(colour.id);
+  return colour.needs <= medalCount() || kept.has(colour.id) || owned.has(colour.id)
+    || (colour.streak > 0 && bestStreak() >= colour.streak);
 }
 
 // The colour to paint the car: the chosen one if it's unlocked, else the first.
