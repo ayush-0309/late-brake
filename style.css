@@ -458,7 +458,7 @@ body.touch .rev-fill { background-size: 170px 100%; }
 
 /* Daily challenge card. */
 .challenge-card {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 12px;
   padding: 10px 12px; margin-bottom: 12px; border-radius: 12px;
   border: 1px solid rgba(179, 107, 255, 0.45);
   background: linear-gradient(90deg, rgba(179, 107, 255, 0.18), rgba(179, 107, 255, 0.04));
@@ -473,7 +473,21 @@ body.touch .rev-fill { background-size: 170px 100%; }
 .challenge-medals { display: flex; gap: 4px; }
 .challenge-medals .medal-target { padding: 2px 7px 2px 5px; }
 .challenge-medals .medal-target b { margin-left: 4px; font-size: 14px; }
+.challenge-medals .medal-target.got { border-color: rgba(255, 255, 255, 0.35); background: rgba(255, 255, 255, 0.1); }
+.challenge-medals .tick { margin-left: 4px; color: var(--green); font-weight: 800; letter-spacing: 0; }
 .challenge-streak { font-size: 14px; font-weight: 700; color: #ff8a3d; white-space: nowrap; }
+/* How today has gone: the medal won, the best lap, and the gap to the next. */
+.challenge-result {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(179, 107, 255, 0.28); font-size: 15px;
+}
+.challenge-result .lbl { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.challenge-result .won { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.challenge-result .won.m1 { color: #e3a874; }
+.challenge-result .won.m2 { color: #dfe4ea; }
+.challenge-result .won.m3 { color: #f2c94c; }
+.challenge-result .best { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.challenge-result .next { color: #c3c8d0; }
 .challenge-card .secondary { padding: 8px 18px; font-size: 16px; }
 
 /* Leaderboard in the circuit details. */

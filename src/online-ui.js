@@ -10,7 +10,7 @@ import { track } from './analytics.js';
 import { CONFIG } from './config.js';
 import { buyColour, resumeCheckout, PAYMENT_FAILED } from './shop.js';
 import { COLOURS, MEDALS } from './medals.js';
-import { TWISTS, twistFor, challengeOn, todayUTC, challengeMedals, streak, bestStreak, todaysMedal, STREAK_GOAL } from './challenge.js';
+import { TWISTS, twistFor, challengeOn, todayUTC, challengeMedals, loadChallengeRun, streak, bestStreak, todaysMedal, STREAK_GOAL } from './challenge.js';
 
 // `game`: { tracks, selected(), select(track), startRun(opts), toast(...), ownedChanged() }
 export function createOnlineUI(game) {
@@ -237,8 +237,9 @@ export function createOnlineUI(game) {
 
   // ---------- daily challenge ----------
 
-  // The circuit and its twist, today's medal times (ticked off once won) and
-  // the streak of days with a medal, counting towards the Hot Streak colour.
+  // The circuit and its twist, today's medal times (ticked off once won),
+  // the streak of days with a medal (towards the Hot Streak colour), and
+  // how today has gone: best lap, the medal it won and what the next needs.
   function renderChallenge() {
     const t = challenge && game.tracks.find((x) => x.id === challenge.track);
     $('challengeCard').hidden = !t;
@@ -246,9 +247,10 @@ export function createOnlineUI(game) {
     const { day, twist } = challenge;
     $('challengeTrack').textContent = t.name;
     $('challengeTwist').innerHTML = `<b>${twist.name}</b> ${twist.blurb}`;
-    const got = todaysMedal(day);
-    $('challengeMedals').innerHTML = challengeMedals(t, twist).map((time, k) =>
-      `<span class="medal-target${got > k ? ' got' : ''}" title="${MEDALS[k]}"><i class="medal m${k + 1}"></i><b>${formatMedalTime(time)}</b></span>`).join('');
+    const got = todaysMedal(day), medals = challengeMedals(t, twist);
+    $('challengeMedals').innerHTML = medals.map((time, k) =>
+      `<span class="medal-target${got > k ? ' got' : ''}" title="${MEDALS[k]}${got > k ? ': won today' : ''}"><i class="medal m${k + 1}"></i><b>${formatMedalTime(time)}</b>${got > k ? '<span class="tick" aria-label="won">✓</span>' : ''}</span>`).join('');
+    $('challengeResult').innerHTML = challengeResult(loadChallengeRun(day)?.best?.time, got, medals);
     const n = streak(day), won = bestStreak() >= STREAK_GOAL;
     $('challengeStreak').textContent = won ? `Streak ${n}` : `Streak ${n} of ${STREAK_GOAL}`;
     $('challengeStreak').title = won
@@ -257,6 +259,17 @@ export function createOnlineUI(game) {
     const end = new Date(day + 'T00:00:00Z').getTime() + 864e5;
     const hours = Math.max(0, Math.ceil((end - Date.now()) / 36e5));
     $('challengeEnds').textContent = `Ends in ${hours} h`;
+  }
+
+  // "Today  [medal] Bronze  1:21.172  0.172 s to silver", or what the first
+  // medal needs before any lap.
+  function challengeResult(best, got, medals) {
+    if (best == null) return `<span class="lbl">Today</span><span class="next">No lap yet. ${MEDALS[0]} needs ${formatMedalTime(medals[0])}</span>`;
+    const gap = got < 3 ? best - medals[got] : 0;
+    return `<span class="lbl">Today</span>`
+      + (got ? `<span class="won m${got}"><i class="medal m${got}"></i>${MEDALS[got - 1]}</span>` : '<span class="won">No medal yet</span>')
+      + `<b class="best">${formatTime(best)}</b>`
+      + (got === 3 ? '<span class="next">Top medal</span>' : gap > 0 ? `<span class="next">${gap.toFixed(3)} s to ${MEDALS[got].toLowerCase()}</span>` : '');
   }
 
   $('challengeBtn').addEventListener('click', () => {
