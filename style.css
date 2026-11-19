@@ -172,6 +172,9 @@ body.racing #racePos { display: block; }
 }
 .sector.active { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4); color: var(--text); }
 .sector.purple { background: var(--purple); color: #fff; }
+/* The next medal to chase, under the sectors in a time trial. */
+.medal-next { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.medal-next b { margin-left: auto; font-size: 16px; letter-spacing: 0; font-variant-numeric: tabular-nums; color: var(--text); }
 .sector.green { background: var(--green); color: #07210f; }
 .sector.yellow { background: var(--yellow); color: #2a2000; }
 .sector.invalid { background: rgba(255, 255, 255, 0.15); color: var(--muted); text-decoration: line-through; }

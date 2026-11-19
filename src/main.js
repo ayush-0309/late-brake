@@ -6,7 +6,7 @@ import { OnlineRaceSession } from './online-race.js';
 import { createLobby } from './lobby-ui.js';
 import { createInput } from './input.js';
 import { createRenderer, drawTrackPreview, drawCarPreview } from './render.js';
-import { loadTrack, saveTrack, clearTrack, formatTime } from './storage.js';
+import { loadTrack, saveTrack, clearTrack, formatTime, formatMedalTime } from './storage.js';
 import { loadSettings, saveSettings, SENSITIVITY, LINE_MODES, CAMERAS } from './settings.js';
 import { createAudio } from './audio.js';
 import { createView3D } from './view3d.js';
@@ -14,7 +14,7 @@ import { createPlatform } from './platform.js';
 import { initAnalytics, track, reportError } from './analytics.js';
 import { createOnlineUI } from './online-ui.js';
 import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, medalFor, earnMedal, unlocked, colourFor } from './medals.js';
-import { challengeTrack, tuneFor, loadChallengeRun, saveChallengeRun, earnChallengeMedal, streak, STREAK_GOAL } from './challenge.js';
+import { challengeTrack, tuneFor, loadChallengeRun, saveChallengeRun, earnChallengeMedal, todaysMedal, streak, STREAK_GOAL } from './challenge.js';
 import { CURRENCIES, shopCurrency, currencyName, priceText } from './shop.js';
 
 const $ = (id) => document.getElementById(id);
@@ -147,7 +147,7 @@ function updateDetail() {
   // The lap times that win each medal here, ticked off once won.
   const got = loadMedals()[t.id] || 0;
   $('detailMedals').innerHTML = t.medals.map((time, k) =>
-    `<span class="medal-target${got > k ? ' got' : ''}"><i class="medal m${k + 1}"></i>${MEDALS[k]} <b>${formatTime(time).replace(/\.?0+$/, '')}</b></span>`).join('');
+    `<span class="medal-target${got > k ? ' got' : ''}"><i class="medal m${k + 1}"></i>${MEDALS[k]} <b>${formatMedalTime(time)}</b></span>`).join('');
 }
 
 function openMenu({ keepRoom = false } = {}) {
@@ -239,6 +239,7 @@ function startRun(opts = {}) {
   show('hud', true);
   hideToast();
   $('trackLabel').textContent = opts.versus ? `vs ${opts.versus.name}` : ch ? `Challenge: ${ch.twist.name}` : selected.name;
+  renderMedalNext();
   document.activeElement?.blur?.();
   platform.gameplayStart();
   track('Run start', { track: selected.name, mode: opts.challenge ? 'challenge' : opts.versus ? 'versus' : mode, camera: settings.camera, line: settings.line });
@@ -734,6 +735,22 @@ function resetCar() {
   if (session && !paused && session.resetToTrack()) stuckTime = 0;
 }
 
+// The next medal a time trial can win here (today's, in the challenge):
+// { k: 0 bronze, 1 silver or 2 gold, time }, or null once gold is held or
+// in a race, which has no medals.
+function nextMedal() {
+  if (!session || session.mode === 'race') return null;
+  const held = runChallenge ? todaysMedal(runChallenge.day) : loadMedals()[selected.id] || 0;
+  return held < 3 ? { k: held, time: session.track.medals[held] } : null;
+}
+
+// Under the sectors: the medal to chase, so it's in view while driving.
+function renderMedalNext() {
+  const m = nextMedal();
+  $('medalNext').hidden = !m;
+  if (m) $('medalNext').innerHTML = `<i class="medal m${m.k + 1}"></i>${MEDALS[m.k]} <b>${formatMedalTime(m.time)}</b>`;
+}
+
 // Today's challenge medal for a clean lap, shaped like earnMedal()'s answer:
 // the medal, the colour it unlocks (Hot Streak, when the streak gets there)
 // and the streak.
@@ -767,7 +784,15 @@ function onLap(e) {
     cls = 'best';
     track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1], board: runChallenge ? 'challenge' : 'circuit' });
   }
+  // A clean lap short of the next medal says how short, which is what a
+  // player chasing it wants to know.
+  const next = !won && e.valid && !e.rescued ? nextMedal() : null;
+  if (next) {
+    const gap = e.time - next.time;
+    sub = `${e.isBest ? 'New best' : `${formatTime(e.time - e.prevBest, true)} to best`} · ${gap < 60 ? `${gap.toFixed(3)} s` : formatTime(gap)} off ${MEDALS[next.k].toLowerCase()}`;
+  }
   toast(won ? `${MEDALS[won.medal - 1]} medal` : `Lap ${e.lap}`, formatTime(e.time), sub, cls);
+  renderMedalNext();
   onlineUI.lapDone(selected, e, session);
   audio.chime(cls === 'best' ? 'best' : cls === 'bad' ? 'bad' : 'lap');
 }
@@ -870,20 +895,35 @@ function updateRaceHud(s) {
   if (!$('results').hidden && now - resultsShownAt > 400) renderResults();
 }
 
+// A notice ('info', like a leaderboard place) never covers a lap's toast
+// while it's up: it waits and shows after it. Otherwise the place arriving
+// from the server wiped the lap's medal or how close it came.
+let toastCls = '', toastNext = null;
 function toast(title, time, sub, cls) {
+  if (cls === 'info' && toastCls && toastCls !== 'info') {
+    toastNext = [title, time, sub, cls];
+    return;
+  }
   const el = $('toast');
   el.className = 'toast show ' + cls;
   el.innerHTML = `<div class="toast-title">${esc(title)}</div><div class="toast-time">${esc(time)}</div>${sub ? `<div class="toast-sub">${esc(sub)}</div>` : ''}`;
+  toastCls = cls;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(hideToast, cls === 'info' ? 1800 : 3200);
+  toastTimer = setTimeout(() => hideToast(true), cls === 'info' ? 1800 : 3200);
 }
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function hideToast() {
+// `next`: show a notice that was waiting (when a toast times out, not when
+// a new run or the menu clears it).
+function hideToast(next = false) {
   $('toast').className = 'toast';
+  toastCls = '';
+  const waiting = toastNext;
+  toastNext = null;
+  if (next && waiting) toast(...waiting);
 }
 
 function flash(id) {

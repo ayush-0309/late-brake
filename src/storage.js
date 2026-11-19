@@ -26,6 +26,10 @@ export function clearTrack(id) {
   } catch {}
 }
 
+// Medal times are whole or half seconds, shown to a tenth (1:21.0): shown as
+// 1:21, a lap of 1:21.172 looked as if it had made it.
+export const formatMedalTime = (t) => formatTime(t).replace(/(\.\d)\d\d$/, '$1');
+
 export function formatTime(t, sign = false) {
   if (t === null || t === undefined || !Number.isFinite(t)) return '--:--.---';
   const neg = t < 0;

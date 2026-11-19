@@ -5,7 +5,7 @@
 // challenge, the leaderboards and the shop need a Google account with a name.
 
 import { getOnline, onlineEnabled, GUEST_NAME } from './online.js';
-import { formatTime, loadTrack } from './storage.js';
+import { formatTime, formatMedalTime, loadTrack } from './storage.js';
 import { track } from './analytics.js';
 import { CONFIG } from './config.js';
 import { buyColour, resumeCheckout, PAYMENT_FAILED } from './shop.js';
@@ -248,7 +248,7 @@ export function createOnlineUI(game) {
     $('challengeTwist').innerHTML = `<b>${twist.name}</b> ${twist.blurb}`;
     const got = todaysMedal(day);
     $('challengeMedals').innerHTML = challengeMedals(t, twist).map((time, k) =>
-      `<span class="medal-target${got > k ? ' got' : ''}" title="${MEDALS[k]}"><i class="medal m${k + 1}"></i><b>${formatTime(time).replace(/\.?0+$/, '')}</b></span>`).join('');
+      `<span class="medal-target${got > k ? ' got' : ''}" title="${MEDALS[k]}"><i class="medal m${k + 1}"></i><b>${formatMedalTime(time)}</b></span>`).join('');
     const n = streak(day), won = bestStreak() >= STREAK_GOAL;
     $('challengeStreak').textContent = won ? `Streak ${n}` : `Streak ${n} of ${STREAK_GOAL}`;
     $('challengeStreak').title = won
