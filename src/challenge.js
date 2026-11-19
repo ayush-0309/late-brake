@@ -19,12 +19,19 @@ export const TWISTS = [
     tune: { grip: 0.7, downforce: 0.7, traction: 0.7 } },
   { id: 'lowdf', name: 'Low downforce', blurb: 'Quick on the straights, nervous in the fast corners',
     tune: { downforce: 0.6, aeroDrag: 0.75 } },
-  { id: 'rocket', name: 'Rocket engine', blurb: 'Far more power: the corners come up sooner',
+  // More traction than this and the AI spins its wheels out of slow
+  // corners, so the extra power shows at the top end.
+  { id: 'rocket', name: 'Rocket engine', blurb: '40 km/h more top speed: the corners come up sooner',
     tune: { power: 1.4, traction: 1.04 } },
-  { id: 'heavy', name: 'Heavy car', blurb: 'Slow to pick up speed and longer to stop',
-    tune: { traction: 0.8, power: 0.85, brake: 0.8 } },
-  { id: 'twitchy', name: 'Twitchy steering', blurb: 'Light, quick steering: small hands win',
-    tune: { steerMax: 1.3, steerIn: 1.7, steerOut: 1.7, align: 0.6 } },
+  // Braking is limited by grip, not the brakes, so less grip is what makes
+  // it stop later (and corner slower).
+  { id: 'heavy', name: 'Heavy car', blurb: 'Slow to pick up speed, longer to stop, slower through corners',
+    tune: { traction: 0.8, power: 0.85, grip: 0.85, downforce: 0.85 } },
+  // Quicker, further steering, and the car may turn past its grip (yawCap)
+  // and is slower to straighten (align): a tap of the keys makes it dart
+  // and the rear step out. Steered smoothly, it's no slower.
+  { id: 'twitchy', name: 'Twitchy steering', blurb: 'The car darts at every input and the rear steps out: steer gently',
+    tune: { steerMax: 1.4, steerIn: 2.5, steerOut: 2.5, align: 0.35, yawCap: 1.5 } },
   // Half the usual allowance: the car centre 0.6 m past the edge has both
   // outside wheels over it (OFF_LIMIT is all four).
   { id: 'strict', name: 'Strict limits', blurb: 'Two wheels over the white line deletes the lap',
@@ -35,12 +42,12 @@ export const TWISTS = [
 // a lone AI driver at easy, medium and hard skill with the twist on, rounded
 // up to the half second. Made by `node tools/medal-times.mjs --challenge`.
 export const CHALLENGE_MEDALS = {
-  'at-1969': { wet: [94, 87.5, 84.5], lowdf: [79.5, 74.5, 71.5], rocket: [76.5, 71.5, 68.5], heavy: [83, 77, 73.5], twitchy: [79, 73.5, 70.5], strict: [79, 74, 71] }, // Spielberg
-  'it-1922': { wet: [111.5, 104, 99.5], lowdf: [95.5, 89, 85.5], rocket: [92, 85.5, 81.5], heavy: [101, 94, 89], twitchy: [96.5, 89.5, 85], strict: [96.5, 89.5, 85.5] }, // Monza
-  'gb-1948': { wet: [137.5, 128.5, 122.5], lowdf: [116, 108, 103], rocket: [111.5, 104, 99], heavy: [118.5, 110.5, 105], twitchy: [114, 106.5, 101.5], strict: [114, 106.5, 101.5] }, // Silverstone
-  'be-1925': { wet: [152, 141.5, 134.5], lowdf: [128.5, 119.5, 114], rocket: [123.5, 114.5, 109], heavy: [133, 123.5, 117.5], twitchy: [127.5, 118.5, 113], strict: [127.5, 118.5, 113] }, // Spa-Francorchamps
-  'mc-1929': { wet: [103.5, 99, 97], lowdf: [87, 84, 81.5], rocket: [85.5, 82, 79.5], heavy: [89, 86, 83.5], twitchy: [85, 81, 80], strict: [86, 82.5, 80.5] }, // Monaco
-  'br-1940': { wet: [105.5, 98.5, 94], lowdf: [89, 83.5, 79.5], rocket: [85.5, 79.5, 76], heavy: [90, 83.5, 80], twitchy: [87, 81, 78], strict: [87, 81, 78] }, // Interlagos
+  'at-1969': { wet: [94, 87.5, 84.5], lowdf: [79.5, 74.5, 71.5], rocket: [76.5, 71.5, 68.5], heavy: [87, 80.5, 77.5], twitchy: [79.5, 74, 70.5], strict: [79, 74, 71] }, // Spielberg
+  'it-1922': { wet: [111.5, 104, 99.5], lowdf: [95.5, 89, 85.5], rocket: [92, 85.5, 81.5], heavy: [105, 97.5, 92.5], twitchy: [96.5, 89.5, 85], strict: [96.5, 89.5, 85.5] }, // Monza
+  'gb-1948': { wet: [137.5, 128.5, 122.5], lowdf: [116, 108, 103], rocket: [111.5, 104, 99], heavy: [125.5, 117, 111.5], twitchy: [114, 106.5, 101.5], strict: [114, 106.5, 101.5] }, // Silverstone
+  'be-1925': { wet: [152, 141.5, 134.5], lowdf: [128.5, 119.5, 114], rocket: [123.5, 114.5, 109], heavy: [139.5, 130, 123.5], twitchy: [127.5, 118.5, 113.5], strict: [127.5, 118.5, 113] }, // Spa-Francorchamps
+  'mc-1929': { wet: [103.5, 99, 97], lowdf: [87, 84, 81.5], rocket: [85.5, 82, 79.5], heavy: [94.5, 90.5, 88], twitchy: [85, 81, 80], strict: [86, 82.5, 80.5] }, // Monaco
+  'br-1940': { wet: [105.5, 98.5, 94], lowdf: [89, 83.5, 79.5], rocket: [85.5, 79.5, 76], heavy: [96, 89.5, 85.5], twitchy: [87, 81.5, 78], strict: [87, 81, 78] }, // Interlagos
 };
 
 // The twist on a challenge day ('YYYY-MM-DD', UTC). The server picks the
