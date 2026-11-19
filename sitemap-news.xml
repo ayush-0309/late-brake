@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/bottas-stays-at-cadillac-for-2027.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-19T09:00:00+05:30</news:publication_date>
+      <news:title>Bottas keeps his Cadillac F1 seat for 2027 ahead of Herta</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/rosberg-1982-title-with-one-win.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-17T12:00:00+05:30</news:publication_date>
       <news:title>On this day: Vettel&#39;s record eighth win and Sainz&#39;s first podium</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/haas-keeps-camara-las-vegas-hirakawa-fp1.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-17T09:00:00+05:30</news:publication_date>
-      <news:title>Haas keeps Camara for F1 Las Vegas GP as Hirakawa returns for FP1</news:title>
     </news:news>
   </url>
 </urlset>
