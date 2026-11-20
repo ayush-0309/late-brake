@@ -7,7 +7,8 @@
 //
 // Run the dev server and `node tools/trailer/save.mjs`, open
 // http://localhost:5173/tools/trailer/ and press Record: the video lands in
-// launch/trailer/. Like the game, nothing here names the championship.
+// launch/trailer/. ?shape=vertical makes it 1080 × 1920 for phones. Like the
+// game, nothing here names the championship.
 
 import { Muxer, ArrayBufferTarget } from 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/+esm';
 import { TRACKS, buildTrack } from '../../src/track.js';
@@ -19,10 +20,16 @@ import { createRenderer } from '../../src/render.js';
 import { createView3D } from '../../src/view3d.js';
 import { createAudio } from '../../src/audio.js';
 import { DT } from '../../src/car.js';
+import { MEDALS, medalFor } from '../../src/medals.js';
+import { formatTime } from '../../src/storage.js';
 import { scoreMusic, BEAT } from './music.js';
 
-const W = 1920, H = 1080, FPS = 60, RATE = 48000;
-const NAME = 'late-brake-trailer.mp4';
+const params = new URLSearchParams(location.search);
+const CUT = 'trailer'; // more cuts go in CUTS, picked with ?cut=
+const VERTICAL = params.get('shape') === 'vertical';
+const [W, H] = VERTICAL ? [1080, 1920] : [1920, 1080];
+const FPS = 60, RATE = 48000;
+const NAME = `late-brake-${CUT}${VERTICAL ? '-vertical' : ''}.mp4`;
 const RED = '#e8112d', TEXT = '#f3f4f6', MUTED = '#c3c8d0', GREEN = '#34d27b';
 const FONT = '"Barlow Condensed", "Arial Narrow", sans-serif';
 const PAINT = '#e8112d';
@@ -34,7 +41,8 @@ const PAINT = '#e8112d';
 // `from` seconds into one; the race skips `skip` ticks of the start lights so
 // GO lands on beat 32. `zoom` brings the top-down cameras closer than the
 // game's (ZOOM by default). Cards are text on their own.
-const SHOTS = [
+const CUTS = {};
+CUTS.trailer = [
   { kind: 'drive', track: 'mc-1929', camera: 'cockpit', beats: 6, at: { stop: 1, lead: 1.9 } },
   { kind: 'card', beats: 2, title: 'SIX REAL CIRCUITS' },
   { kind: 'drive', track: 'be-1925', camera: 'chase', beats: 6, at: { stop: 0, lead: 1.6 }, kicker: 'SPA-FRANCORCHAMPS', title: 'BUILT AT TRUE SCALE' },
@@ -51,11 +59,16 @@ const SHOTS = [
   { kind: 'drive', track: 'mc-1929', camera: 'chase', beats: 4, at: { stop: 2, lead: 1.4 }, kicker: 'MONACO', title: 'A DAILY CHALLENGE AND LEADERBOARDS' },
   { kind: 'end', track: 'be-1925', camera: 'fixed', beats: 8, at: { stop: 1, lead: 3 }, zoom: 1 },
 ];
+
+const SHOTS = CUTS[CUT];
 const ZOOM = { chase: 1.7, fixed: 1.5 };
 
 const $ = (id) => document.getElementById(id);
 const status = (s) => { $('status').textContent = s; window.trailerStatus = s; };
 const out = $('out');
+out.width = W;
+out.height = H;
+Object.assign(out.style, { aspectRatio: `${W} / ${H}`, width: VERTICAL ? 'min(420px, 100vw)' : 'min(960px, 100vw)' });
 const octx = out.getContext('2d');
 const tracks = new Map();
 const trackById = (id) => {
@@ -108,13 +121,16 @@ function tick(sh) {
   }
   s.step(inp);
   if (s.phase === 'running') renderer.addSkid(s.car);
+  sh.ticks = (sh.ticks || 0) + 1;
+  const lap = s.events.find((e) => e.type === 'lap');
+  if (lap) Object.assign(sh, { lap, lapTick: sh.ticks });
   s.events.length = 0;
   return inp;
 }
 
 // A lap by a quicker AI, to race as a ghost: the flying lap after the start.
-function ghostLap(t) {
-  const s = new Session(t, null);
+function ghostLap(t, opts) {
+  const s = new Session(t, null, opts);
   const sh = { session: s, driver: createDriver(t, t.line ||= buildLine(t), 0.985) };
   let lap = null;
   for (let k = 0; k < 60 * 400 && !lap; k++) {
@@ -126,9 +142,14 @@ function ghostLap(t) {
   return { time: lap.time, sectors: lap.sectors, ghost: lap.ghost, rescued: false, splits: [] };
 }
 
+// The circuit and session options for a shot.
+function shotTrack(shot) {
+  return { t: trackById(shot.track), opts: {} };
+}
+
 // Sets a shot up and runs it on to where it starts.
 function prepare(shot) {
-  const t = trackById(shot.track);
+  const { t, opts } = shotTrack(shot);
   const line = t.line ||= buildLine(t);
   sizeCanvases(shot.camera === 'cockpit' ? 1 : shot.zoom ?? ZOOM[shot.camera]);
   renderer.setTrack(t);
@@ -141,18 +162,35 @@ function prepare(shot) {
   }
   if (shot.kind === 'ghost') {
     // A quicker ghost, so it pulls clear of the car instead of hiding under it.
-    const best = ghostLap(t);
-    sh.session = new Session(t, { best, bestSectors: best.sectors });
+    const best = ghostLap(t, opts);
+    sh.session = new Session(t, { best, bestSectors: best.sectors }, opts);
     sh.driver = createDriver(t, line, 0.92);
     for (let k = 0; k < 60 * 400; k++) {
       tick(sh);
       if (sh.session.laps.length >= 1 && sh.session.lapTime >= shot.from) return sh;
     }
     throw new Error('Ghost shot never reached its start');
-  } else {
-    sh.session = new Session(t, null);
-    sh.driver = createDriver(t, line, 0.97);
   }
+  if (shot.kind === 'finish') {
+    // Drive it once to find the tick the flying lap ends on, then again (the
+    // same, the physics being deterministic) to `cross` beats before it.
+    const at = (probe) => {
+      for (let k = 0; k < 60 * 600; k++) {
+        tick(probe);
+        if (probe.lap?.lap === 2) return probe.ticks;
+      }
+      throw new Error('Finish shot never finished a lap');
+    };
+    const end = at({ shot, session: new Session(t, null, opts), driver: createDriver(t, line, 0.985) });
+    sh.session = new Session(t, null, opts);
+    sh.driver = createDriver(t, line, 0.985);
+    while ((sh.ticks || 0) < end - Math.round(shot.cross * BEAT / DT)) tick(sh);
+    sh.lap = null;
+    renderer.setTrack(t); // drops the probe's skid marks
+    return sh;
+  }
+  sh.session = new Session(t, null, opts);
+  sh.driver = createDriver(t, line, 0.97);
   // A flying lap, a little before the chosen stop.
   const list = stops(t);
   const stop = list[shot.at.stop % list.length];
@@ -174,6 +212,14 @@ function font(size, weight = 800, italic = true) {
   return `${italic ? 'italic ' : ''}${weight} ${size}px ${FONT}`;
 }
 
+// Sets the font, smaller if need be so `text` fits in `max` pixels (titles
+// made for 1920 wide, drawn on a 1080-wide vertical frame).
+function fitFont(text, size, max, weight = 800, italic = true) {
+  octx.font = font(size, weight, italic);
+  const w = octx.measureText(text).width + (parseFloat(octx.letterSpacing) || 0) * text.length;
+  if (w > max) octx.font = font(Math.floor((size * max) / w), weight, italic);
+}
+
 function vignette() {
   const g = octx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
   g.addColorStop(0, 'rgba(0,0,0,0)');
@@ -186,25 +232,28 @@ function vignette() {
 function caption(kicker, title, t) {
   const k = ease(t / 0.35);
   octx.save();
-  const g = octx.createLinearGradient(0, H - 330, 0, H);
+  // Landscape: bottom left. Vertical: high up, clear of the car (low on the
+  // screen there) and of a phone app's own buttons along the bottom.
+  const [clear, dark] = VERTICAL ? [800, 0] : [H - 330, H];
+  const g = octx.createLinearGradient(0, clear, 0, dark);
   g.addColorStop(0, 'rgba(0,0,0,0)');
   g.addColorStop(1, `rgba(0,0,0,${0.55 * k})`);
   octx.fillStyle = g;
-  octx.fillRect(0, H - 330, W, 330);
+  octx.fillRect(0, Math.min(clear, dark), W, Math.abs(dark - clear));
   octx.globalAlpha = k;
-  const x = 110 - (1 - k) * 70;
-  const bottom = H - 110;
+  const x = (VERTICAL ? 90 : 110) - (1 - k) * 70;
+  const bottom = VERTICAL ? 640 : H - 110;
   octx.fillStyle = RED;
   octx.fillRect(x - 34, bottom - (title ? 150 : 50), 10, title ? 150 : 50);
   octx.shadowColor = 'rgba(0,0,0,0.6)';
   octx.shadowBlur = 18;
   octx.letterSpacing = '6px';
-  octx.font = font(40, 700, false);
+  fitFont(kicker, VERTICAL ? 46 : 40, W - x - 60, 700, false);
   octx.fillStyle = RED;
   octx.fillText(kicker, x, bottom - (title ? 104 : 4));
   if (title) {
     octx.letterSpacing = '1px';
-    octx.font = font(94);
+    fitFont(title, 94, W - x - 60);
     octx.fillStyle = TEXT;
     octx.fillText(title, x, bottom);
   }
@@ -232,12 +281,12 @@ function card(shot, t) {
   octx.textAlign = 'center';
   octx.fillStyle = TEXT;
   octx.letterSpacing = '2px';
-  octx.font = font(shot.medals ? 120 : 170);
+  fitFont(shot.title, shot.medals ? 120 : 170, W * 0.88);
   const ty = shot.sub ? -20 : 55;
   octx.fillText(shot.title, 0, shot.medals ? -40 : ty);
   if (shot.sub) {
     octx.letterSpacing = '10px';
-    octx.font = font(64, 700, false);
+    fitFont(shot.sub, 64, W * 0.88, 700, false);
     octx.fillStyle = shot.medals ? MUTED : RED;
     octx.fillText(shot.sub, 0, shot.medals ? 60 : 90);
   }
@@ -293,14 +342,14 @@ function lights(s) {
   octx.restore();
 }
 
-function endCard(t) {
+function endCard(t, sub = 'FREE IN YOUR BROWSER  ·  NO DOWNLOAD') {
   octx.fillStyle = `rgba(7,8,10,${0.55 + 0.25 * ease(t / 0.6)})`;
   octx.fillRect(0, 0, W, H);
   const k = ease(t / 0.45);
   octx.save();
   octx.globalAlpha = k;
   octx.textAlign = 'left';
-  octx.font = font(250);
+  fitFont('LATEBRAKE', 250, W * 0.9);
   octx.letterSpacing = '2px';
   const late = octx.measureText('LATE').width, brake = octx.measureText('BRAKE').width;
   const x = W / 2 - (late + brake) / 2;
@@ -316,9 +365,9 @@ function endCard(t) {
   octx.globalAlpha = k2;
   octx.textAlign = 'center';
   octx.letterSpacing = '8px';
-  octx.font = font(54, 700, false);
+  fitFont(sub, 54, W * 0.9, 700, false);
   octx.fillStyle = MUTED;
-  octx.fillText('FREE IN YOUR BROWSER  ·  NO DOWNLOAD', W / 2, y + 110);
+  octx.fillText(sub, W / 2, y + 110);
   const k3 = ease((t - 0.7) / 0.4);
   octx.globalAlpha = k3;
   octx.letterSpacing = '4px';
@@ -339,7 +388,7 @@ function drawShot(sh, t) {
   if (shot.kind === 'card') return card(shot, t);
   const s = sh.session;
   const cockpit = shot.camera === 'cockpit' && view3d;
-  const opts = { ghost: shot.kind === 'ghost', camera: cockpit ? 'none' : shot.camera, line: shot.line || 'off', lineColours: 'standard', paint: PAINT };
+  const opts = { ghost: shot.kind === 'ghost', camera: cockpit ? 'none' : shot.camera, line: shot.line || 'off', lineColours: 'standard', paint: shot.paint || PAINT };
   renderer.draw(s, 1, opts, 1 / FPS);
   if (cockpit) {
     view3d.draw(s, 1, opts);
@@ -348,13 +397,74 @@ function drawShot(sh, t) {
     // The middle of the bigger picture, keeping the car where the camera puts
     // it: low on screen for chase, in the middle for fixed.
     const g = $('game'), cw = g.width, ch = g.height, z = cw / W;
-    const sx = (cw - W * Math.min(z, 1)) / 2, sy = (shot.camera === 'chase' ? 0.63 : 0.5) * (ch - H * Math.min(z, 1));
+    // `crop` (0 top to 1 bottom of the bigger picture) can frame a shot higher.
+    const sx = (cw - W * Math.min(z, 1)) / 2, sy = (shot.crop ?? (shot.camera === 'chase' ? 0.63 : 0.5)) * (ch - H * Math.min(z, 1));
     octx.drawImage(g, sx, sy, Math.min(cw, W), Math.min(ch, H), 0, 0, W, H);
   }
   vignette();
   if (shot.kind === 'race') lights(s);
-  if (shot.kind === 'end') return endCard(t);
+  if (shot.kind === 'end') return endCard(t, shot.sub);
+  if (shot.hud === 'speed') readout('SPEED', `${Math.round(s.car.speed * 3.6)} KM/H`, t);
+  if (shot.hud === 'tyres') readout('TYRE GRIP', `${Math.round(s.tyres * 100)}%`, t);
+  if (shot.kind === 'finish' && sh.lap) lapToast(s.track, sh.lap, (sh.ticks - sh.lapTick) * DT);
   if (shot.kicker) caption(shot.kicker, shot.title, t - 0.15);
+}
+
+// The game's readout for a twist, top left like its timing panel.
+function readout(label, value, t) {
+  const k = ease(t / 0.3);
+  const x = VERTICAL ? 70 : 80, y = VERTICAL ? 260 : 80, w = 380, h = 130;
+  octx.save();
+  octx.globalAlpha = k;
+  octx.fillStyle = 'rgba(11,13,17,0.78)';
+  octx.strokeStyle = 'rgba(255,255,255,0.12)';
+  octx.lineWidth = 2;
+  octx.beginPath();
+  octx.roundRect(x, y, w, h, 18);
+  octx.fill();
+  octx.stroke();
+  octx.letterSpacing = '5px';
+  octx.font = font(30, 700, false);
+  octx.fillStyle = MUTED;
+  octx.fillText(label, x + 30, y + 46);
+  octx.letterSpacing = '1px';
+  octx.font = font(64);
+  octx.fillStyle = TEXT;
+  octx.fillText(value, x + 30, y + 108);
+  octx.restore();
+}
+
+// The game's toast for a finished challenge lap: the medal it wins.
+const MEDAL_COLOURS = ['#e3a874', '#dfe4ea', '#f2c94c'];
+function lapToast(track, lap, since) {
+  if (since > 3.2) return;
+  const k = ease(since / 0.25) * (1 - ease((since - 2.8) / 0.4));
+  const m = lap.valid ? medalFor(track, lap.time) : 0;
+  octx.save();
+  octx.globalAlpha = k;
+  octx.translate(W / 2, H * (VERTICAL ? 0.3 : 0.28) - (1 - k) * 30);
+  const w = 760, h = 300;
+  octx.fillStyle = 'rgba(11,13,17,0.86)';
+  octx.strokeStyle = m ? MEDAL_COLOURS[m - 1] : 'rgba(255,255,255,0.2)';
+  octx.lineWidth = 4;
+  octx.beginPath();
+  octx.roundRect(-w / 2, -h / 2, w, h, 26);
+  octx.fill();
+  octx.stroke();
+  octx.textAlign = 'center';
+  octx.letterSpacing = '8px';
+  octx.font = font(46, 700, false);
+  octx.fillStyle = m ? MEDAL_COLOURS[m - 1] : MUTED;
+  octx.fillText(m ? `${MEDALS[m - 1].toUpperCase()} MEDAL` : `LAP ${lap.lap}`, 0, -72);
+  octx.letterSpacing = '2px';
+  octx.font = font(124);
+  octx.fillStyle = TEXT;
+  octx.fillText(formatTime(lap.time), 0, 46);
+  octx.letterSpacing = '6px';
+  octx.font = font(36, 700, false);
+  octx.fillStyle = MUTED;
+  octx.fillText("TODAY'S CHALLENGE", 0, 112);
+  octx.restore();
 }
 
 // ---------- recording ----------
