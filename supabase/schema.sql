@@ -150,6 +150,36 @@ $$;
 revoke all on function public.submit_lap(text, real, real[], jsonb, boolean) from public;
 grant execute on function public.submit_lap(text, real, real[], jsonb, boolean) to authenticated;
 
+-- A daily challenge result. The day's goal (src/challenge.js: a race from the
+-- back, a ghost duel, three clean laps or a sector sprint) decides what the
+-- time is, so it's only checked for being believable. Keeps each player's
+-- best for the day on today's circuit, like the challenge laps above.
+create or replace function public.submit_challenge(p_time real) returns json
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  today date := (now() at time zone 'utc')::date;
+  improved boolean := false;
+  best real;
+  rank int;
+begin
+  if uid is null then raise exception 'Sign in first'; end if;
+  if public.is_guest() then raise exception 'Sign in with Google first'; end if;
+  if not exists (select 1 from profiles where id = uid) then raise exception 'Pick a name first'; end if;
+  if p_time < 10 or p_time > 1200 then raise exception 'Time out of range'; end if;
+  insert into challenge_laps as c (day, user_id, track, time, ghost)
+    values (today, uid, (select c.track from challenge_today() c), p_time, '{}'::jsonb)
+    on conflict (day, user_id) do update set time = excluded.time, ghost = excluded.ghost, set_at = now()
+    where c.time > excluded.time
+    returning true into improved;
+  select time into best from challenge_laps where day = today and user_id = uid;
+  select count(*) + 1 into rank from challenge_laps where day = today and time < best;
+  return json_build_object('improved', coalesce(improved, false), 'rank', rank, 'day', today);
+end;
+$$;
+revoke all on function public.submit_challenge(real) from public;
+grant execute on function public.submit_challenge(real) to authenticated;
+
 -- Car colours bought with Dodo Payments, one row per checkout session. Only
 -- the `shop` Edge Function writes here (with the service role); players can
 -- read their own. Rows outlive a deleted account so payments can be traced.

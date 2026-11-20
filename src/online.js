@@ -138,6 +138,12 @@ async function createSupabaseOnline({ url, anonKey }) {
       }));
     },
 
+    // Today's challenge result: a time whose meaning depends on the day's
+    // goal (challenge.js). The server keeps each player's best for the day.
+    async submitChallenge(time) {
+      return check(await db.rpc('submit_challenge', { p_time: time }));
+    },
+
     // Car colours this player has bought (ids).
     async ownedColours() {
       if (!user) return [];

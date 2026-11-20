@@ -44,7 +44,7 @@ Live at https://www.latebrake.in. Vercel serves the repo root as-is: there's no 
 | `src/input.js` | Keyboard, gamepad and on-screen pedals |
 | `src/storage.js` | Best laps and ghosts in localStorage |
 | `src/medals.js` | Bronze, silver and gold medals per circuit and the car colours they unlock (or that can be bought), in localStorage |
-| `src/challenge.js` | The daily challenge's twists (wet track, low downforce, rocket engine, heavy car, worn tyres, strict limits), their medal times, today's record and the medal streak |
+| `src/challenge.js` | The daily challenge's goals (from the back, ghost duel, three clean laps, sector sprint), how a run is judged against them, their medal times, today's record and the medal streak |
 | `terms.html`, `privacy.html`, `refunds.html`, `contact.html`, `pages.css` | Terms of use, privacy policy, refund policy and contact page (payment providers check for these); keep them in step with what the game collects and sells |
 | `src/shop.js`, `src/prices.js` | Buying car colours: prices in the player's currency (`src/prices.js`, made by `tools/make-prices.mjs`), Dodo Payments checkout over the game, with payments checked by `supabase/functions/shop` |
 | `src/main.js` | Game loop, menus, HUD |
@@ -105,9 +105,18 @@ Each circuit has bronze, silver and gold lap times (`medals` in `SETTINGS`, `src
 
 ## Daily challenge
 
-Each day (UTC) has one circuit, picked by the server (`challenge_today()` in `supabase/schema.sql`), and one twist from `TWISTS` in `src/challenge.js`, worked out from the date the same way so every player gets the same one: it changes daily, and each circuit-and-twist pairing comes round once in 36 days. A twist multiplies the car's handling (`tune`, applied to `CAR` in `src/car.js`), wears the tyres (`wear`: grip fades over each lap, new tyres at the line, shown in the HUD), or tightens the track limits (`offLimit`: two wheels over instead of four). The racing line and the AI are worked out for the twisted car, so the painted braking zones fit it.
+Each day (UTC) has one circuit, picked by the server (`challenge_today()` in `supabase/schema.sql`), and one goal from `GOALS` in `src/challenge.js`, worked out from the date the same way so every player gets the same one. The goal changes daily and meets each circuit in turn:
 
-Challenge laps are kept apart from the circuit's own: their own best lap and ghost for the day, their own leaderboard (`challenge_laps`), and medal times per circuit and twist (`CHALLENGE_MEDALS`, from `node tools/medal-times.mjs --challenge`, which fails if the AI can't lap a twist cleanly). A medal in the challenge counts towards a streak of days in a row; seven wins Hot Streak, a car colour that can't be bought (`streak` in `COLOURS`). The streak lives in this browser (`latebrake:challenge`), like the medals. The server's lap floors (`min_time`) sit below every twist's gold, so twists need no server change. Try one locally with `play.html?online=mock&twist=wet`.
+- **From the back**: a 2-lap race against five easy AI cars, starting last. 3rd, 2nd and a win are bronze, silver and gold.
+- **Ghost duel**: one lap from the grid against the hard AI's own first lap, shown as a ghost (`duelGhost()`). Beating it is gold; within 1 s silver, within 3 s bronze.
+- **Three clean laps**: three laps in a row inside the track limits; going off sets the count back to zero. Ranked on the three laps' total.
+- **Sector sprint**: from the lights to the end of sector 1, then straight into another go.
+
+`createGoalRun()` turns a run's events into a result (a time in seconds, lower is better) and a medal; the HUD and toasts show what the goal asks and how close a try came. Medal times for the sprint and three clean laps come from the AI at easy, medium and hard skill (`GOAL_MEDALS`, from `node tools/medal-times.mjs --challenge`, which stops if the AI can't finish a goal). Challenge runs use the normal car, so their laps count for the circuit's records and leaderboard too.
+
+Today's best result goes on today's board through `submit_challenge()` (the server only checks the time is believable, since the goal decides what it means; a race counts once it's on the podium). A challenge medal counts towards a streak of days in a row; seven wins Hot Streak, a car colour that can't be bought (`streak` in `COLOURS`). The streak and today's best live in this browser (`latebrake:challenge`), like the medals. Try a goal locally with `play.html?online=mock&goal=sprint` (`back`, `duel`, `clean`).
+
+Car handling changes (`tune` in `src/car.js`), tyre wear and tighter track limits (`wear` and `offLimit` in `src/session.js`) are still there for conditions to come back on top of the goals, once they can be seen and heard.
 
 ## Credits
 

@@ -3,9 +3,9 @@
 // result into `medals` in SETTINGS (src/track.js).
 //   node tools/medal-times.mjs
 //
-// With --challenge, the same for every daily-challenge twist on every
-// circuit, driving a time trial with the twist on (its car, line and track
-// limits). Paste that into CHALLENGE_MEDALS (src/challenge.js).
+// With --challenge, the daily challenge's medal times for its timed goals
+// (three clean laps, the sector sprint) on every circuit, judged the way the
+// game judges them. Paste that into GOAL_MEDALS (src/challenge.js).
 //   node tools/medal-times.mjs --challenge
 
 import { TRACKS, buildTrack } from '../src/track.js';
@@ -14,7 +14,7 @@ import { RaceSession } from '../src/race.js';
 import { Session } from '../src/session.js';
 import { createDriver, DIFFICULTY } from '../src/ai.js';
 import { DT } from '../src/car.js';
-import { TWISTS, tuneFor, challengeTrack } from '../src/challenge.js';
+import { GOALS, createGoalRun, duelGhost } from '../src/challenge.js';
 
 const PARKED = { throttle: 0, brake: 1, steer: 0 }; // the player stays on the grid
 const LAPS = 4;
@@ -22,16 +22,15 @@ const LEVELS = ['easy', 'medium', 'hard'];
 const halfUp = (t) => Math.ceil(t * 2) / 2;
 
 if (process.argv.includes('--challenge')) {
-  console.log('export const CHALLENGE_MEDALS = {');
+  const goals = GOALS.filter((g) => g.id === 'clean' || g.id === 'sprint');
+  console.log('export const GOAL_MEDALS = {');
   for (const def of TRACKS) {
-    const base = buildTrack(def);
-    const rows = [];
-    for (const twist of TWISTS) {
-      const t = challengeTrack(base, twist);
-      const times = LEVELS.map((level) => halfUp(trialLap(t, twist, DIFFICULTY[level])));
-      rows.push(`${twist.id}: [${times.join(', ')}]`);
-    }
-    console.log(`  '${def.id}': { ${rows.join(', ')} }, // ${def.name}`);
+    const t = buildTrack(def);
+    const rows = goals.map((goal) => {
+      const round = goal.id === 'sprint' ? (x) => Math.ceil(x * 10) / 10 : halfUp;
+      return `${goal.id}: [${LEVELS.map((level) => round(goalResult(t, goal, DIFFICULTY[level]))).join(', ')}]`;
+    });
+    console.log(`  '${def.id}': { ${rows.join(', ')} }, // ${def.name}, duel ghost ${duelGhost(t).time.toFixed(3)}`);
   }
   console.log('};');
 } else {
@@ -50,18 +49,24 @@ if (process.argv.includes('--challenge')) {
   }
 }
 
-// The AI drives a time trial on `t` with the twist on; its best clean lap.
-// A twist the AI can't lap cleanly is a bug in the twist: it stops here.
-function trialLap(t, twist, skill) {
-  const s = new Session(t, null, { challenge: true, tune: tuneFor(twist), offLimit: twist.offLimit, wear: twist.wear });
-  const driver = createDriver(t, t.line, skill);
-  for (let k = 0; k < 20 * 60 / DT && s.laps.length < LAPS; k++) {
+// The AI's best result at a goal over a few laps, judged as the game does.
+// A goal the AI can't finish is a bug in the goal: it stops here.
+function goalResult(t, goal, skill) {
+  const s = new Session(t, null, { challenge: true });
+  const driver = createDriver(t, t.line ||= buildLine(t), skill);
+  const run = createGoalRun(goal, t);
+  let best = Infinity;
+  for (let k = 0; k < 20 * 60 / DT && s.laps.length < 6; k++) {
     if (s.phase !== 'running') { s.step(PARKED); continue; }
     const a = driver.control(s.car, [], DT);
     if (a.reset) s.resetToTrack();
     s.step({ ...a, sens: 1 });
+    for (const e of s.events) {
+      const r = run.event(e, s);
+      if (r?.result) best = Math.min(best, r.result.time);
+    }
+    s.events.length = 0;
   }
-  const clean = s.laps.filter((l) => l.valid).map((l) => l.time);
-  if (!clean.length) throw new Error(`${t.name}, ${twist.name}, skill ${skill}: no clean lap in ${LAPS}`);
-  return Math.min(...clean);
+  if (!isFinite(best)) throw new Error(`${t.name}, ${goal.name}, skill ${skill}: never finished`);
+  return best;
 }

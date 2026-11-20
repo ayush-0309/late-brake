@@ -13,8 +13,8 @@ import { createView3D } from './view3d.js';
 import { createPlatform } from './platform.js';
 import { initAnalytics, track, reportError } from './analytics.js';
 import { createOnlineUI } from './online-ui.js';
-import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, medalFor, earnMedal, unlocked, colourFor } from './medals.js';
-import { challengeTrack, tuneFor, loadChallengeRun, saveChallengeRun, earnChallengeMedal, todaysMedal, streak, STREAK_GOAL } from './challenge.js';
+import { MEDALS, COLOURS, loadMedals, clearMedals, medalCount, earnMedal, unlocked, colourFor } from './medals.js';
+import { createGoalRun, duelGhost, recordChallengeResult, streak, STREAK_GOAL } from './challenge.js';
 import { CURRENCIES, shopCurrency, currencyName, priceText } from './shop.js';
 
 const $ = (id) => document.getElementById(id);
@@ -34,7 +34,8 @@ const platform = createPlatform({
 });
 let runsStarted = 0;
 let runOpts = {};          // what the current run is: { versus, challenge, mode }
-let runChallenge = null;   // today's challenge ({ day, track, twist }) when the run is it
+let runChallenge = null;   // today's challenge ({ day, track, goal }) when the run is it
+let goalRun = null;        // judges the run against today's goal (challenge.js)
 let pendingVersus = null;  // a shared ghost waiting for the next Start
 
 // play.html?track=<id> opens straight onto that circuit.
@@ -213,19 +214,19 @@ function startRun(opts = {}) {
   stuckHinted = false;
   incidents = [];
   helpOffered = false;
-  // The daily challenge runs today's circuit with its twist: the car, line
-  // and limits it changes, its own medal times, and a record of its own.
+  // The daily challenge runs today's circuit with today's goal: a race from
+  // the back of the grid, or a time trial (against the duel's ghost).
   const ch = opts.challenge && onlineUI.challenge?.track === selected.id ? onlineUI.challenge : null;
   runChallenge = ch;
-  const runTrack = ch ? challengeTrack(selected, ch.twist) : selected;
-  const saved = ch ? loadChallengeRun(ch.day) : loadTrack(selected.id);
-  const mode = opts.mode || settings.mode;
+  goalRun = ch ? createGoalRun(ch.goal, selected) : null;
+  const saved = loadTrack(selected.id);
+  const mode = ch ? (ch.goal.race ? 'race' : 'trial') : opts.mode || settings.mode;
   session = opts.online ? new OnlineRaceSession(selected, saved, opts.online)
     : mode === 'race'
-    ? new RaceSession(selected, saved, { opponents: settings.opponents, laps: settings.raceLaps, difficulty: settings.difficulty, name: onlineUI.user?.name })
-    : new Session(runTrack, saved, { versus: opts.versus, challenge: !!ch, tune: ch && tuneFor(ch.twist), offLimit: ch?.twist.offLimit, wear: ch?.twist.wear });
+    ? new RaceSession(selected, saved, { ...(ch?.goal.race || { opponents: settings.opponents, laps: settings.raceLaps, difficulty: settings.difficulty }), name: onlineUI.user?.name })
+    : new Session(selected, saved, { versus: ch?.goal.id === 'duel' ? duelGhost(selected) : opts.versus, challenge: !!ch });
   resultsShownAt = 0;
-  renderer.setTrack(runTrack);
+  renderer.setTrack(selected);
   paused = false;
   stopResumeCount();
   hideHelp();
@@ -238,7 +239,7 @@ function startRun(opts = {}) {
   document.body.classList.toggle('racing', session.mode === 'race');
   show('hud', true);
   hideToast();
-  $('trackLabel').textContent = opts.versus ? `vs ${opts.versus.name}` : ch ? `Challenge: ${ch.twist.name}` : selected.name;
+  $('trackLabel').textContent = ch ? `Challenge: ${ch.goal.name}` : opts.versus ? `vs ${opts.versus.name}` : selected.name;
   renderMedalNext();
   show('tyreGrip', !!session.wear);
   document.activeElement?.blur?.();
@@ -588,6 +589,7 @@ function handleEvents() {
   for (const e of session.events) {
     if (e.type === 'lap' && !(session.mode === 'race' && e.lap > session.totalLaps)) onLap(e);
     if (e.type === 'finish') onFinish(e);
+    if (goalRun) onGoal(goalRun.event(e, session));
     if (session.finished && (e.type === 'invalid' || e.type === 'off')) continue; // autopilot after the flag
     if (e.type === 'invalid') {
       flash('invalidBadge');
@@ -736,37 +738,71 @@ function resetCar() {
   if (session && !paused && session.resetToTrack()) stuckTime = 0;
 }
 
-// The next medal a time trial can win here (today's, in the challenge):
-// { k: 0 bronze, 1 silver or 2 gold, time }, or null once gold is held or
-// in a race, which has no medals.
+// The next medal a time trial can win on this circuit: { k: 0 bronze,
+// 1 silver or 2 gold, time }, or null once gold is held, in a race (no
+// medals) or in the challenge (its goal has its own).
 function nextMedal() {
-  if (!session || session.mode === 'race') return null;
-  const held = runChallenge ? todaysMedal(runChallenge.day) : loadMedals()[selected.id] || 0;
+  if (!session || session.mode === 'race' || goalRun) return null;
+  const held = loadMedals()[selected.id] || 0;
   return held < 3 ? { k: held, time: session.track.medals[held] } : null;
 }
 
-// Under the sectors: the medal to chase, so it's in view while driving.
+// Under the sectors: the medal to chase, or in the challenge what today's
+// goal asks (the ghost's time, clean laps so far), in view while driving.
 function renderMedalNext() {
+  if (goalRun) {
+    const h = goalRun.hud();
+    $('medalNext').hidden = false;
+    $('medalNext').innerHTML = `${esc(h.label)} <b>${esc(h.value)}</b>`;
+    return;
+  }
   const m = nextMedal();
   $('medalNext').hidden = !m;
   if (m) $('medalNext').innerHTML = `<i class="medal m${m.k + 1}"></i>${MEDALS[m.k]} <b>${formatMedalTime(m.time)}</b>`;
 }
 
-// Today's challenge medal for a clean lap, shaped like earnMedal()'s answer:
-// the medal, the colour it unlocks (Hot Streak, when the streak gets there)
-// and the streak.
-function challengeMedal(time) {
-  const m = medalFor(session.track, time);
-  const got = m ? earnChallengeMedal(runChallenge.day, m) : null;
-  if (!got) return null;
-  return { medal: m, unlocked: got.reachedGoal ? COLOURS.filter((c) => c.streak) : [], streak: got.streak };
+// What today's goal made of an event (challenge.js): the toast, today's
+// record and streak, the leaderboard, and for the duel and the sprint the
+// next attempt. Shown over the lap's own toast.
+function onGoal(r) {
+  if (!r) return;
+  const goal = goalRun.goal;
+  renderMedalNext();
+  if (r.reset) return toast(goal.name, 'Back to 0', 'Off the track: three in a row starts again', 'bad');
+  if (r.off) {
+    toast(goal.name, 'Off the track', goal.id === 'duel' ? 'The ghost takes this one. Again!' : 'Again!', 'bad');
+    return restartSoon();
+  }
+  if (!r.result) return toast(`Clean lap ${r.count} of 3`, formatTime(r.lapTime), r.count === 2 ? 'One more' : 'Two more to go', 'best');
+  const { time, medal } = r.result;
+  const got = recordChallengeResult(runChallenge.day, time, medal);
+  let title = medal ? `${MEDALS[medal - 1]} medal` : goal.name, sub = '';
+  if (goal.id === 'back') {
+    if (!medal) title = `Finished P${r.position}`;
+    sub = r.position === 1 ? 'From last to first' : medal ? `P${r.position} from the back` : 'Top 3 wins a medal';
+  } else if (goal.id === 'duel') {
+    sub = r.gap <= 0 ? `You beat the ghost by ${(-r.gap).toFixed(3)} s` : `The ghost wins by ${r.gap.toFixed(3)} s`;
+  } else {
+    sub = r.next ? `${(time - r.next.target).toFixed(3)} s to ${MEDALS[r.next.medal - 1].toLowerCase()}` : 'Top medal';
+  }
+  if (got.reachedGoal) sub = 'New car colour unlocked: Hot Streak';
+  else if (got.medal) sub += ` · streak ${got.streak} ${got.streak === 1 ? 'day' : 'days'}`;
+  toast(title, formatTime(time), sub, medal ? 'best' : 'slower');
+  if (medal) platform.happyTime();
+  track('Challenge', { step: 'result', result: medal ? MEDALS[medal - 1] : 'none', goal: goal.id });
+  // Today's board ranks results; a race counts once it's on the podium.
+  if (got.best && (goal.id !== 'back' || medal)) onlineUI.submitChallenge(time);
+  if (r.done && goal.id !== 'back') restartSoon();
+}
+
+// The duel and the sprint go again by themselves: one more try is the point.
+function restartSoon() {
+  const s = session;
+  setTimeout(() => { if (session === s && !paused) requestRun(); }, 2600);
 }
 
 function onLap(e) {
-  if (e.valid) {
-    if (runChallenge) saveChallengeRun(runChallenge.day, session.saveData());
-    else saveTrack(selected.id, session.saveData());
-  }
+  if (e.valid) saveTrack(selected.id, session.saveData());
   let sub, cls;
   if (!e.valid) { sub = 'Invalid · track limits'; cls = 'bad'; }
   else if (e.isBest && e.prevBest === null) { sub = 'First lap on the board'; cls = 'best'; }
@@ -775,15 +811,13 @@ function onLap(e) {
   if (e.rescued) sub += ' · rescued';
   if (e.isBest && !e.rescued) platform.happyTime();
   track('Lap', { track: selected.name, result: e.rescued ? 'rescued' : e.valid ? 'valid' : 'invalid', best: e.isBest ? 'yes' : 'no' });
-  // A clean lap can win a medal, and medals unlock car colours. In the
-  // challenge it's today's medal, which keeps the streak going.
-  const won = !e.valid || e.rescued ? null : runChallenge ? challengeMedal(e.time) : earnMedal(selected, e.time);
+  // A clean lap can win a medal, and medals unlock car colours.
+  const won = e.valid && !e.rescued ? earnMedal(selected, e.time) : null;
   if (won) {
     const newColour = won.unlocked.filter((c) => !onlineUI.owned.has(c.id)).at(-1);
     if (newColour) sub = `New car colour unlocked: ${newColour.name}`;
-    else if (won.streak) sub = `Challenge streak: ${won.streak} ${won.streak === 1 ? 'day' : 'days'}`;
     cls = 'best';
-    track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1], board: runChallenge ? 'challenge' : 'circuit' });
+    track('Medal', { track: selected.name, medal: MEDALS[won.medal - 1] });
   }
   // A clean lap short of the next medal says how short, which is what a
   // player chasing it wants to know.

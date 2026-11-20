@@ -1,118 +1,173 @@
-// The daily challenge's twists, records and streak. Each day's challenge is
-// one circuit (picked by the server, see challenge_today() in
-// supabase/schema.sql) with one twist that changes the car or the rules.
-// The twist comes from the date the same way the circuit does, so everyone
-// gets the same one. It changes every day, and with six circuits and six
-// twists each pairing comes round once in 36 days. No DOM here, so it can
+// The daily challenge: one circuit and one goal a day, the same for
+// everyone, with its records and the medal streak. The server picks the
+// circuit (challenge_today() in supabase/schema.sql); the goal comes from the
+// date the same way, so everyone gets the same one. No DOM here, so it can
 // run headless too.
 
-import { CAR } from './car.js';
-import { buildLine } from './line.js';
 import { TRACKS } from './track.js';
+import { Session } from './session.js';
+import { buildLine } from './line.js';
+import { createDriver, DIFFICULTY } from './ai.js';
+import { DT } from './car.js';
+import { formatTime, formatMedalTime } from './storage.js';
 
-// `tune` multiplies CAR's handling (car.js); `wear` is the share of grip the
-// tyres lose over a lap; `offLimit` replaces the track limit (session.js:
-// metres the car centre may go past the edge). The line and the AI drivers
-// are worked out for the changed car, so the painted braking zones are right
-// for it.
-export const TWISTS = [
-  { id: 'wet', name: 'Wet track', blurb: 'Less grip everywhere: brake early, go gently on the power',
-    tune: { grip: 0.7, downforce: 0.7, traction: 0.7 } },
-  { id: 'lowdf', name: 'Low downforce', blurb: 'Quick on the straights, nervous in the fast corners',
-    tune: { downforce: 0.6, aeroDrag: 0.75 } },
-  // More traction than this and the AI spins its wheels out of slow
-  // corners, so the extra power shows at the top end.
-  { id: 'rocket', name: 'Rocket engine', blurb: '40 km/h more top speed: the corners come up sooner',
-    tune: { power: 1.4, traction: 1.04 } },
-  // Braking is limited by grip, not the brakes, so less grip is what makes
-  // it stop later (and corner slower).
-  { id: 'heavy', name: 'Heavy car', blurb: 'Slow to pick up speed, longer to stop, slower through corners',
-    tune: { traction: 0.8, power: 0.85, grip: 0.85, downforce: 0.85 } },
-  // Fresh tyres at the line, worn to 70% grip by the end of the lap
-  // (session.js), so the same corner needs more care late in the lap.
-  { id: 'worn', name: 'Worn tyres', blurb: 'Grip fades through the lap: brake earlier for the last corners',
-    wear: 0.3 },
-  // Half the usual allowance: the car centre 0.6 m past the edge has both
-  // outside wheels over it (OFF_LIMIT is all four).
-  { id: 'strict', name: 'Strict limits', blurb: 'Two wheels over the white line deletes the lap',
-    offLimit: 0.6 },
+// What each day asks. A run gives one result, a time in seconds (lower is
+// better), and a medal (0 none, 1 bronze, 2 silver, 3 gold): createGoalRun()
+// judges it. `race` runs the goal as a race (race.js), where the player
+// always starts at the back.
+export const GOALS = [
+  { id: 'back', name: 'From the back', blurb: 'Start last of six. Two laps to get to the front',
+    race: { opponents: 5, laps: 2, difficulty: 'easy' } },
+  { id: 'duel', name: 'Ghost duel', blurb: 'One lap, head to head with a gold-pace ghost' },
+  { id: 'clean', name: 'Three clean laps', blurb: "Three laps in a row inside the limits. One off and it's back to zero" },
+  { id: 'sprint', name: 'Sector sprint', blurb: 'From the lights to the end of sector 1. Retry as often as you like' },
 ];
+const CLEAN_LAPS = 3;
 
-// Bronze, silver and gold for each circuit and twist: the best flying lap of
-// a lone AI driver at easy, medium and hard skill with the twist on, rounded
-// up to the half second. Made by `node tools/medal-times.mjs --challenge`.
-export const CHALLENGE_MEDALS = {
-  'at-1969': { wet: [94, 87.5, 84.5], lowdf: [79.5, 74.5, 71.5], rocket: [76.5, 71.5, 68.5], heavy: [87, 80.5, 77.5], worn: [83.5, 78, 75], strict: [79, 74, 71] }, // Spielberg
-  'it-1922': { wet: [111.5, 104, 99.5], lowdf: [95.5, 89, 85.5], rocket: [92, 85.5, 81.5], heavy: [105, 97.5, 92.5], worn: [100.5, 93, 89.5], strict: [96.5, 89.5, 85.5] }, // Monza
-  'gb-1948': { wet: [137.5, 128.5, 122.5], lowdf: [116, 108, 103], rocket: [111.5, 104, 99], heavy: [125.5, 117, 111.5], worn: [122, 114, 108.5], strict: [114, 106.5, 101.5] }, // Silverstone
-  'be-1925': { wet: [152, 141.5, 134.5], lowdf: [128.5, 119.5, 114], rocket: [123.5, 114.5, 109], heavy: [139.5, 130, 123.5], worn: [135, 125.5, 120], strict: [127.5, 118.5, 113] }, // Spa-Francorchamps
-  'mc-1929': { wet: [103.5, 99, 97], lowdf: [87, 84, 81.5], rocket: [85.5, 82, 79.5], heavy: [94.5, 90.5, 88], worn: [91.5, 88.5, 85.5], strict: [86, 82.5, 80.5] }, // Monaco
-  'br-1940': { wet: [105.5, 98.5, 94], lowdf: [89, 83.5, 79.5], rocket: [85.5, 79.5, 76], heavy: [96, 89.5, 85.5], worn: [93, 87, 83.5], strict: [87, 81, 78] }, // Interlagos
+// Bronze, silver and gold for the timed goals on each circuit: the AI at
+// easy, medium and hard skill (the sprint rounded up to the tenth, three
+// clean laps to the half second). Made by `node tools/medal-times.mjs
+// --challenge`. The duel's come from its ghost (duelGhost()), and From the
+// back is judged on the finishing position: 3rd, 2nd, 1st.
+export const GOAL_MEDALS = {
+  'at-1969': { clean: [237, 221, 212], sprint: [29.6, 28.2, 27.6] }, // Spielberg
+  'it-1922': { clean: [289, 268, 256], sprint: [35.6, 33.8, 33.4] }, // Monza
+  'gb-1948': { clean: [342, 318.5, 303.5], sprint: [36.4, 34.1, 32.6] }, // Silverstone
+  'be-1925': { clean: [382, 355, 338], sprint: [40.9, 38.4, 36.8] }, // Spa-Francorchamps
+  'mc-1929': { clean: [258, 247.5, 241], sprint: [31.3, 30, 29.7] }, // Monaco
+  'br-1940': { clean: [260.5, 243.5, 233], sprint: [29.5, 27.9, 26.9] }, // Interlagos
 };
 
-// The twist on a challenge day ('YYYY-MM-DD', UTC). The server picks the
-// circuit as the day of the year modulo the number of circuits; the twist
-// steps on each day too, one extra step each time the circuits come round,
-// so a circuit meets a different twist every time.
-export function twistFor(day) {
+// The day of the year (1 = 1 January) of a 'YYYY-MM-DD' day, UTC.
+function dayOfYear(day) {
   const d = new Date(day + 'T00:00:00Z');
-  const doy = Math.round((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5) + 1;
-  return TWISTS[(doy + Math.floor(doy / TRACKS.length)) % TWISTS.length];
+  return Math.round((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5) + 1;
 }
 
-// Bronze, silver and gold on a circuit with a twist.
-export function challengeMedals(track, twist) {
-  return CHALLENGE_MEDALS[track.id]?.[twist.id] || track.medals;
+// The goal on a challenge day. The server picks the circuit as the day of the
+// year modulo the number of circuits; the goal steps on each day too, one
+// extra step each time the circuits come round, so a circuit meets a
+// different goal each time.
+export function goalFor(day) {
+  const doy = dayOfYear(day);
+  return GOALS[(doy + Math.floor(doy / TRACKS.length)) % GOALS.length];
 }
 
 // The challenge on a day, worked out the way the server does it (circuits
 // sorted by id, picked by day of the year), so the menu can show it before
-// the server has answered: { day, track: circuit id, twist }.
+// the server has answered: { day, track: circuit id, goal }.
 export function challengeOn(day) {
   const ids = TRACKS.map((t) => t.id).sort();
-  const d = new Date(day + 'T00:00:00Z');
-  const doy = Math.round((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5) + 1;
-  return { day, track: ids[doy % ids.length], twist: twistFor(day) };
+  return { day, track: ids[dayOfYear(day) % ids.length], goal: goalFor(day) };
 }
 
 export const todayUTC = () => new Date().toISOString().slice(0, 10);
 
-// CAR with a twist's changes, or null when it leaves the car alone.
-const tunes = new Map();
-export function tuneFor(twist) {
-  if (!twist?.tune) return null;
-  if (!tunes.has(twist.id)) {
-    tunes.set(twist.id, Object.fromEntries(Object.entries(CAR).map(([k, v]) => [k, v * (twist.tune[k] ?? 1)])));
+// The duel's ghost: the hard AI's first lap from the grid, as a player's run
+// starts. The physics is deterministic, so it's the same lap every time and
+// for everyone; worked out once per circuit.
+const ghosts = new Map();
+export function duelGhost(track) {
+  if (!ghosts.has(track.id)) {
+    const s = new Session(track, null);
+    const driver = createDriver(track, track.line ||= buildLine(track), DIFFICULTY.hard);
+    let lap = null;
+    for (let k = 0; k < 20 * 60 / DT && !lap; k++) {
+      if (s.phase !== 'running') { s.step({ throttle: 0, brake: 0, steer: 0 }); continue; }
+      const a = driver.control(s.car, [], DT);
+      if (a.reset) s.resetToTrack();
+      s.step({ ...a, sens: 1 });
+      lap = s.events.find((e) => e.type === 'lap');
+      s.events.length = 0;
+    }
+    ghosts.set(track.id, { name: 'Gold-pace ghost', time: lap.time, ghost: lap.ghost });
   }
-  return tunes.get(twist.id);
+  return ghosts.get(track.id);
 }
 
-// The circuit as the challenge runs it: the same track with the twist's
-// racing line and medal times. Made once per circuit and twist; everything
-// else (shape, scenery) comes from the circuit itself.
-const derived = new Map();
-export function challengeTrack(base, twist) {
-  const key = `${base.id}:${twist.id}`;
-  if (!derived.has(key)) {
-    const t = Object.create(base);
-    const tune = tuneFor(twist);
-    if (tune || twist.wear) {
-      t.line = buildLine(base, tune || CAR, twist.wear);
-      t.linePaths = null; // the 2D renderer's paths for the line, made from it
-    } else {
-      t.line = base.line ||= buildLine(base);
-    }
-    t.medals = challengeMedals(base, twist);
-    t.twist = twist;
-    derived.set(key, t);
+// Bronze, silver and gold for a goal on a circuit: times, or for From the
+// back the finishing positions.
+export function goalMedals(goal, track) {
+  if (goal.id === 'back') return [3, 2, 1];
+  if (goal.id === 'duel') {
+    const t = duelGhost(track).time;
+    return [t + 3, t + 1, t];
   }
-  return derived.get(key);
+  return GOAL_MEDALS[track.id]?.[goal.id] || [Infinity, Infinity, Infinity];
+}
+
+// A medal target as shown on the card and the HUD.
+export function medalTarget(goal, value) {
+  if (goal.id === 'back') return ['3rd', '2nd', 'Win'][3 - value];
+  return goal.id === 'duel' ? formatTime(value) : formatMedalTime(value);
+}
+
+const medalFor = (medals, time) => medals.reduce((m, target, k) => (time <= target ? k + 1 : m), 0);
+
+// Judges one challenge run. event() takes each session event and returns
+// what it means for the goal, or null:
+//   { result: { time, medal }, ... }   the run's result (time in seconds)
+//   { done: true }                     the attempt is over (the duel and sprint start again)
+//   { count, lapTime } / { reset }     three clean laps: the count so far, or back to zero
+// plus details for the toast (position, gap, next). hud() is the line under
+// the sectors: { label, value }.
+export function createGoalRun(goal, track) {
+  const medals = goalMedals(goal, track);
+  const ghost = goal.id === 'duel' ? duelGhost(track) : null;
+  let chain = [];       // three clean laps: the clean laps in a row so far
+  let best = null;      // this run's best result
+  const next = (medal) => (medal < 3 ? { medal: medal + 1, target: medals[medal] } : null);
+  const judge = (time, extra = {}) => {
+    const medal = extra.position ? (extra.position <= 3 ? 4 - extra.position : 0) : medalFor(medals, time);
+    if (!best || time < best.time) best = { time, medal };
+    return { result: { time, medal }, next: next(medal), ...extra };
+  };
+
+  return {
+    goal, medals, ghost,
+    event(e, s) {
+      switch (goal.id) {
+        case 'back':
+          if (e.type !== 'finish') return null;
+          return judge(s.playerFinishedAt + s.penalty, { position: e.position, done: true });
+        case 'duel':
+          if (e.type !== 'lap' || e.lap !== 1) return null;
+          if (!e.valid || e.rescued) return { done: true, off: true };
+          return judge(e.time, { gap: e.time - ghost.time, done: true });
+        case 'clean':
+          if (e.type === 'invalid') {
+            const had = chain.length;
+            chain = [];
+            return had ? { reset: true } : null;
+          }
+          if (e.type !== 'lap' || !e.valid || e.rescued) return null;
+          chain.push(e.time);
+          if (chain.length < CLEAN_LAPS) return { count: chain.length, lapTime: e.time };
+          return judge(chain.slice(-CLEAN_LAPS).reduce((a, b) => a + b, 0), { count: chain.length, lapTime: e.time });
+        case 'sprint':
+          if (e.type === 'invalid' && s.lap === 1) return { done: true, off: true };
+          if (e.type !== 'sector' || e.index !== 0 || s.lap !== 1) return null;
+          return judge(e.time, { done: true });
+      }
+      return null;
+    },
+    hud() {
+      const n = next(best?.medal || 0);
+      const chase = n ? `${['Bronze', 'Silver', 'Gold'][n.medal - 1]} ${medalTarget(goal, n.target)}` : 'Gold won';
+      switch (goal.id) {
+        case 'back': return { label: 'From the back', value: 'Win for gold' };
+        case 'duel': return { label: 'Ghost', value: formatTime(ghost.time) };
+        case 'clean': return { label: 'Clean laps', value: `${Math.min(chain.length, CLEAN_LAPS)} of ${CLEAN_LAPS}` };
+        default: return { label: 'Sprint to S1', value: chase };
+      }
+    },
+  };
 }
 
 // ---------- records, kept in this browser like the circuit records ----------
 //
-// { run: { day, best, bestSectors } (today's best lap and ghost),
-//   days: { [day]: 1 bronze | 2 silver | 3 gold }, bestStreak }
+// { result: { day, time, medal } (today's best), days: { [day]: 1 bronze |
+//   2 silver | 3 gold }, bestStreak }
 
 const KEY = 'latebrake:challenge';
 const KEEP_DAYS = 60;
@@ -132,16 +187,10 @@ function save(data) {
   } catch {}
 }
 
-// Today's best lap and sectors, the challenge's answer to loadTrack().
-export function loadChallengeRun(day) {
-  const run = load().run;
-  return run?.day === day ? run : null;
-}
-
-export function saveChallengeRun(day, data) {
-  const all = load();
-  all.run = { day, ...data };
-  save(all);
+// Today's best result: { time, medal }, or null.
+export function loadChallengeResult(day) {
+  const r = load().result;
+  return r?.day === day ? r : null;
 }
 
 const dayBefore = (day) => new Date(Date.parse(day + 'T00:00:00Z') - 864e5).toISOString().slice(0, 10);
@@ -159,14 +208,22 @@ export function bestStreak() {
   return load().bestStreak || 0;
 }
 
-// A clean challenge lap: the medal it newly earns today, the streak, and
-// whether that streak has just reached the goal for the first time, or null
-// when it's no better than today's medal so far.
-export function earnChallengeMedal(day, medal) {
+export function todaysMedal(day) {
+  return load().days?.[day] || 0;
+}
+
+// A result for today's challenge. Keeps the best one (a better medal first,
+// then a lower time) and today's medal, and says what changed: `best` (it's
+// today's best result), `medal` (a medal better than today's so far, else 0),
+// the streak, and whether the streak has just reached the goal.
+export function recordChallengeResult(day, time, medal) {
   const all = load();
+  const old = all.result?.day === day ? all.result : null;
+  const best = !old || medal > old.medal || (medal === old.medal && time < old.time);
+  if (best) all.result = { day, time, medal };
   const days = all.days || {};
-  if (medal <= (days[day] || 0)) return null;
-  days[day] = medal;
+  const newMedal = medal > (days[day] || 0) ? medal : 0;
+  if (newMedal) days[day] = medal;
   const cutoff = new Date(Date.parse(day + 'T00:00:00Z') - KEEP_DAYS * 864e5).toISOString().slice(0, 10);
   for (const d of Object.keys(days)) if (d < cutoff) delete days[d];
   const now = streak(day, days);
@@ -174,9 +231,5 @@ export function earnChallengeMedal(day, medal) {
   all.days = days;
   all.bestStreak = Math.max(before, now);
   save(all);
-  return { medal, streak: now, reachedGoal: before < STREAK_GOAL && now >= STREAK_GOAL };
-}
-
-export function todaysMedal(day) {
-  return load().days?.[day] || 0;
+  return { best, medal: newMedal, streak: now, reachedGoal: before < STREAK_GOAL && now >= STREAK_GOAL };
 }

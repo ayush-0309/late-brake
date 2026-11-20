@@ -80,11 +80,11 @@ export function createMockOnline() {
       save(data);
       emit();
     },
-    // Same rule as the server (challengeOn). ?twist=<id> picks the twist, to
-    // try each one.
+    // Same rule as the server (challengeOn). ?goal=<id> picks the goal, to
+    // try each one (the real server leaves it to the date).
     async challenge() {
       const { day, track } = challengeOn(today());
-      return { day, track, twist: new URLSearchParams(location.search).get('twist') || undefined };
+      return { day, track, goal: new URLSearchParams(location.search).get('goal') || undefined };
     },
     async leaderboard(track, { challenge = false, limit = 10 } = {}) {
       const rows = challenge ? data.daily[today()] || [] : data.best[track] || [];
@@ -109,6 +109,19 @@ export function createMockOnline() {
         save(data);
       }
       const best = Math.min(lap.time, mine?.time ?? Infinity);
+      return { improved, rank: list.filter((r) => r.time < best).length + 1, day: today() };
+    },
+    async submitChallenge(time) {
+      if (user?.guest) throw new Error('Sign in with Google first');
+      if (!user?.name) throw new Error('Pick a name first');
+      const list = (data.daily[today()] ||= []);
+      const mine = list.find((r) => r.userId === user.id);
+      const improved = !mine || time < mine.time;
+      if (improved) {
+        if (mine) mine.time = time; else list.push({ userId: user.id, name: user.name, time });
+        save(data);
+      }
+      const best = Math.min(time, mine?.time ?? Infinity);
       return { improved, rank: list.filter((r) => r.time < best).length + 1, day: today() };
     },
     async ghost(track, userId) {
