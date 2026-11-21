@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/russell-fastest-wet-las-vegas-practice.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-21T09:00:00+05:30</news:publication_date>
+      <news:title>Russell fastest in wet F1 Las Vegas practice as FP1 washes out</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/piquet-1981-caesars-palace-title.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-19T12:00:00+05:30</news:publication_date>
       <news:title>On this day: Adams and Lotterer, Spa&#39;s one-off F1 drivers, born</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/bottas-stays-at-cadillac-for-2027.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-19T09:00:00+05:30</news:publication_date>
-      <news:title>Bottas keeps his Cadillac F1 seat for 2027 ahead of Herta</news:title>
     </news:news>
   </url>
 </urlset>
