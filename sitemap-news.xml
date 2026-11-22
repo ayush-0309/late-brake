@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-22-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-22T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Kubica&#39;s F1 comeback and Verstappen&#39;s Vegas win</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/verstappen-las-vegas-pole-antonelli-penalty.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-20T15:00:00+05:30</news:publication_date>
       <news:title>F1 to show drivers&#39; heart rates on TV as Verstappen opts out</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-20-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-20T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Moss wins at Riverside and Vettel bows out in Abu Dhabi</news:title>
     </news:news>
   </url>
 </urlset>
