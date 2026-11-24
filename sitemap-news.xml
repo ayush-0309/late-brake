@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/hakkinen-zonta-pass-spa-2000.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-24T18:00:00+05:30</news:publication_date>
+      <news:title>How Häkkinen passed Schumacher around Zonta at Spa in 2000</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/karun-chandhok-india-second-f1-driver.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-23T09:00:00+05:30</news:publication_date>
       <news:title>Verstappen wins F1 Las Vegas GP as Ferrari drivers collide</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/senna-toleman-monaco-1984.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-22T18:00:00+05:30</news:publication_date>
-      <news:title>How Senna nearly won the 1984 Monaco Grand Prix in a Toleman</news:title>
     </news:news>
   </url>
 </urlset>
