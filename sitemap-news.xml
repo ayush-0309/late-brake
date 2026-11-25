@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/vettel-toro-rosso-monza-2008.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-25T15:00:00+05:30</news:publication_date>
+      <news:title>How Vettel won the 2008 Italian Grand Prix in a Toro Rosso</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-25-november.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-23T18:00:00+05:30</news:publication_date>
       <news:title>Six F1 Qatar Grand Prix facts that sound made up</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/camara-stays-at-haas-qatar-abu-dhabi.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-23T15:00:00+05:30</news:publication_date>
-      <news:title>Camara to finish F1 season with Haas, giving up F2 title bid</news:title>
     </news:news>
   </url>
 </urlset>
