@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/senna-holds-off-mansell-monaco-1992.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-26T18:00:00+05:30</news:publication_date>
+      <news:title>How Senna held off Mansell to win the 1992 Monaco Grand Prix</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/hamilton-silverstone-2008-wet-win.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-25T09:00:00+05:30</news:publication_date>
       <news:title>Gasly says cooling problem cost him an F1 Las Vegas podium</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/hakkinen-zonta-pass-spa-2000.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-24T18:00:00+05:30</news:publication_date>
-      <news:title>How Häkkinen passed Schumacher around Zonta at Spa in 2000</news:title>
     </news:news>
   </url>
 </urlset>
