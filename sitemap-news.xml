@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/canadian-grand-prix-montreal-facts.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-27T18:00:00+05:30</news:publication_date>
+      <news:title>Six F1 Canadian Grand Prix facts that sound made up</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/hamilton-leclerc-ferrari-talks-qatar.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-26T09:00:00+05:30</news:publication_date>
       <news:title>FIA finds Williams broke F1&#39;s 2025 cost cap by £627,000</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/abu-dhabi-grand-prix-facts.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-25T18:00:00+05:30</news:publication_date>
-      <news:title>Six F1 Abu Dhabi Grand Prix facts that sound made up</news:title>
     </news:news>
   </url>
 </urlset>
