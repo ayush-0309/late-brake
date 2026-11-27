@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-27-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-27T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: Webber wins at Interlagos and Rosberg takes the title</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/bearman-stays-at-haas-2027.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-25T15:00:00+05:30</news:publication_date>
       <news:title>How Vettel won the 2008 Italian Grand Prix in a Toro Rosso</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-25-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-25T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Schumacher&#39;s last race and Alonso&#39;s farewell</news:title>
     </news:news>
   </url>
 </urlset>
