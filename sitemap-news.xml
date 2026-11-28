@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/on-this-day-28-november.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-28T12:00:00+05:30</news:publication_date>
+      <news:title>On this day: F1 loses Paco Godia, Joe Kelly and Frank Williams</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/antonelli-tops-qatar-practice-mercedes.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-26T15:00:00+05:30</news:publication_date>
       <news:title>How Hamilton won the 2008 British Grand Prix by 68 seconds</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/on-this-day-26-november.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-26T12:00:00+05:30</news:publication_date>
-      <news:title>On this day: Massa&#39;s farewell and Verstappen&#39;s record 19th win</news:title>
     </news:news>
   </url>
 </urlset>
