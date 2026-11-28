@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/antonelli-tops-qatar-practice-mercedes.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-28T09:00:00+05:30</news:publication_date>
+      <news:title>Antonelli fastest in both F1 Qatar GP practice sessions</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/canadian-grand-prix-montreal-facts.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-26T12:00:00+05:30</news:publication_date>
       <news:title>On this day: Massa&#39;s farewell and Verstappen&#39;s record 19th win</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/williams-alpine-2025-cost-cap-breach.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-26T09:00:00+05:30</news:publication_date>
-      <news:title>FIA finds Williams broke F1&#39;s 2025 cost cap by £627,000</news:title>
     </news:news>
   </url>
 </urlset>
