@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://www.latebrake.in/blog/audi-loses-tsunoda-monza-appeal.html</loc>
+    <news:news>
+      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
+      <news:publication_date>2026-11-28T15:00:00+05:30</news:publication_date>
+      <news:title>Audi loses FIA appeal over Tsunoda&#39;s Italian Grand Prix point</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://www.latebrake.in/blog/on-this-day-28-november.html</loc>
     <news:news>
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
@@ -54,14 +62,6 @@
       <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
       <news:publication_date>2026-11-26T18:00:00+05:30</news:publication_date>
       <news:title>How Senna held off Mansell to win the 1992 Monaco Grand Prix</news:title>
-    </news:news>
-  </url>
-  <url>
-    <loc>https://www.latebrake.in/blog/hamilton-silverstone-2008-wet-win.html</loc>
-    <news:news>
-      <news:publication><news:name>Late Brake</news:name><news:language>en</news:language></news:publication>
-      <news:publication_date>2026-11-26T15:00:00+05:30</news:publication_date>
-      <news:title>How Hamilton won the 2008 British Grand Prix by 68 seconds</news:title>
     </news:news>
   </url>
 </urlset>
